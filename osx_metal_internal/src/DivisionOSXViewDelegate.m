@@ -175,9 +175,10 @@ static char* readFromFile(const char* path);
         {
             DivisionRenderPass* pass = &render_pass_ctx->render_passes[i];
             DivisionRenderPassInternalPlatform_* pass_impl = &render_pass_ctx->render_passes_impl[i];
+            struct DivisionVertexBufferInternalPlatform_ vert_buffer = vert_buff_ctx->buffers_impl[pass->vertex_buffer];
 
             id <MTLRenderPipelineState> pipelineState = pass_impl->mtl_pipeline_state;
-            id <MTLBuffer> vertDataMtlBuffer = vert_buff_ctx->buffers_impl[pass->vertex_buffer].mtl_buffer;
+            id <MTLBuffer> vertDataMtlBuffer = vert_buffer.mtl_buffer;
 
             [renderEnc setRenderPipelineState:pipelineState];
 
@@ -203,7 +204,7 @@ static char* readFromFile(const char* path);
             }
 
             [renderEnc
-                drawPrimitives:MTLPrimitiveTypeTriangle
+                drawPrimitives:vert_buffer.mtl_primitive_type
                    vertexStart:pass->first_vertex
                    vertexCount:pass->vertex_count
             ];

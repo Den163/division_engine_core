@@ -6,6 +6,8 @@
 #include "osx_window_context.h"
 #include "osx_vertex_buffer.h"
 
+static inline MTLPrimitiveType division_topology_to_mtl_type(DivisionRenderTopology topology);
+
 bool division_engine_internal_platform_vertex_buffer_context_alloc(
     DivisionContext* ctx, const DivisionSettings* settings)
 {
@@ -68,6 +70,7 @@ bool division_engine_internal_platform_vertex_buffer_alloc(DivisionContext* ctx,
 
     impl_buffer->mtl_buffer = buffer;
     impl_buffer->mtl_vertex_descriptor = vertex_descriptor;
+    impl_buffer->mtl_primitive_type = division_topology_to_mtl_type(vert_buffer->topology);
 
     return true;
 }
@@ -89,4 +92,20 @@ void division_engine_internal_platform_vertex_buffer_free(DivisionContext* ctx, 
     DivisionVertexBufferInternalPlatform_* vertex_buffer = &ctx->vertex_buffer_context->buffers_impl[buffer_id];
     vertex_buffer->mtl_buffer = nil;
     vertex_buffer->mtl_vertex_descriptor = nil;
+}
+
+MTLPrimitiveType division_topology_to_mtl_type(DivisionRenderTopology topology)
+{
+    switch (topology)
+    {
+        case DIVISION_TOPOLOGY_TRIANGLES:
+            return MTLPrimitiveTypeTriangle;
+        case DIVISION_TOPOLOGY_POINTS:
+            return MTLPrimitiveTypePoint;
+        case DIVISION_TOPOLOGY_LINES:
+            return MTLPrimitiveTypeLine;
+        default:
+            fprintf(stderr, "Unknown topology");
+            return 0;
+    };
 }
