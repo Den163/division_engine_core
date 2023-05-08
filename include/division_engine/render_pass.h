@@ -6,7 +6,7 @@
 #include "context.h"
 
 typedef struct DivisionRenderPass {
-    int32_t* uniform_buffers;
+    uint32_t* uniform_buffers;
     int32_t uniform_buffer_count;
     int32_t vertex_buffer;
     int32_t first_vertex;

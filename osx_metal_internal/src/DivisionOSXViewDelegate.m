@@ -1,7 +1,5 @@
 #include "DivisionOSXViewDelegate.h"
 
-#include <Foundation/Foundation.h>
-
 #include "division_engine/renderer.h"
 #include "division_engine/render_pass.h"
 #include "division_engine/uniform_buffer.h"
@@ -183,7 +181,7 @@ static char* readFromFile(const char* path);
 
             for (int ubIdx = 0; ubIdx < pass->uniform_buffer_count; ubIdx++)
             {
-                int32_t buff_id = pass->uniform_buffers[ubIdx];
+                uint32_t buff_id = pass->uniform_buffers[ubIdx];
                 id <MTLBuffer> uniformMtlBuffer = uniform_buff_ctx->uniform_buffers_impl[buff_id].mtl_buffer;
                 DivisionUniformBuffer buffDesc = uniform_buff_ctx->uniform_buffers[buff_id];
                 switch (buffDesc.shaderType)

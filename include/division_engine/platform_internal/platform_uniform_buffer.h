@@ -13,13 +13,15 @@ DIVISION_EXPORT bool division_engine_internal_platform_uniform_buffer_context_al
 DIVISION_EXPORT void division_engine_internal_platform_uniform_buffer_context_free(DivisionContext* ctx);
 
 
-DIVISION_EXPORT void division_engine_internal_platform_uniform_buffer_alloc(
-    DivisionContext* ctx, DivisionUniformBuffer buffer);
+DIVISION_EXPORT bool division_engine_internal_platform_uniform_buffer_alloc(
+    DivisionContext* ctx, DivisionUniformBuffer buffer, uint32_t buffer_id);
+
+DIVISION_EXPORT void division_engine_internal_platform_uniform_buffer_free(DivisionContext* ctx, uint32_t buffer_id);
 
 DIVISION_EXPORT void* division_engine_internal_platform_uniform_buffer_borrow_data_pointer(
-    DivisionContext* ctx, int32_t buffer);
+    DivisionContext* ctx, uint32_t buffer_id);
 DIVISION_EXPORT void division_engine_internal_platform_uniform_buffer_return_data_pointer(
-    DivisionContext* ctx, int32_t buffer, void* data_pointer);
+    DivisionContext* ctx, uint32_t buffer_id, void* data_pointer);
 
 #ifdef __cplusplus
 }

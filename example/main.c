@@ -105,7 +105,10 @@ void init_callback(DivisionContext* ctx)
         .binding = 1,
         .shaderType = DIVISION_SHADER_FRAGMENT
     };
-    int32_t uniform_buffer = division_engine_uniform_buffer_alloc(ctx, buff);
+
+    uint32_t uniform_buffer;
+    division_engine_uniform_buffer_alloc(ctx, buff, &uniform_buffer);
+
     float* uniform_ptr = division_engine_uniform_buffer_borrow_data_pointer(ctx, uniform_buffer);
     memcpy(uniform_ptr, testVec, sizeof(testVec));
     division_engine_uniform_buffer_return_data_pointer(ctx, uniform_buffer, uniform_ptr);

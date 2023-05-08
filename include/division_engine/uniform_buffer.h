@@ -6,6 +6,7 @@
 #include "context.h"
 #include "division_engine_core_export.h"
 #include "division_engine/shader.h"
+#include "division_id_table/unordered_id_table.h"
 
 struct DivisionUniformBufferInternal_;
 
@@ -16,9 +17,10 @@ typedef struct DivisionUniformBuffer {
 } DivisionUniformBuffer;
 
 typedef struct DivisionUniformBufferSystemContext {
+    DivisionUnorderedIdTable id_table;
     DivisionUniformBuffer* uniform_buffers;
     struct DivisionUniformBufferInternal_* uniform_buffers_impl;
-    int32_t uniform_buffer_count;
+    size_t uniform_buffer_count;
 } DivisionUniformBufferSystemContext;
 
 bool division_engine_internal_uniform_buffer_context_alloc(DivisionContext* ctx, const DivisionSettings* settings);
@@ -28,10 +30,13 @@ void division_engine_internal_uniform_buffer_context_free(DivisionContext* ctx);
 extern "C" {
 #endif
 
-DIVISION_EXPORT int32_t division_engine_uniform_buffer_alloc(DivisionContext* ctx, DivisionUniformBuffer buffer);
-DIVISION_EXPORT void* division_engine_uniform_buffer_borrow_data_pointer(DivisionContext* ctx, int32_t buffer);
+DIVISION_EXPORT bool division_engine_uniform_buffer_alloc(
+    DivisionContext* ctx, DivisionUniformBuffer buffer, uint32_t* out_buffer_id);
+DIVISION_EXPORT void division_engine_uniform_buffer_free(DivisionContext* ctx, uint32_t buffer_id);
+
+DIVISION_EXPORT void* division_engine_uniform_buffer_borrow_data_pointer(DivisionContext* ctx, uint32_t buffer);
 DIVISION_EXPORT void
-division_engine_uniform_buffer_return_data_pointer(DivisionContext* ctx, int32_t buffer, void* data_pointer);
+division_engine_uniform_buffer_return_data_pointer(DivisionContext* ctx, uint32_t buffer, void* data_pointer);
 
 #ifdef __cplusplus
 }

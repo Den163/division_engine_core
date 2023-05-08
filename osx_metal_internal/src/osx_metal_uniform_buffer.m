@@ -25,7 +25,8 @@ void division_engine_internal_platform_uniform_buffer_context_free(DivisionConte
     free(uniform_buffers_impl);
 }
 
-void division_engine_internal_platform_uniform_buffer_alloc(DivisionContext* ctx, DivisionUniformBuffer buffer)
+bool division_engine_internal_platform_uniform_buffer_alloc(
+    DivisionContext* ctx, DivisionUniformBuffer buffer, uint32_t buffer_id)
 {
     DivisionOSXWindowContext* window_ctx = ctx->renderer_context->window_data;
     id<MTLBuffer> mtl_buffer = [window_ctx->app_delegate->viewDelegate createBufferWithSize:buffer.data_bytes];
@@ -36,21 +37,28 @@ void division_engine_internal_platform_uniform_buffer_alloc(DivisionContext* ctx
         sizeof(DivisionUniformBufferInternal_) * uniform_buffer_ctx->uniform_buffer_count
     );
 
-    DivisionUniformBufferInternal_* internal_buffer =
-        &uniform_buffer_ctx->uniform_buffers_impl[uniform_buffer_ctx->uniform_buffer_count - 1];
+    if (uniform_buffer_ctx->uniform_buffers_impl == NULL) return false;
 
+    DivisionUniformBufferInternal_* internal_buffer = &uniform_buffer_ctx->uniform_buffers_impl[buffer_id];
     internal_buffer->mtl_buffer = mtl_buffer;
+
+    return true;
 }
 
-void* division_engine_internal_platform_uniform_buffer_borrow_data_pointer(DivisionContext* ctx, int32_t buffer)
+void* division_engine_internal_platform_uniform_buffer_borrow_data_pointer(DivisionContext* ctx, uint32_t buffer_id)
 {
-    return [ctx->uniform_buffer_context->uniform_buffers_impl[buffer].mtl_buffer contents];
+    return [ctx->uniform_buffer_context->uniform_buffers_impl[buffer_id].mtl_buffer contents];
 }
 
 void division_engine_internal_platform_uniform_buffer_return_data_pointer(
-    DivisionContext* ctx, int32_t buffer, void* data_pointer)
+    DivisionContext* ctx, uint32_t buffer_id, void* data_pointer)
 {
     DivisionUniformBufferSystemContext* uniform_buffer_ctx = ctx->uniform_buffer_context;
-    id<MTLBuffer> mtl_buffer = uniform_buffer_ctx->uniform_buffers_impl[buffer].mtl_buffer;
+    id<MTLBuffer> mtl_buffer = uniform_buffer_ctx->uniform_buffers_impl[buffer_id].mtl_buffer;
     [mtl_buffer didModifyRange:NSMakeRange(0, [mtl_buffer length])];
+}
+
+void division_engine_internal_platform_uniform_buffer_free(DivisionContext* ctx, uint32_t buffer_id)
+{
+    ctx->uniform_buffer_context->uniform_buffers_impl[buffer_id].mtl_buffer = nil;
 }
