@@ -47,7 +47,7 @@ DIVISION_EXPORT bool division_engine_shader_program_alloc(
     const DivisionShaderSettings* settings,
     int32_t source_count,
     uint32_t* out_shader_program_id
-                                                         );
+);
 
 DIVISION_EXPORT void division_engine_shader_program_free(DivisionContext* ctx, uint32_t shader_program_id);
 
