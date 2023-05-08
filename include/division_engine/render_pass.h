@@ -1,17 +1,18 @@
 #pragma once
 
 #include <stdint.h>
+#include <stddef.h>
 
 #include "division_engine_core_export.h"
 #include "context.h"
 
 typedef struct DivisionRenderPass {
+    size_t vertex_count;
+    size_t first_vertex;
     uint32_t* uniform_buffers;
     int32_t uniform_buffer_count;
     int32_t vertex_buffer;
-    int32_t first_vertex;
-    int32_t vertex_count;
-    int32_t shader_program;
+    uint32_t shader_program;
 } DivisionRenderPass;
 
 typedef struct DivisionRenderPassSystemContext {

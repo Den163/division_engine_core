@@ -6,6 +6,7 @@
 
 #include "division_engine/context.h"
 #include <division_engine_core_export.h>
+#include <division_id_table/unordered_id_table.h>
 
 typedef enum {
     DIVISION_SHADER_VERTEX = 0,
@@ -29,8 +30,9 @@ typedef struct DivisionShaderSettings {
 } DivisionShaderSettings;
 
 typedef struct DivisionShaderSystemContext {
+    DivisionUnorderedIdTable id_table;
     struct DivisionShaderInternal_* shaders_impl;
-    int32_t shader_count;
+    size_t shader_count;
 } DivisionShaderSystemContext;
 
 bool division_engine_internal_shader_system_context_alloc(DivisionContext* ctx, const DivisionSettings* settings);
@@ -40,8 +42,14 @@ void division_engine_internal_shader_system_context_free(DivisionContext* ctx);
 extern "C" {
 #endif
 
-DIVISION_EXPORT int32_t division_engine_shader_program_create(
-    DivisionContext* ctx, const DivisionShaderSettings* settings, int32_t source_count);
+DIVISION_EXPORT bool division_engine_shader_program_alloc(
+    DivisionContext* ctx,
+    const DivisionShaderSettings* settings,
+    int32_t source_count,
+    uint32_t* out_shader_program_id
+                                                         );
+
+DIVISION_EXPORT void division_engine_shader_program_free(DivisionContext* ctx, uint32_t shader_program_id);
 
 #ifdef __cplusplus
 }

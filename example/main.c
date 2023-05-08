@@ -72,8 +72,8 @@ void init_callback(DivisionContext* ctx)
 #endif
     int32_t source_count = sizeof(shader_settings) / sizeof(DivisionShaderSettings);
 
-    int32_t shader_program = division_engine_shader_program_create(ctx, shader_settings, source_count);
-    assert(shader_program >= 0);
+    uint32_t shader_program;
+    division_engine_shader_program_alloc(ctx, shader_settings, source_count, &shader_program);
 
     VertexData vd[] = {
         { .position = {-0.5f, -0.5f, 0}, .color = {1, 1, 1, 1} },
