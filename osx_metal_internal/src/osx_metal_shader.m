@@ -7,11 +7,7 @@
 bool division_engine_internal_platform_shader_system_context_alloc(
     DivisionContext* ctx, const DivisionSettings* settings)
 {
-    DivisionShaderSystemContext* shader_context = malloc(sizeof(DivisionShaderSystemContext));
-    shader_context->shader_programs = NULL;
-    shader_context->shader_program_count = 0;
-
-    ctx->shader_context = shader_context;
+    ctx->shader_context->shaders_impl = NULL;
 
     return true;
 }
@@ -20,16 +16,14 @@ void division_engine_internal_platform_shader_system_context_free(DivisionContex
 {
     DivisionShaderSystemContext* shader_context = ctx->shader_context;
     DivisionOSXWindowContext* window_context = ctx->renderer_context->window_data;
-    DivisionOSXViewDelegate* view_delegate = window_context->app_delegate->viewDelegate;
 
-    for (int32_t i; i < shader_context->shader_program_count; i++)
+    for (int32_t i; i < shader_context->shader_count; i++)
     {
-        DivisionMetalShaderProgram* shader_program = &shader_context->shader_programs[i];
+        DivisionMetalShaderProgram* shader_program = &shader_context->shaders_impl[i];
         shader_program->vertex_function = nil;
         shader_program->fragment_function = nil;
     }
-    free(shader_context->shader_programs);
-    free(shader_context);
+    free(shader_context->shaders_impl);
 }
 
 int32_t division_engine_internal_platform_shader_program_create(
@@ -37,7 +31,7 @@ int32_t division_engine_internal_platform_shader_program_create(
 {
     DivisionOSXWindowContext* window_ctx = ctx->renderer_context->window_data;
     DivisionShaderSystemContext* shader_ctx = ctx->shader_context;
-    int32_t pipeline_state_count = shader_ctx->shader_program_count;
+    int32_t shader_program_count = shader_ctx->shader_count;
 
     DivisionMetalShaderProgram shader_program = {
         .vertex_function = nil,
@@ -48,19 +42,14 @@ int32_t division_engine_internal_platform_shader_program_create(
                             sourceCount:source_count
                              outProgram:&shader_program])
     {
-        int32_t new_count = pipeline_state_count + 1;
-        shader_ctx->shader_programs = realloc(
-            shader_ctx->shader_programs, sizeof(DivisionMetalShaderProgram[new_count]));
-        shader_ctx->shader_programs[pipeline_state_count] = shader_program;
-        shader_ctx->shader_program_count = new_count;
+        int32_t shaderIdx = shader_program_count - 1;
 
-        return pipeline_state_count;
+        shader_ctx->shaders_impl = realloc(
+            shader_ctx->shaders_impl, sizeof(DivisionMetalShaderProgram[shader_program_count]));
+        shader_ctx->shaders_impl[shaderIdx] = shader_program;
+
+        return shaderIdx;
     }
 
     return -1;
-}
-
-void division_engine_internal_platform_shader_program_free(DivisionContext* ctx, int32_t program_id)
-{
-    // TODO: Not implemented
 }

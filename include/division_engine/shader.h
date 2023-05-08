@@ -28,6 +28,11 @@ typedef struct DivisionShaderSettings {
     const char* entry_point_name;
 } DivisionShaderSettings;
 
+typedef struct DivisionShaderSystemContext {
+    struct DivisionShaderInternal_* shaders_impl;
+    int32_t shader_count;
+} DivisionShaderSystemContext;
+
 bool division_engine_internal_shader_system_context_alloc(DivisionContext* ctx, const DivisionSettings* settings);
 void division_engine_internal_shader_system_context_free(DivisionContext* ctx);
 
@@ -37,8 +42,6 @@ extern "C" {
 
 DIVISION_EXPORT int32_t division_engine_shader_program_create(
     DivisionContext* ctx, const DivisionShaderSettings* settings, int32_t source_count);
-
-DIVISION_EXPORT void division_engine_shader_program_free(DivisionContext* ctx, int32_t program_id);
 
 #ifdef __cplusplus
 }

@@ -33,7 +33,7 @@ bool division_engine_internal_platform_render_pass_alloc(DivisionContext* ctx, D
         sizeof(DivisionRenderPassInternalPlatform_[render_pass_ctx->render_pass_count])
     );
 
-    DivisionMetalShaderProgram* shader_program = &ctx->shader_context->shader_programs[render_pass->shader_program];
+    DivisionMetalShaderProgram* shader_program = &ctx->shader_context->shaders_impl[render_pass->shader_program];
     DivisionVertexBufferInternalPlatform_* vert_buff =
         &ctx->vertex_buffer_context->buffers_impl[render_pass->vertex_buffer];
     DivisionOSXViewDelegate* view_delegate = ctx->renderer_context->window_data->app_delegate->viewDelegate;
