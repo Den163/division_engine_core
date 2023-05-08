@@ -14,7 +14,7 @@ DIVISION_EXPORT bool division_engine_internal_platform_shader_system_context_all
 DIVISION_EXPORT void division_engine_internal_platform_shader_system_context_free(DivisionContext* ctx);
 
 
-DIVISION_EXPORT int32_t division_engine_internal_platform_shader_program_create(
+DIVISION_EXPORT bool division_engine_internal_platform_shader_program_create(
     DivisionContext* ctx, const DivisionShaderSettings* settings, int32_t source_count);
 
 #ifdef __cplusplus

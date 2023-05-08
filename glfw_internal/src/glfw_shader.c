@@ -5,6 +5,7 @@
 #include <stdio.h>
 
 #include "division_engine/shader.h"
+#include "glfw_shader.h"
 
 static int create_shader_from_source(const char* source, size_t source_size, GLuint gl_shader_type);
 static bool alloc_shader_source_from_file(const char* path, char** shader_data, size_t* data_size);
@@ -20,14 +21,17 @@ bool division_engine_internal_platform_shader_system_context_alloc(
     DivisionContext* ctx, const DivisionSettings* settings
 )
 {
+    ctx->shader_context->shaders_impl = NULL;
+
     return true;
 }
 
 void division_engine_internal_platform_shader_system_context_free(DivisionContext* ctx)
 {
+    free(ctx->shader_context->shaders_impl);
 }
 
-int32_t division_engine_internal_platform_shader_program_create(
+bool division_engine_internal_platform_shader_program_create(
     DivisionContext* ctx, const DivisionShaderSettings* settings, int32_t source_count)
 {
     int32_t gl_program = glCreateProgram();
@@ -38,12 +42,21 @@ int32_t division_engine_internal_platform_shader_program_create(
     }
     glLinkProgram(gl_program);
 
-    return check_program_status(gl_program) ? gl_program : -1;
-}
+    if (check_program_status(gl_program)) {
+        DivisionShaderSystemContext* shader_ctx = ctx->shader_context;
+        shader_ctx->shaders_impl = realloc(
+            shader_ctx->shaders_impl,
+            sizeof(DivisionShaderInternal_[shader_ctx->shader_count])
+        );
+        shader_ctx->shaders_impl[shader_ctx->shader_count - 1] = (DivisionShaderInternal_) {
+            .gl_shader_program = gl_program,
+        };
 
-void division_engine_internal_platform_shader_program_free(DivisionContext* ctx, int32_t program_id)
-{
-    glDeleteProgram((GLuint) program_id);
+        return true;
+    }
+
+    glDeleteProgram(gl_program);
+    return false;
 }
 
 bool attach_shader_to_program_from_file(const char* path, DivisionShaderType type, int32_t program_id)

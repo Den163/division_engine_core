@@ -1,8 +1,6 @@
 #pragma once
 
-#ifndef GLAD_GL_H_
-#include <glad/gl.h>
-#endif
+#include "glad_restrict.h"
 
 typedef struct DivisionUniformBufferInternal_ {
     GLuint gl_buffer;

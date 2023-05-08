@@ -8,12 +8,15 @@
 #include "division_engine/uniform_buffer.h"
 #include "division_engine/vertex_buffer.h"
 
+#include "glfw_shader.h"
 #include "glfw_uniform_buffer.h"
 #include "glfw_vertex_buffer.h"
 
 #include "division_engine/platform_internal/platform_renderer.h"
 
 static inline void renderer_draw(DivisionContext* ctx);
+
+typedef struct DivisionWindowContextPlatformInternal_* DivisionWindowContextPlatformInternalPtr_;
 
 bool division_engine_internal_platform_renderer_alloc(DivisionContext* ctx, const DivisionSettings* settings)
 {
@@ -46,7 +49,7 @@ bool division_engine_internal_platform_renderer_alloc(DivisionContext* ctx, cons
         return false;
     }
 
-    ctx->renderer_context->window_data = window;
+    ctx->renderer_context->window_data = (DivisionWindowContextPlatformInternalPtr_) window;
 
     return true;
 }
@@ -92,6 +95,7 @@ void renderer_draw(DivisionContext* ctx)
     DivisionVertexBufferSystemContext* vert_buff_ctx = ctx->vertex_buffer_context;
     DivisionUniformBufferSystemContext* uniform_buff_ctx = ctx->uniform_buffer_context;
     DivisionRenderPassSystemContext* render_pass_ctx = ctx->render_pass_context;
+    DivisionShaderSystemContext* shader_ctx = ctx->shader_context;
     int32_t pass_count = render_pass_ctx->render_pass_count;
 
     glClearBufferfv(GL_COLOR, 0, (const GLfloat*) &renderer_ctx->clear_color);
@@ -99,16 +103,16 @@ void renderer_draw(DivisionContext* ctx)
     {
         DivisionRenderPass pass = render_pass_ctx->render_passes[i];
         DivisionVertexBufferInternalPlatform_ vb_internal = vert_buff_ctx->buffers_impl[pass.vertex_buffer];
+        DivisionShaderInternal_ shader_internal = shader_ctx->shaders_impl[pass.shader_program];
 
         glBindBuffer(GL_ARRAY_BUFFER, vb_internal.gl_buffer);
-        glUseProgram(pass.shader_program);
+        glUseProgram(shader_internal.gl_shader_program);
 
         for (int32_t uniform_idx = 0; uniform_idx < pass.uniform_buffer_count; uniform_idx++)
         {
             int32_t uniform_buffer_id = pass.uniform_buffers[uniform_idx];
             GLuint gl_uniform_buff = uniform_buff_ctx->uniform_buffers_impl[uniform_buffer_id].gl_buffer;
             DivisionUniformBuffer* uniform_buffer = &uniform_buff_ctx->uniform_buffers[uniform_buffer_id];
-
 
             glBindBufferBase(GL_UNIFORM_BUFFER, uniform_buffer->binding, gl_uniform_buff);
         }
