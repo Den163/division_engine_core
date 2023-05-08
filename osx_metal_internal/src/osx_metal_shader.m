@@ -26,7 +26,7 @@ void division_engine_internal_platform_shader_system_context_free(DivisionContex
     free(shader_context->shaders_impl);
 }
 
-int32_t division_engine_internal_platform_shader_program_create(
+bool division_engine_internal_platform_shader_program_create(
     DivisionContext* ctx, const DivisionShaderSettings* settings, int32_t source_count)
 {
     DivisionOSXWindowContext* window_ctx = ctx->renderer_context->window_data;
@@ -48,8 +48,8 @@ int32_t division_engine_internal_platform_shader_program_create(
             shader_ctx->shaders_impl, sizeof(DivisionMetalShaderProgram[shader_program_count]));
         shader_ctx->shaders_impl[shaderIdx] = shader_program;
 
-        return shaderIdx;
+        return true;
     }
 
-    return -1;
+    return false;
 }
