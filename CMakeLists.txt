@@ -1,17 +1,21 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.22.2)
-project(division_engine_core)
+project(division_engine_core LANGUAGES C CXX)
 set(CMAKE_C_STANDARD 11)
-
-add_subdirectory(example)
+set(CMAKE_CXX_STANDARD 17)
 
 include(GenerateExportHeader)
+
+add_subdirectory(example)
+add_subdirectory(tests)
 
 set(SOURCES
     src/context.c
     src/renderer.c
     src/shader.c
     src/vertex_buffer.c
-    src/uniform_buffer.c src/render_pass.c)
+    src/uniform_buffer.c
+    src/render_pass.c
+    src/unordered_id_table.c)
 
 add_library(division_engine_core STATIC ${SOURCES})
 

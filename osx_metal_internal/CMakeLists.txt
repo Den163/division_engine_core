@@ -1,4 +1,4 @@
-project(osx_metal_internal OBJC)
+project(osx_metal_internal LANGUAGES OBJC)
 
 set(OSX_METAL_INTERNAL_SOURCES
     src/osx_metal_renderer.m
@@ -16,4 +16,5 @@ set_target_properties(
 )
 
 target_include_directories(osx_metal_internal PRIVATE include ${CMAKE_SOURCE_DIR}/include ${CMAKE_BINARY_DIR})
-target_link_libraries(osx_metal_internal "-framework Foundation -framework AppKit -framework Metal -framework MetalKit" objc)
+target_link_libraries(osx_metal_internal
+                      "-framework Foundation -framework AppKit -framework Metal -framework MetalKit")
