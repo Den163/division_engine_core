@@ -37,9 +37,10 @@ typedef struct DivisionVertexBuffer {
 } DivisionVertexBuffer;
 
 typedef struct DivisionVertexBufferSystemContext {
+    DivisionUnorderedIdTable id_table;
     DivisionVertexBuffer* buffers;
     struct DivisionVertexBufferInternalPlatform_* buffers_impl;
-    int32_t buffers_count;
+    size_t buffers_count;
 } DivisionVertexBufferSystemContext;
 
 
@@ -51,16 +52,15 @@ extern "C" {
 #endif
 
 
-DIVISION_EXPORT int32_t division_engine_vertex_buffer_alloc(
-    DivisionContext* ctx,
-    DivisionVertexAttributeSettings* attrs,
-    int32_t attr_count,
-    int32_t vertex_count,
-    DivisionRenderTopology render_topology);
+DIVISION_EXPORT bool division_engine_vertex_buffer_alloc(
+    DivisionContext* ctx, DivisionVertexAttributeSettings* attrs, int32_t attr_count, int32_t vertex_count,
+    DivisionRenderTopology render_topology, uint32_t* out_vertex_buffer_id);
 
-DIVISION_EXPORT void* division_engine_vertex_buffer_borrow_data_pointer(DivisionContext* ctx, int32_t vertex_buffer);
+DIVISION_EXPORT void division_engine_vertex_buffer_free(DivisionContext* ctx, uint32_t vertex_buffer_id);
+
+DIVISION_EXPORT void* division_engine_vertex_buffer_borrow_data_pointer(DivisionContext* ctx, uint32_t vertex_buffer);
 DIVISION_EXPORT void division_engine_vertex_buffer_return_data_pointer(
-    DivisionContext* ctx, int32_t vertex_buffer, void* data_pointer);
+    DivisionContext* ctx, uint32_t vertex_buffer, void* data_pointer);
 
 #ifdef __cplusplus
 }

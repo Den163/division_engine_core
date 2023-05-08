@@ -92,8 +92,9 @@ void init_callback(DivisionContext* ctx)
 
     int32_t attr_count = sizeof(attr) / sizeof(DivisionVertexAttributeSettings);
 
-    int32_t vertex_buffer = division_engine_vertex_buffer_alloc(
-        ctx, attr, attr_count, vertex_count, DIVISION_TOPOLOGY_TRIANGLES);
+    uint32_t vertex_buffer;
+    division_engine_vertex_buffer_alloc(
+        ctx, attr, attr_count, vertex_count, DIVISION_TOPOLOGY_TRIANGLES, &vertex_buffer);
     VertexData* vert_buff_ptr = division_engine_vertex_buffer_borrow_data_pointer(ctx, vertex_buffer);
     memcpy(vert_buff_ptr, vd, sizeof(vd));
     division_engine_vertex_buffer_return_data_pointer(ctx, vertex_buffer, vert_buff_ptr);

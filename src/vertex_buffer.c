@@ -27,6 +27,8 @@ bool division_engine_internal_vertex_buffer_context_alloc(DivisionContext* ctx, 
         .buffers_count = 0
     };
 
+    division_unordered_id_table_alloc(&ctx->vertex_buffer_context->id_table, 10);
+
     return division_engine_internal_platform_vertex_buffer_context_alloc(ctx, settings);
 }
 
@@ -35,6 +37,7 @@ void division_engine_internal_vertex_buffer_context_free(DivisionContext* ctx)
     division_engine_internal_platform_vertex_buffer_context_free(ctx);
 
     DivisionVertexBufferSystemContext* vertex_buffer_ctx = ctx->vertex_buffer_context;
+    division_unordered_id_table_free(&vertex_buffer_ctx->id_table);
 
     for (int i = 0; i < vertex_buffer_ctx->buffers_count; i++)
     {
@@ -45,20 +48,40 @@ void division_engine_internal_vertex_buffer_context_free(DivisionContext* ctx)
     free(vertex_buffer_ctx);
 }
 
-int32_t division_engine_vertex_buffer_alloc(
+bool division_engine_vertex_buffer_alloc(
     DivisionContext* ctx,
     DivisionVertexAttributeSettings* attrs,
     int32_t attr_count,
     int32_t vertex_count,
-    DivisionRenderTopology render_topology
-                                           )
+    DivisionRenderTopology render_topology,
+    uint32_t* out_vertex_buffer_id)
 {
     DivisionVertexBufferSystemContext* vertex_ctx = ctx->vertex_buffer_context;
+
+    uint32_t vertex_buffer_id = division_unordered_id_table_insert(&vertex_ctx->id_table);
+    if (vertex_buffer_id >= vertex_ctx->buffers_count) {
+        vertex_ctx->buffers_count = vertex_buffer_id + 1;
+        vertex_ctx->buffers = realloc(vertex_ctx->buffers, sizeof(DivisionVertexBuffer[vertex_ctx->buffers_count]));
+    }
+
+    if (vertex_ctx->buffers == NULL)
+    {
+        division_unordered_id_table_remove(&vertex_ctx->id_table, vertex_buffer_id);
+        ctx->error_callback(DIVISION_INTERNAL_ERROR, "Failed to reallocate Vertex Buffers array");
+        return false;
+    }
 
     DivisionVertexBuffer vertex_buffer = {
         .attributes = malloc(sizeof(DivisionVertexAttribute[attr_count])),
         .attribute_count = attr_count,
     };
+
+    if (vertex_buffer.attributes == NULL)
+    {
+        division_unordered_id_table_remove(&vertex_ctx->id_table, vertex_buffer_id);
+        ctx->error_callback(DIVISION_INTERNAL_ERROR, "Failed to reallocate Attributes array");
+        return false;
+    }
 
     int32_t per_vertex_data_size;
     gather_attributes_info(
@@ -68,16 +91,17 @@ int32_t division_engine_vertex_buffer_alloc(
     vertex_buffer.per_vertex_data_size = per_vertex_data_size;
     vertex_buffer.topology = render_topology;
 
-    int32_t buffers_count = vertex_ctx->buffers_count;
-    int32_t new_buffers_count = buffers_count + 1;
-    vertex_ctx->buffers = realloc(vertex_ctx->buffers, sizeof(DivisionVertexBuffer[new_buffers_count]));
+    vertex_ctx->buffers[vertex_buffer_id] = vertex_buffer;
 
-    vertex_ctx->buffers[buffers_count] = vertex_buffer;
-    vertex_ctx->buffers_count++;
+    if (division_engine_internal_platform_vertex_buffer_alloc(ctx, vertex_buffer_id) == false)
+    {
+        division_unordered_id_table_remove(&vertex_ctx->id_table, vertex_buffer_id);
+        free(vertex_buffer.attributes);
+        return false;
+    }
 
-    division_engine_internal_platform_vertex_buffer_alloc(ctx);
-
-    return vertex_ctx->buffers_count - 1;
+    *out_vertex_buffer_id = vertex_buffer_id;
+    return true;
 }
 
 void gather_attributes_info(
@@ -133,12 +157,24 @@ AttrTraits_ division_attribute_get_traits(DivisionShaderVariableType attributeTy
     }
 }
 
-void* division_engine_vertex_buffer_borrow_data_pointer(DivisionContext* ctx, int32_t vertex_buffer)
+void division_engine_vertex_buffer_free(DivisionContext* ctx, uint32_t vertex_buffer_id)
+{
+    division_engine_internal_platform_vertex_buffer_free(ctx, vertex_buffer_id);
+    DivisionVertexBuffer* vertex_buffer = &ctx->vertex_buffer_context->buffers[vertex_buffer_id];
+    for (int i = 0; i < vertex_buffer->attribute_count; i++)
+    {
+        free(vertex_buffer->attributes);
+    }
+
+    division_unordered_id_table_remove(&ctx->vertex_buffer_context->id_table, vertex_buffer_id);
+}
+
+void* division_engine_vertex_buffer_borrow_data_pointer(DivisionContext* ctx, uint32_t vertex_buffer)
 {
     return division_engine_internal_platform_vertex_buffer_borrow_data_pointer(ctx, vertex_buffer);
 }
 
-void division_engine_vertex_buffer_return_data_pointer(DivisionContext* ctx, int32_t vertex_buffer, void* data_pointer)
+void division_engine_vertex_buffer_return_data_pointer(DivisionContext* ctx, uint32_t vertex_buffer, void* data_pointer)
 {
     division_engine_internal_platform_vertex_buffer_return_data_pointer(ctx, vertex_buffer, data_pointer);
 }

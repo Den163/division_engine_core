@@ -11,7 +11,7 @@ typedef struct DivisionRenderPass {
     size_t first_vertex;
     uint32_t* uniform_buffers;
     int32_t uniform_buffer_count;
-    int32_t vertex_buffer;
+    uint32_t vertex_buffer;
     uint32_t shader_program;
 } DivisionRenderPass;
 

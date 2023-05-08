@@ -29,38 +29,64 @@ void division_engine_internal_platform_vertex_buffer_context_free(DivisionContex
     free(vert_buffer_ctx->buffers_impl);
 }
 
-void division_engine_internal_platform_vertex_buffer_alloc(DivisionContext* ctx)
+bool division_engine_internal_platform_vertex_buffer_alloc(DivisionContext* ctx, uint32_t buffer_id)
 {
     DivisionVertexBufferSystemContext* vert_buffer_ctx = ctx->vertex_buffer_context;
     DivisionOSXWindowContext* window_context = ctx->renderer_context->window_data;
 
-    size_t buff_id = vert_buffer_ctx->buffers_count - 1;
     vert_buffer_ctx->buffers_impl = realloc(
         vert_buffer_ctx->buffers_impl,
         sizeof(DivisionVertexBufferInternalPlatform_) * vert_buffer_ctx->buffers_count
     );
 
-    DivisionVertexBuffer* vert_buffer = &vert_buffer_ctx->buffers[buff_id];
-    DivisionVertexBufferInternalPlatform_* impl_buffer = &vert_buffer_ctx->buffers_impl[buff_id];
+    if (vert_buffer_ctx->buffers_impl == NULL)
+    {
+        ctx->error_callback(DIVISION_INTERNAL_ERROR, "Failed to reallocate Vertex Buffer Implementation array");
+        return false;
+    }
+
+    DivisionVertexBuffer* vert_buffer = &vert_buffer_ctx->buffers[buffer_id];
+    DivisionVertexBufferInternalPlatform_* impl_buffer = &vert_buffer_ctx->buffers_impl[buffer_id];
 
     DivisionOSXViewDelegate* view_delegate = window_context->app_delegate->viewDelegate;
     id <MTLBuffer> buffer = [view_delegate
         createBufferWithSize:vert_buffer->per_vertex_data_size * vert_buffer->vertex_count];
 
+    if (buffer == nil)
+    {
+        ctx->error_callback(DIVISION_INTERNAL_ERROR, "Failed to create MTLBuffer");
+        return false;
+    }
+
     MTLVertexDescriptor* vertex_descriptor = [view_delegate createVertexDescriptorForBuffer:vert_buffer];
+
+    if (vertex_descriptor == nil)
+    {
+        ctx->error_callback(DIVISION_INTERNAL_ERROR, "Failed to create MTLVertexDescriptor");
+        return false;
+    }
 
     impl_buffer->mtl_buffer = buffer;
     impl_buffer->mtl_vertex_descriptor = vertex_descriptor;
+
+    return true;
 }
 
-void* division_engine_internal_platform_vertex_buffer_borrow_data_pointer(DivisionContext* ctx, int32_t vertex_buffer)
+void* division_engine_internal_platform_vertex_buffer_borrow_data_pointer(DivisionContext* ctx, uint32_t vertex_buffer)
 {
     return [ctx->vertex_buffer_context->buffers_impl[vertex_buffer].mtl_buffer contents];
 }
 
 void division_engine_internal_platform_vertex_buffer_return_data_pointer(
-    DivisionContext* ctx, int32_t vertex_buffer, void* data_pointer)
+    DivisionContext* ctx, uint32_t vertex_buffer, void* data_pointer)
 {
     id<MTLBuffer> mtl_buffer = ctx->vertex_buffer_context->buffers_impl[vertex_buffer].mtl_buffer;
     [mtl_buffer didModifyRange:NSMakeRange(0, [mtl_buffer length])];
+}
+
+void division_engine_internal_platform_vertex_buffer_free(DivisionContext* ctx, uint32_t buffer_id)
+{
+    DivisionVertexBufferInternalPlatform_* vertex_buffer = &ctx->vertex_buffer_context->buffers_impl[buffer_id];
+    vertex_buffer->mtl_buffer = nil;
+    vertex_buffer->mtl_vertex_descriptor = nil;
 }
