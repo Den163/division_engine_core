@@ -20,17 +20,21 @@
     id <MTLCommandQueue> commandQueue;
 };
 
-+ (instancetype)withContext:(DivisionContext*)aContext settings:(const DivisionSettings*)aSettings device:(id)aDevice;
++ (instancetype)withContext:(DivisionContext*)aContext
+                   settings:(const DivisionSettings*)aSettings
+                     device:(id)aDevice;
 
-- (instancetype)initWithContext:(DivisionContext*)aContext settings:(const DivisionSettings*)aSettings device:(id)aDevice;
+- (instancetype)initWithContext:(DivisionContext*)aContext
+                       settings:(const DivisionSettings*)aSettings
+                         device:(id)aDevice;
 
 - (id <MTLBuffer>)createBufferWithSize:(size_t)data_bytes;
 
 - (MTLVertexDescriptor*)createVertexDescriptorForBuffer:(const DivisionVertexBuffer*)vertexBuffer;
 
 
-- (id <MTLRenderPipelineState>)createRenderPipelineState:
-    (const DivisionMetalShaderProgram*)program vertexDescriptor:(MTLVertexDescriptor*)desc;
+- (id <MTLRenderPipelineState>)createRenderPipelineStateForShaderProgram:(const DivisionMetalShaderProgram*)program
+                                                        vertexDescriptor:(MTLVertexDescriptor*)desc;
 
 - (bool)createShaderProgramWithSettings:
     (const DivisionShaderSettings*)shaderSettings

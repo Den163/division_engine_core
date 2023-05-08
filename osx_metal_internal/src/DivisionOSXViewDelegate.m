@@ -16,7 +16,10 @@ static inline MTLVertexFormat division_attribute_type_to_mtl_format(DivisionShad
 static char* readFromFile(const char* path);
 
 @implementation DivisionOSXViewDelegate
-- (instancetype)initWithContext:(DivisionContext*)aContext settings:(const DivisionSettings*)aSettings device:(id)aDevice {
+- (instancetype)initWithContext:(DivisionContext*)aContext
+                       settings:(const DivisionSettings*)aSettings
+                         device:(id)aDevice
+{
     self = [super init];
     if (self)
     {
@@ -29,11 +32,13 @@ static char* readFromFile(const char* path);
     return self;
 }
 
-- (id <MTLBuffer>)createBufferWithSize:(size_t)data_bytes {
+- (id <MTLBuffer>)createBufferWithSize:(size_t)data_bytes
+{
     return [device newBufferWithLength:data_bytes options:MTLResourceStorageModeManaged];
 }
 
-- (MTLVertexDescriptor*)createVertexDescriptorForBuffer:(const DivisionVertexBuffer*)vertexBuffer {
+- (MTLVertexDescriptor*)createVertexDescriptorForBuffer:(const DivisionVertexBuffer*)vertexBuffer
+{
     MTLVertexDescriptor* descriptor = [MTLVertexDescriptor new];
     MTLVertexAttributeDescriptorArray* attrDescArray = [descriptor attributes];
     for (int i = 0; i < vertexBuffer->attribute_count; i++)
@@ -51,7 +56,9 @@ static char* readFromFile(const char* path);
     return descriptor;
 }
 
-- (id <MTLRenderPipelineState>)createRenderPipelineState:(const DivisionMetalShaderProgram*)program vertexDescriptor:(MTLVertexDescriptor*)desc {
+- (id <MTLRenderPipelineState>)createRenderPipelineStateForShaderProgram:(const DivisionMetalShaderProgram*)program
+                                                        vertexDescriptor:(MTLVertexDescriptor*)desc
+{
     MTLRenderPipelineDescriptor* pipeline_descriptor = [MTLRenderPipelineDescriptor new];
     if (program->vertex_function != NULL)
     {
@@ -138,7 +145,10 @@ static char* readFromFile(const char* path);
     }
 }
 
-+ (instancetype)withContext:(DivisionContext*)aContext settings:(const DivisionSettings*)aSettings device:(id)aDevice {
++ (instancetype)withContext:(DivisionContext*)aContext
+                   settings:(const DivisionSettings*)aSettings
+                     device:(id)aDevice
+{
     return [[self alloc] initWithContext:aContext settings:aSettings device:aDevice];
 }
 
