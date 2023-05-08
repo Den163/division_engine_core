@@ -51,7 +51,9 @@ static char* readFromFile(const char* path);
     return descriptor;
 }
 
-- (id <MTLRenderPipelineState>)createRenderPipelineState:(const DivisionMetalShaderProgram*)program vertexDescriptor:(MTLVertexDescriptor*)desc {
+- (id <MTLRenderPipelineState>)createRenderPipelineStateForShaderProgram:(const DivisionMetalShaderProgram*)program
+                                                        vertexDescriptor:(MTLVertexDescriptor*)desc
+{
     MTLRenderPipelineDescriptor* pipeline_descriptor = [MTLRenderPipelineDescriptor new];
     if (program->vertex_function != NULL)
     {

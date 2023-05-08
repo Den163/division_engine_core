@@ -39,8 +39,8 @@ bool division_engine_internal_platform_render_pass_alloc(DivisionContext* ctx, D
     DivisionOSXViewDelegate* view_delegate = ctx->renderer_context->window_data->app_delegate->viewDelegate;
 
     id <MTLRenderPipelineState> pipeline_state = [view_delegate
-        createRenderPipelineState:shader_program
-                 vertexDescriptor:vert_buff->mtl_vertex_descriptor];
+        createRenderPipelineStateForShaderProgram:shader_program
+                                 vertexDescriptor:vert_buff->mtl_vertex_descriptor];
 
     render_pass_ctx->render_passes_impl[render_pass_ctx->render_pass_count - 1] = (DivisionRenderPassInternalPlatform_)
         {

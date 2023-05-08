@@ -29,8 +29,8 @@
 - (MTLVertexDescriptor*)createVertexDescriptorForBuffer:(const DivisionVertexBuffer*)vertexBuffer;
 
 
-- (id <MTLRenderPipelineState>)createRenderPipelineState:
-    (const DivisionMetalShaderProgram*)program vertexDescriptor:(MTLVertexDescriptor*)desc;
+- (id <MTLRenderPipelineState>)createRenderPipelineStateForShaderProgram:
+    (const DivisionMetalShaderProgram*)program          vertexDescriptor:(MTLVertexDescriptor*)desc;
 
 - (bool)createShaderProgramWithSettings:
     (const DivisionShaderSettings*)shaderSettings
