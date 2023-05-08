@@ -80,13 +80,13 @@ static char* readFromFile(const char* path);
 
     if (err)
     {
-        fprintf(stderr, "%s\n", [[err debugDescription] UTF8String]);
+        context->error_callback(DIVISION_INTERNAL_ERROR, [[err debugDescription] UTF8String]);
         return nil;
     }
 
     if (!renderPipelineState)
     {
-        fprintf(stderr, "Render pipeline state is null\n");
+        context->error_callback(DIVISION_INTERNAL_ERROR, "Render pipeline state is null");
         return nil;
     }
 
@@ -105,7 +105,11 @@ static char* readFromFile(const char* path);
             DivisionShaderSettings shader = shaderSettings[i];
 
             char* shaderSrc = readFromFile(shader.file_path);
-
+            if (shaderSrc == NULL)
+            {
+                context->error_callback(DIVISION_INTERNAL_ERROR, "Failed to read from file");
+                return false;
+            }
 
             id <MTLLibrary> library = [device
                 newLibraryWithSource:[NSString stringWithUTF8String:shaderSrc] options:nil error:&err];
@@ -113,13 +117,13 @@ static char* readFromFile(const char* path);
 
             if (err)
             {
-                fprintf(stderr, "%s\n", [[err debugDescription] UTF8String]);
+                context->error_callback(DIVISION_INTERNAL_ERROR, [[err debugDescription] UTF8String]);
                 return false;
             }
 
             if (!library)
             {
-                fprintf(stderr, "Created shader library is null\n");
+                context->error_callback(DIVISION_INTERNAL_ERROR, "Created shader library is null\n");
                 return false;
             }
 

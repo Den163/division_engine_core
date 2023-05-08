@@ -29,22 +29,33 @@ void division_engine_internal_uniform_buffer_context_free(DivisionContext* ctx)
 bool division_engine_uniform_buffer_alloc(DivisionContext* ctx, DivisionUniformBuffer buffer, uint32_t* out_buffer_id)
 {
     DivisionUniformBufferSystemContext* uniform_buffer_ctx = ctx->uniform_buffer_context;
-    const uint32_t id = division_unordered_id_table_insert(&uniform_buffer_ctx->id_table);
-    if (id >= uniform_buffer_ctx->uniform_buffer_count)
+    const uint32_t buff_id = division_unordered_id_table_insert(&uniform_buffer_ctx->id_table);
+    if (buff_id >= uniform_buffer_ctx->uniform_buffer_count)
     {
-        uniform_buffer_ctx->uniform_buffer_count = id + 1;
+        uniform_buffer_ctx->uniform_buffer_count = buff_id + 1;
         uniform_buffer_ctx->uniform_buffers = realloc(
             uniform_buffer_ctx->uniform_buffers,
             sizeof(DivisionUniformBuffer[uniform_buffer_ctx->uniform_buffer_count])
         );
 
-        if (uniform_buffer_ctx->uniform_buffers == NULL) return false;
+        if (uniform_buffer_ctx->uniform_buffers == NULL)
+        {
+            ctx->error_callback(DIVISION_INTERNAL_ERROR, "Failed to reallocate Uniform Buffers array");
+            division_unordered_id_table_remove(&uniform_buffer_ctx->id_table, buff_id);
+            return false;
+        }
     }
 
-    uniform_buffer_ctx->uniform_buffers[id] = buffer;
+    uniform_buffer_ctx->uniform_buffers[buff_id] = buffer;
 
-    *out_buffer_id = id;
-    return division_engine_internal_platform_uniform_buffer_alloc(ctx, buffer, id);
+    *out_buffer_id = buff_id;
+    if (division_engine_internal_platform_uniform_buffer_alloc(ctx, buffer, buff_id) == false)
+    {
+        division_unordered_id_table_remove(&uniform_buffer_ctx->id_table, buff_id);
+        return false;
+    }
+
+    return true;
 }
 
 void* division_engine_uniform_buffer_borrow_data_pointer(DivisionContext* ctx, uint32_t buffer)

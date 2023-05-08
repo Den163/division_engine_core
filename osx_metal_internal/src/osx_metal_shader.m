@@ -17,7 +17,7 @@ void division_engine_internal_platform_shader_system_context_free(DivisionContex
     DivisionShaderSystemContext* shader_context = ctx->shader_context;
     DivisionOSXWindowContext* window_context = ctx->renderer_context->window_data;
 
-    for (int32_t i; i < shader_context->shader_count; i++)
+    for (int32_t i = 0; i < shader_context->shader_count; i++)
     {
         DivisionMetalShaderProgram* shader_program = &shader_context->shaders_impl[i];
         shader_program->vertex_function = nil;
@@ -40,6 +40,7 @@ bool division_engine_internal_platform_shader_program_create(
     if ([window_ctx->app_delegate->viewDelegate
             createShaderProgramWithSettings:settings sourceCount:source_count outProgram:&shader_program] == false)
     {
+        ctx->error_callback(DIVISION_INTERNAL_ERROR, "Failed to create shader program");
         return false;
     }
 
@@ -55,6 +56,8 @@ bool division_engine_internal_platform_shader_program_create(
         if (shader_ctx->shaders_impl == NULL)
         {
             division_unordered_id_table_remove(&shader_ctx->id_table, program_id);
+            ctx->error_callback(DIVISION_INTERNAL_ERROR, "Failed to reallocate Shader Implementation array");
+
             return false;
         }
     }

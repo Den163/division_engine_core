@@ -30,6 +30,11 @@ bool division_engine_internal_platform_uniform_buffer_alloc(
 {
     DivisionOSXWindowContext* window_ctx = ctx->renderer_context->window_data;
     id<MTLBuffer> mtl_buffer = [window_ctx->app_delegate->viewDelegate createBufferWithSize:buffer.data_bytes];
+    if (mtl_buffer == nil)
+    {
+        ctx->error_callback(DIVISION_INTERNAL_ERROR, "Failed to create MTLBuffer");
+        return false;
+    }
 
     DivisionUniformBufferSystemContext* uniform_buffer_ctx = ctx->uniform_buffer_context;
     uniform_buffer_ctx->uniform_buffers_impl = realloc(
@@ -37,7 +42,11 @@ bool division_engine_internal_platform_uniform_buffer_alloc(
         sizeof(DivisionUniformBufferInternal_) * uniform_buffer_ctx->uniform_buffer_count
     );
 
-    if (uniform_buffer_ctx->uniform_buffers_impl == NULL) return false;
+    if (uniform_buffer_ctx->uniform_buffers_impl == NULL)
+    {
+        ctx->error_callback(DIVISION_INTERNAL_ERROR, "Failed to reallocate Uniform Buffer Implementation array");
+        return false;
+    }
 
     DivisionUniformBufferInternal_* internal_buffer = &uniform_buffer_ctx->uniform_buffers_impl[buffer_id];
     internal_buffer->mtl_buffer = mtl_buffer;
