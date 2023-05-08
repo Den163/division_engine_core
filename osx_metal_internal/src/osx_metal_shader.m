@@ -26,7 +26,7 @@ void division_engine_internal_platform_shader_system_context_free(DivisionContex
     free(shader_context->shaders_impl);
 }
 
-bool division_engine_internal_platform_shader_program_create(
+bool division_engine_internal_platform_shader_program_alloc(
     DivisionContext* ctx, const DivisionShaderSettings* settings, int32_t source_count, uint32_t* out_shader_program_id)
 {
     DivisionOSXWindowContext* window_ctx = ctx->renderer_context->window_data;
