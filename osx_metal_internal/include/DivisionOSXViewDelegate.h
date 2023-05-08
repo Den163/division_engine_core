@@ -1,40 +1,40 @@
 #pragma once
 
-#include <MetalKit/MetalKit.hpp>
+#include <Foundation/Foundation.h>
+#include <MetalKit/MetalKit.h>
+#include <Metal/Metal.h>
 
 #include "division_engine/context.h"
-#include "division_engine/settings.h"
-#include "division_engine/shader.h"
 #include "division_engine/vertex_buffer.h"
-#import "osx_shader_context.h"
-#import "../../include/division_engine/vertex_buffer.h"
+#include "osx_shader_context.h"
 
-class DivisionOSXViewDelegate : public MTK::ViewDelegate {
-public:
-    DivisionOSXViewDelegate(MTL::Device* device, const DivisionSettings* settings, DivisionContext* context);
-    ~DivisionOSXViewDelegate() override;
-
-    void drawInMTKView(MTK::View* pView) override;
-    void drawableSizeWillChange(MTK::View* pView, CGSize size) override;
-
-    const DivisionSettings* settings;
+@interface DivisionOSXViewDelegate : NSObject <MTKViewDelegate>
+{
+@public
     DivisionContext* context;
-
-    MTL::Buffer* createBuffer(size_t dataSize);
-    void deleteBuffer(MTL::Buffer* buffer);
-
-    MTL::VertexDescriptor* createVertexDescriptor(const DivisionVertexBuffer* vertexBuffer);
-    void deleteVertexDescriptor(MTL::VertexDescriptor* vertexDescriptor);
-
-    MTL::RenderPipelineState* createRenderPipelineState(
-        const DivisionMetalShaderProgram* program, MTL::VertexDescriptor* vertexDescriptor);
-    void deleteRenderPipelineState(MTL::RenderPipelineState* pipelineState);
-
-    bool createShaderProgram(
-        const DivisionShaderSettings* shaderSettings, int32_t source_count, DivisionMetalShaderProgram* out_program);
-    void deleteShaderProgram(DivisionMetalShaderProgram* program);
-
-private:
-    MTL::Device* _device;
-    MTL::CommandQueue* _commandQueue;
+@public
+    const DivisionSettings* settings;
+@public
+    id <MTLDevice> device;
+@public
+    id <MTLCommandQueue> commandQueue;
 };
+
++ (instancetype)withContext:(DivisionContext*)aContext settings:(const DivisionSettings*)aSettings device:(id)aDevice;
+
+- (instancetype)initWithContext:(DivisionContext*)aContext settings:(const DivisionSettings*)aSettings device:(id)aDevice;
+
+- (id <MTLBuffer>)createBufferWithSize:(size_t)data_bytes;
+
+- (MTLVertexDescriptor*)createVertexDescriptorForBuffer:(const DivisionVertexBuffer*)vertexBuffer;
+
+
+- (id <MTLRenderPipelineState>)createRenderPipelineState:
+    (const DivisionMetalShaderProgram*)program vertexDescriptor:(MTLVertexDescriptor*)desc;
+
+- (bool)createShaderProgramWithSettings:
+    (const DivisionShaderSettings*)shaderSettings
+                            sourceCount:(int32_t)sourceCount
+                             outProgram:(DivisionMetalShaderProgram*)out_program;
+
+@end

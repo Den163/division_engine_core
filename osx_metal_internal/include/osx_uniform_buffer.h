@@ -1,8 +1,8 @@
 #pragma once
 
-#include <Metal/Metal.hpp>
+#include <Metal/Metal.h>
 
 typedef struct DivisionUniformBufferInternal_
 {
-    MTL::Buffer* mtl_buffer;
+    __strong id<MTLBuffer> mtl_buffer;
 } DivisionUniformBufferInternal_;

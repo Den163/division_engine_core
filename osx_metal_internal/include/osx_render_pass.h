@@ -1,7 +1,7 @@
 #pragma once
 
-#include <Metal/Metal.hpp>
+#include <Metal/Metal.h>
 
 typedef struct DivisionRenderPassInternalPlatform_ {
-    MTL::RenderPipelineState* mtl_pipeline_state;
+    __strong id<MTLRenderPipelineState> mtl_pipeline_state;
 } DivisionRenderPassInternalPlatform_;

@@ -1,9 +1,9 @@
 #pragma once
 
-#include <MetalKit/MetalKit.hpp>
+#include <MetalKit/MetalKit.h>
 
-struct DivisionVertexBufferInternalPlatform_
+typedef struct DivisionVertexBufferInternalPlatform_
 {
-    MTL::Buffer* mtl_buffer;
-    MTL::VertexDescriptor* mtl_vertex_descriptor;
-};
+    __strong id<MTLBuffer> mtl_buffer;
+    __strong MTLVertexDescriptor* mtl_vertex_descriptor;
+} DivisionVertexBufferInternalPlatform_;

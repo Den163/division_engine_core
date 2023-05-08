@@ -1,4 +1,4 @@
-#include <DivisionOSXAppDelegate.h>
+#include <DivisionOSXAppDelegateCpp.h>
 #include "division_engine/renderer.h"
 
 

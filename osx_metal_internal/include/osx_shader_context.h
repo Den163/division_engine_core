@@ -1,17 +1,16 @@
 #pragma once
 
-#include <MetalKit/MetalKit.hpp>
-#include <unordered_map>
-#include <string>
+#include <Metal/Metal.h>
+#include <MetalKit/MetalKit.h>
 
 typedef struct DivisionMetalAttribute DivisionMetalAttribute;
 
 typedef struct DivisionMetalShaderProgram {
-    MTL::Function* vertex_function;
-    MTL::Function* fragment_function;
+    __strong id<MTLFunction> vertex_function;
+    __strong id<MTLFunction> fragment_function;
 } DivisionMetalShaderProgram;
 
 typedef struct DivisionShaderSystemContext {
     DivisionMetalShaderProgram* shader_programs;
-    size_t shader_program_count;
+    int32_t shader_program_count;
 } DivisionShaderSystemContext ;

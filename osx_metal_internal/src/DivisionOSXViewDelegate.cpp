@@ -1,4 +1,4 @@
-#include "DivisionOSXViewDelegate.h"
+#include "DivisionOSXViewDelegateCpp.h"
 #include <cstdio>
 
 #include <NSUtils.h>

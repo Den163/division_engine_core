@@ -1,11 +1,9 @@
 #pragma once
 
-#include <Foundation/Foundation.hpp>
-
+#include <Foundation/Foundation.h>
 #include "DivisionOSXAppDelegate.h"
 
 typedef struct DivisionWindowContextPlatformInternal_ {
-    NS::AutoreleasePool* autorelease_pool;
-    NS::Application* app;
-    DivisionOSXAppDelegate* app_delegate;
+    __strong NSApplication* app;
+    __strong DivisionOSXAppDelegate* app_delegate;
 } DivisionOSXWindowContext;
