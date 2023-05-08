@@ -110,13 +110,13 @@ void renderer_draw(DivisionContext* ctx)
 
         for (int32_t uniform_idx = 0; uniform_idx < pass.uniform_buffer_count; uniform_idx++)
         {
-            int32_t uniform_buffer_id = pass.uniform_buffers[uniform_idx];
+            uint32_t uniform_buffer_id = pass.uniform_buffers[uniform_idx];
             GLuint gl_uniform_buff = uniform_buff_ctx->uniform_buffers_impl[uniform_buffer_id].gl_buffer;
             DivisionUniformBuffer* uniform_buffer = &uniform_buff_ctx->uniform_buffers[uniform_buffer_id];
 
             glBindBufferBase(GL_UNIFORM_BUFFER, uniform_buffer->binding, gl_uniform_buff);
         }
 
-        glDrawArrays(vb_internal.gl_topology, pass.first_vertex, pass.vertex_count);
+        glDrawArrays(vb_internal.gl_topology, (GLint) pass.first_vertex, (GLint) pass.vertex_count);
     }
 }

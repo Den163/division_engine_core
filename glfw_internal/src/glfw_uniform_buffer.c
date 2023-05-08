@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include "glfw_uniform_buffer.h"
 
-static inline GLuint get_gl_uniform_buffer(const DivisionContext* ctx, int32_t division_buffer)
+static inline GLuint get_gl_uniform_buffer(const DivisionContext* ctx, uint32_t division_buffer)
 {
     return ctx->uniform_buffer_context->uniform_buffers_impl[division_buffer].gl_buffer;
 }
@@ -20,8 +20,8 @@ void division_engine_internal_platform_uniform_buffer_context_free(DivisionConte
     free(ctx->uniform_buffer_context->uniform_buffers_impl);
 }
 
-void division_engine_internal_platform_uniform_buffer_alloc(
-    DivisionContext* ctx, DivisionUniformBuffer buffer)
+bool division_engine_internal_platform_uniform_buffer_alloc(
+    DivisionContext* ctx, DivisionUniformBuffer buffer, uint32_t buffer_id)
 {
     GLuint gl_buff;
     glGenBuffers(1, &gl_buff);
@@ -33,18 +33,32 @@ void division_engine_internal_platform_uniform_buffer_alloc(
         uniform_buffer_ctx->uniform_buffers_impl,
         sizeof(DivisionUniformBufferInternal_[uniform_buffer_ctx->uniform_buffer_count])
     );
-    uniform_buffer_ctx->uniform_buffers_impl[uniform_buffer_ctx->uniform_buffer_count - 1] =
+
+    if (uniform_buffer_ctx == NULL)
+    {
+        ctx->error_callback(DIVISION_INTERNAL_ERROR, "Failed to realloc Uniform Buffer Implementation array");
+        return false;
+    }
+
+    uniform_buffer_ctx->uniform_buffers_impl[buffer_id] =
         (DivisionUniformBufferInternal_) { .gl_buffer = gl_buff };
+
+    return true;
+}
+
+void division_engine_internal_platform_uniform_buffer_free(DivisionContext* ctx, uint32_t buffer_id)
+{
+    glDeleteBuffers(1, &ctx->uniform_buffer_context->uniform_buffers_impl[buffer_id].gl_buffer);
 }
 
 void* division_engine_internal_platform_uniform_buffer_borrow_data_pointer(
-    DivisionContext* ctx, int32_t buffer)
+    DivisionContext* ctx, uint32_t buffer_id)
 {
-    return glMapNamedBuffer(get_gl_uniform_buffer(ctx, buffer), GL_READ_WRITE);
+    return glMapNamedBuffer(get_gl_uniform_buffer(ctx, buffer_id), GL_READ_WRITE);
 }
 
 void division_engine_internal_platform_uniform_buffer_return_data_pointer(
-    DivisionContext* ctx, int32_t buffer, void* data_pointer)
+    DivisionContext* ctx, uint32_t buffer_id, void* data_pointer)
 {
-    glUnmapNamedBuffer(get_gl_uniform_buffer(ctx, buffer));
+    glUnmapNamedBuffer(get_gl_uniform_buffer(ctx, buffer_id));
 }

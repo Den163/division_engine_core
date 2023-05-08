@@ -20,9 +20,9 @@ DIVISION_EXPORT bool division_engine_internal_platform_vertex_buffer_alloc(Divis
 DIVISION_EXPORT void division_engine_internal_platform_vertex_buffer_free(DivisionContext* ctx, uint32_t buffer_id);
 
 DIVISION_EXPORT void* division_engine_internal_platform_vertex_buffer_borrow_data_pointer(
-    DivisionContext* ctx, uint32_t vertex_buffer);
+    DivisionContext* ctx, uint32_t buffer_id);
 DIVISION_EXPORT void division_engine_internal_platform_vertex_buffer_return_data_pointer(
-    DivisionContext* ctx, uint32_t vertex_buffer, void* data_pointer);
+    DivisionContext* ctx, uint32_t buffer_id, void* data_pointer);
 
 #ifdef __cplusplus
 }

@@ -31,8 +31,11 @@ void division_engine_internal_platform_shader_system_context_free(DivisionContex
     free(ctx->shader_context->shaders_impl);
 }
 
-bool division_engine_internal_platform_shader_program_create(
-    DivisionContext* ctx, const DivisionShaderSettings* settings, int32_t source_count)
+bool division_engine_internal_platform_shader_program_alloc(
+    DivisionContext* ctx,
+    const DivisionShaderSettings* settings,
+    int32_t source_count,
+    uint32_t* out_shader_program_id)
 {
     int32_t gl_program = glCreateProgram();
     for (int i = 0; i < source_count; i++)
@@ -42,21 +45,42 @@ bool division_engine_internal_platform_shader_program_create(
     }
     glLinkProgram(gl_program);
 
-    if (check_program_status(gl_program)) {
-        DivisionShaderSystemContext* shader_ctx = ctx->shader_context;
+    if (!check_program_status(gl_program))
+    {
+
+        ctx->error_callback(DIVISION_INTERNAL_ERROR, "Failed to link shader program");
+        glDeleteProgram(gl_program);
+        return false;
+    }
+
+    DivisionShaderSystemContext* shader_ctx = ctx->shader_context;
+    uint32_t program_id = division_unordered_id_table_insert(&ctx->shader_context->id_table);
+
+    if (program_id >= shader_ctx->shader_count)
+    {
         shader_ctx->shaders_impl = realloc(
             shader_ctx->shaders_impl,
             sizeof(DivisionShaderInternal_[shader_ctx->shader_count])
         );
-        shader_ctx->shaders_impl[shader_ctx->shader_count - 1] = (DivisionShaderInternal_) {
-            .gl_shader_program = gl_program,
-        };
 
-        return true;
+        if (shader_ctx->shaders_impl == NULL)
+        {
+            division_unordered_id_table_remove(&shader_ctx->id_table, program_id);
+            ctx->error_callback(DIVISION_INTERNAL_ERROR, "Failed to realloc Shader Implementation array");
+            return false;
+        }
     }
 
-    glDeleteProgram(gl_program);
-    return false;
+    shader_ctx->shaders_impl[program_id] = (DivisionShaderInternal_) {.gl_shader_program = gl_program};
+
+    *out_shader_program_id = program_id;
+    return true;
+}
+
+void division_engine_internal_platform_shader_program_free(DivisionContext* ctx, uint32_t shader_program_id)
+{
+    glDeleteProgram(ctx->shader_context->shaders_impl[shader_program_id].gl_shader_program);
+    division_unordered_id_table_remove(&ctx->shader_context->id_table, shader_program_id);
 }
 
 bool attach_shader_to_program_from_file(const char* path, DivisionShaderType type, int32_t program_id)
