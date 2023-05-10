@@ -174,14 +174,15 @@ static char* readFromFile(const char* path);
         for (int32_t i = 0; i < render_pass_ctx->render_pass_count; i++)
         {
             DivisionRenderPass* pass = &render_pass_ctx->render_passes[i];
+            if (pass->vertex_count == 0) continue;
+
             DivisionRenderPassInternalPlatform_* pass_impl = &render_pass_ctx->render_passes_impl[i];
-            struct DivisionVertexBufferInternalPlatform_ vert_buffer = vert_buff_ctx->buffers_impl[pass->vertex_buffer];
+            DivisionVertexBufferInternalPlatform_ vert_buffer = vert_buff_ctx->buffers_impl[pass->vertex_buffer];
 
             id <MTLRenderPipelineState> pipelineState = pass_impl->mtl_pipeline_state;
             id <MTLBuffer> vertDataMtlBuffer = vert_buffer.mtl_buffer;
 
             [renderEnc setRenderPipelineState:pipelineState];
-
             [renderEnc setVertexBuffer:vertDataMtlBuffer offset:0 atIndex:MTL_VERTEX_DATA_BUFFER_INDEX];
 
             for (int ubIdx = 0; ubIdx < pass->uniform_buffer_count; ubIdx++)

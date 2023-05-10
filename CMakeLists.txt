@@ -15,7 +15,9 @@ set(SOURCES
     src/vertex_buffer.c
     src/uniform_buffer.c
     src/render_pass.c
-    src/unordered_id_table.c)
+    src/unordered_id_table.c
+    src/ordered_id_table.c
+)
 
 add_library(division_engine_core STATIC ${SOURCES})
 

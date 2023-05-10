@@ -19,6 +19,9 @@ typedef struct DivisionRenderPassSystemContext {
     DivisionRenderPass* render_passes;
     struct DivisionRenderPassInternalPlatform_* render_passes_impl;
     int32_t render_pass_count;
+
+    uint32_t* orders;
+    int32_t orders_count;
 } DivisionRenderPassSystemContext;
 
 bool division_engine_internal_render_pass_context_alloc(

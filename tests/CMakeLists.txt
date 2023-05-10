@@ -10,7 +10,7 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(Catch2)
 
-set(DIVISION_TESTS_SOURCES division_unordered_id_table.cpp)
+set(DIVISION_TESTS_SOURCES division_unordered_id_table_tests.cpp division_ordered_id_table_tests.cpp)
 add_executable(division_engine_core_tests ${DIVISION_TESTS_SOURCES})
 target_link_libraries(division_engine_core_tests PRIVATE division_engine_core Catch2::Catch2WithMain)
 

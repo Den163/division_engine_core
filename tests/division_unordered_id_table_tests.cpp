@@ -3,7 +3,7 @@
 
 #define TEST_ID_TABLE_SIZE 10
 
-TEST_CASE("alloc check")
+TEST_CASE("Unordered id table alloc check")
 {
     DivisionUnorderedIdTable table;
     division_unordered_id_table_alloc(&table, TEST_ID_TABLE_SIZE);
@@ -13,7 +13,7 @@ TEST_CASE("alloc check")
     division_unordered_id_table_free(&table);
 }
 
-TEST_CASE("insert check")
+TEST_CASE("Unordered id table insert check")
 {
     DivisionUnorderedIdTable table;
     division_unordered_id_table_alloc(&table, TEST_ID_TABLE_SIZE);
@@ -26,7 +26,7 @@ TEST_CASE("insert check")
     division_unordered_id_table_free(&table);
 }
 
-TEST_CASE("remove check")
+TEST_CASE("Unordered id table remove check")
 {
     DivisionUnorderedIdTable table;
     division_unordered_id_table_alloc(&table, TEST_ID_TABLE_SIZE);
@@ -40,7 +40,7 @@ TEST_CASE("remove check")
     division_unordered_id_table_free(&table);
 }
 
-TEST_CASE("Mixed operations") {
+TEST_CASE("Unordered id table mixed operations") {
     DivisionUnorderedIdTable table;
     division_unordered_id_table_alloc(&table, TEST_ID_TABLE_SIZE);
 

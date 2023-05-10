@@ -4,6 +4,10 @@
 #include <stddef.h>
 #include <stdbool.h>
 
+
+/*
+ * Data structure, that creates new ids
+ */
 typedef struct DivisionUnorderedIdTable
 {
     uint32_t max_id;

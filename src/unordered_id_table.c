@@ -22,6 +22,9 @@ void division_unordered_id_table_alloc(DivisionUnorderedIdTable* table, size_t c
 void division_unordered_id_table_free(DivisionUnorderedIdTable* table)
 {
     free(table->free_ids);
+
+    table->free_ids = NULL;
+    table->free_ids_count = table->free_ids_capacity = table->max_id = 0;
 }
 
 uint32_t division_unordered_id_table_insert(DivisionUnorderedIdTable* table)
