@@ -59,18 +59,6 @@ bool division_engine_vertex_buffer_alloc(
     DivisionVertexBufferSystemContext* vertex_ctx = ctx->vertex_buffer_context;
 
     uint32_t vertex_buffer_id = division_unordered_id_table_insert(&vertex_ctx->id_table);
-    if (vertex_buffer_id >= vertex_ctx->buffers_count) {
-        vertex_ctx->buffers_count = vertex_buffer_id + 1;
-        vertex_ctx->buffers = realloc(vertex_ctx->buffers, sizeof(DivisionVertexBuffer[vertex_ctx->buffers_count]));
-    }
-
-    if (vertex_ctx->buffers == NULL)
-    {
-        division_unordered_id_table_remove(&vertex_ctx->id_table, vertex_buffer_id);
-        ctx->error_callback(DIVISION_INTERNAL_ERROR, "Failed to reallocate Vertex Buffers array");
-        return false;
-    }
-
     DivisionVertexBuffer vertex_buffer = {
         .attributes = malloc(sizeof(DivisionVertexAttribute[attr_count])),
         .attribute_count = attr_count,
@@ -91,14 +79,26 @@ bool division_engine_vertex_buffer_alloc(
     vertex_buffer.per_vertex_data_size = per_vertex_data_size;
     vertex_buffer.topology = render_topology;
 
-    vertex_ctx->buffers[vertex_buffer_id] = vertex_buffer;
-
-    if (division_engine_internal_platform_vertex_buffer_alloc(ctx, vertex_buffer_id) == false)
+    if (!division_engine_internal_platform_vertex_buffer_alloc(ctx, vertex_buffer_id, &vertex_buffer))
     {
         division_unordered_id_table_remove(&vertex_ctx->id_table, vertex_buffer_id);
         free(vertex_buffer.attributes);
         return false;
     }
+
+    if (vertex_buffer_id >= vertex_ctx->buffers_count) {
+        vertex_ctx->buffers_count = vertex_buffer_id + 1;
+        vertex_ctx->buffers = realloc(vertex_ctx->buffers, sizeof(DivisionVertexBuffer[vertex_ctx->buffers_count]));
+
+        if (vertex_ctx->buffers == NULL)
+        {
+            division_unordered_id_table_remove(&vertex_ctx->id_table, vertex_buffer_id);
+            ctx->error_callback(DIVISION_INTERNAL_ERROR, "Failed to reallocate Vertex Buffers array");
+            return false;
+        }
+    }
+
+    vertex_ctx->buffers[vertex_buffer_id] = vertex_buffer;
 
     *out_vertex_buffer_id = vertex_buffer_id;
     return true;
@@ -164,6 +164,7 @@ void division_engine_vertex_buffer_free(DivisionContext* ctx, uint32_t vertex_bu
     for (int i = 0; i < vertex_buffer->attribute_count; i++)
     {
         free(vertex_buffer->attributes);
+        vertex_buffer->attributes = NULL;
     }
 
     division_unordered_id_table_remove(&ctx->vertex_buffer_context->id_table, vertex_buffer_id);

@@ -37,10 +37,14 @@ bool division_engine_internal_platform_uniform_buffer_alloc(
     }
 
     DivisionUniformBufferSystemContext* uniform_buffer_ctx = ctx->uniform_buffer_context;
-    uniform_buffer_ctx->uniform_buffers_impl = realloc(
-        uniform_buffer_ctx->uniform_buffers_impl,
-        sizeof(DivisionUniformBufferInternal_) * uniform_buffer_ctx->uniform_buffer_count
-    );
+
+    if (buffer_id >= uniform_buffer_ctx->uniform_buffer_count)
+    {
+        uniform_buffer_ctx->uniform_buffers_impl = realloc(
+            uniform_buffer_ctx->uniform_buffers_impl,
+            sizeof(DivisionUniformBufferInternal_[buffer_id + 1])
+        );
+    }
 
     if (uniform_buffer_ctx->uniform_buffers_impl == NULL)
     {

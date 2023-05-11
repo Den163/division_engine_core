@@ -5,6 +5,7 @@
 
 #include "division_engine_core_export.h"
 #include "context.h"
+#include "division_id_table/ordered_id_table.h"
 
 typedef struct DivisionRenderPass {
     size_t vertex_count;
@@ -16,12 +17,10 @@ typedef struct DivisionRenderPass {
 } DivisionRenderPass;
 
 typedef struct DivisionRenderPassSystemContext {
+    DivisionOrderedIdTable id_table;
     DivisionRenderPass* render_passes;
     struct DivisionRenderPassInternalPlatform_* render_passes_impl;
     int32_t render_pass_count;
-
-    uint32_t* orders;
-    int32_t orders_count;
 } DivisionRenderPassSystemContext;
 
 bool division_engine_internal_render_pass_context_alloc(
@@ -33,7 +32,10 @@ void division_engine_internal_render_pass_context_free(DivisionContext* ctx);
 extern "C" {
 #endif
 
-DIVISION_EXPORT int32_t division_engine_render_pass_alloc(DivisionContext* ctx, DivisionRenderPass render_pass);
+DIVISION_EXPORT bool division_engine_render_pass_alloc(
+    DivisionContext* ctx, DivisionRenderPass render_pass, uint32_t* out_render_pass_id);
+
+DIVISION_EXPORT void division_engine_render_pass_free(DivisionContext* ctx, uint32_t render_pass_id);
 
 #ifdef __cplusplus
 }

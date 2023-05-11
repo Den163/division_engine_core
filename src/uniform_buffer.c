@@ -30,6 +30,13 @@ bool division_engine_uniform_buffer_alloc(DivisionContext* ctx, DivisionUniformB
 {
     DivisionUniformBufferSystemContext* uniform_buffer_ctx = ctx->uniform_buffer_context;
     const uint32_t buff_id = division_unordered_id_table_insert(&uniform_buffer_ctx->id_table);
+
+    if (division_engine_internal_platform_uniform_buffer_alloc(ctx, buffer, buff_id) == false)
+    {
+        division_unordered_id_table_remove(&uniform_buffer_ctx->id_table, buff_id);
+        return false;
+    }
+
     if (buff_id >= uniform_buffer_ctx->uniform_buffer_count)
     {
         uniform_buffer_ctx->uniform_buffer_count = buff_id + 1;
@@ -49,12 +56,6 @@ bool division_engine_uniform_buffer_alloc(DivisionContext* ctx, DivisionUniformB
     uniform_buffer_ctx->uniform_buffers[buff_id] = buffer;
 
     *out_buffer_id = buff_id;
-    if (division_engine_internal_platform_uniform_buffer_alloc(ctx, buffer, buff_id) == false)
-    {
-        division_unordered_id_table_remove(&uniform_buffer_ctx->id_table, buff_id);
-        return false;
-    }
-
     return true;
 }
 

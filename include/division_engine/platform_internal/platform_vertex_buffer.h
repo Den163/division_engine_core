@@ -4,6 +4,7 @@
 
 #include "division_engine/context.h"
 #include "division_engine/settings.h"
+#import "division_engine/vertex_buffer.h"
 
 #include <division_engine_core_export.h>
 
@@ -16,7 +17,8 @@ DIVISION_EXPORT bool division_engine_internal_platform_vertex_buffer_context_all
 
 DIVISION_EXPORT void division_engine_internal_platform_vertex_buffer_context_free(DivisionContext* ctx);
 
-DIVISION_EXPORT bool division_engine_internal_platform_vertex_buffer_alloc(DivisionContext* ctx, uint32_t buffer_id);
+DIVISION_EXPORT bool division_engine_internal_platform_vertex_buffer_alloc(
+    DivisionContext* ctx, uint32_t buffer_id, DivisionVertexBuffer* vertex_buffer);
 DIVISION_EXPORT void division_engine_internal_platform_vertex_buffer_free(DivisionContext* ctx, uint32_t buffer_id);
 
 DIVISION_EXPORT void* division_engine_internal_platform_vertex_buffer_borrow_data_pointer(

@@ -114,6 +114,7 @@ void init_callback(DivisionContext* ctx)
     memcpy(uniform_ptr, testVec, sizeof(testVec));
     division_engine_uniform_buffer_return_data_pointer(ctx, uniform_buffer, uniform_ptr);
 
+    uint32_t render_pass_id;
     division_engine_render_pass_alloc(ctx, (DivisionRenderPass) {
         .vertex_buffer = vertex_buffer,
         .shader_program = shader_program,
@@ -121,7 +122,7 @@ void init_callback(DivisionContext* ctx)
         .uniform_buffer_count = 1,
         .first_vertex = 0,
         .vertex_count = vertex_count
-    });
+    }, &render_pass_id);
 }
 
 void update_callback(DivisionContext* ctx)

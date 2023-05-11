@@ -1,7 +1,6 @@
 #include <MetalKit/MetalKit.h>
 
 #include "division_engine/platform_internal/platform_vertex_buffer.h"
-#include "division_engine/vertex_buffer.h"
 #include "division_engine/renderer.h"
 #include "osx_window_context.h"
 #include "osx_vertex_buffer.h"
@@ -18,8 +17,6 @@ bool division_engine_internal_platform_vertex_buffer_context_alloc(
 void division_engine_internal_platform_vertex_buffer_context_free(DivisionContext* ctx)
 {
     DivisionVertexBufferSystemContext* vert_buffer_ctx = ctx->vertex_buffer_context;
-    DivisionOSXWindowContext* window_ctx = ctx->renderer_context->window_data;
-    DivisionOSXViewDelegate* view_delegate = window_ctx->app_delegate->viewDelegate;
 
     for (int i = 0; i < vert_buffer_ctx->buffers_count; i++)
     {
@@ -31,15 +28,20 @@ void division_engine_internal_platform_vertex_buffer_context_free(DivisionContex
     free(vert_buffer_ctx->buffers_impl);
 }
 
-bool division_engine_internal_platform_vertex_buffer_alloc(DivisionContext* ctx, uint32_t buffer_id)
+bool division_engine_internal_platform_vertex_buffer_alloc(
+    DivisionContext* ctx, uint32_t buffer_id, DivisionVertexBuffer* vertex_buffer)
 {
     DivisionVertexBufferSystemContext* vert_buffer_ctx = ctx->vertex_buffer_context;
     DivisionOSXWindowContext* window_context = ctx->renderer_context->window_data;
 
-    vert_buffer_ctx->buffers_impl = realloc(
-        vert_buffer_ctx->buffers_impl,
-        sizeof(DivisionVertexBufferInternalPlatform_) * vert_buffer_ctx->buffers_count
-    );
+    if (buffer_id >= vert_buffer_ctx->buffers_count)
+    {
+        vert_buffer_ctx->buffers_impl = realloc(
+            vert_buffer_ctx->buffers_impl,
+            sizeof(DivisionVertexBufferInternalPlatform_[buffer_id + 1])
+        );
+    }
+
 
     if (vert_buffer_ctx->buffers_impl == NULL)
     {
@@ -47,12 +49,11 @@ bool division_engine_internal_platform_vertex_buffer_alloc(DivisionContext* ctx,
         return false;
     }
 
-    DivisionVertexBuffer* vert_buffer = &vert_buffer_ctx->buffers[buffer_id];
     DivisionVertexBufferInternalPlatform_* impl_buffer = &vert_buffer_ctx->buffers_impl[buffer_id];
 
     DivisionOSXViewDelegate* view_delegate = window_context->app_delegate->viewDelegate;
     id <MTLBuffer> buffer = [view_delegate
-        createBufferWithSize:vert_buffer->per_vertex_data_size * vert_buffer->vertex_count];
+        createBufferWithSize:vertex_buffer->per_vertex_data_size * vertex_buffer->vertex_count];
 
     if (buffer == nil)
     {
@@ -60,7 +61,7 @@ bool division_engine_internal_platform_vertex_buffer_alloc(DivisionContext* ctx,
         return false;
     }
 
-    MTLVertexDescriptor* vertex_descriptor = [view_delegate createVertexDescriptorForBuffer:vert_buffer];
+    MTLVertexDescriptor* vertex_descriptor = [view_delegate createVertexDescriptorForBuffer:vertex_buffer];
 
     if (vertex_descriptor == nil)
     {
@@ -70,7 +71,7 @@ bool division_engine_internal_platform_vertex_buffer_alloc(DivisionContext* ctx,
 
     impl_buffer->mtl_buffer = buffer;
     impl_buffer->mtl_vertex_descriptor = vertex_descriptor;
-    impl_buffer->mtl_primitive_type = division_topology_to_mtl_type(vert_buffer->topology);
+    impl_buffer->mtl_primitive_type = division_topology_to_mtl_type(vertex_buffer->topology);
 
     return true;
 }

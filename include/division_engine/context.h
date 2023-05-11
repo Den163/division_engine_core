@@ -8,7 +8,7 @@
 
 #include <division_engine_core_export.h>
 
-#define DIVISION_INTERNAL_ERROR -88
+#define DIVISION_INTERNAL_ERROR (-8)
 
 struct DivisionRendererSystemContext;
 struct DivisionShaderSystemContext;

@@ -171,9 +171,10 @@ static char* readFromFile(const char* path);
         DivisionVertexBufferSystemContext* vert_buff_ctx = context->vertex_buffer_context;
         DivisionUniformBufferSystemContext* uniform_buff_ctx = context->uniform_buffer_context;
 
-        for (int32_t i = 0; i < render_pass_ctx->render_pass_count; i++)
+        uint32_t* render_pass_ids = render_pass_ctx->id_table.orders;
+        for (int32_t i = 0; i < render_pass_ctx->id_table.orders_count; i++)
         {
-            DivisionRenderPass* pass = &render_pass_ctx->render_passes[i];
+            DivisionRenderPass* pass = &render_pass_ctx->render_passes[render_pass_ids[i]];
             if (pass->vertex_count == 0) continue;
 
             DivisionRenderPassInternalPlatform_* pass_impl = &render_pass_ctx->render_passes_impl[i];
