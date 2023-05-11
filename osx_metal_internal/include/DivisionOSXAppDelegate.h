@@ -6,7 +6,7 @@
 
 #include "DivisionOSXViewDelegate.h"
 
-#include "division_engine/context.h"
+#include "rendering/context.h"
 
 @interface DivisionOSXAppDelegate: NSObject<NSApplicationDelegate>
 {

@@ -1,5 +1,5 @@
-#include "division_engine/shader.h"
-#include "division_engine/platform_internal/platfrom_shader.h"
+#include "rendering/shader.h"
+#include "rendering/platform_internal/platfrom_shader.h"
 
 #include <stdbool.h>
 #include <stdlib.h>

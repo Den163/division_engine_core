@@ -3,16 +3,16 @@
 #include "glad/gl.h"
 #include "GLFW/glfw3.h"
 
-#include "division_engine/render_pass.h"
-#include "division_engine/renderer.h"
-#include "division_engine/uniform_buffer.h"
-#include "division_engine/vertex_buffer.h"
+#include "rendering/render_pass.h"
+#include "rendering/renderer.h"
+#include "rendering/uniform_buffer.h"
+#include "rendering/vertex_buffer.h"
 
 #include "glfw_shader.h"
 #include "glfw_uniform_buffer.h"
 #include "glfw_vertex_buffer.h"
 
-#include "division_engine/platform_internal/platform_renderer.h"
+#include "rendering/platform_internal/platform_renderer.h"
 
 static inline void renderer_draw(DivisionContext* ctx);
 

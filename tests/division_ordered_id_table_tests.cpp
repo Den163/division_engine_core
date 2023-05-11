@@ -1,6 +1,6 @@
 #include "catch2/catch_all.hpp"
 
-#include "division_id_table/ordered_id_table.h"
+#include "data_structures/ordered_id_table.h"
 
 TEST_CASE("Ordered id table alloc check")
 {

@@ -1,5 +1,5 @@
 #include <catch2/catch_all.hpp>
-#include "division_id_table/unordered_id_table.h"
+#include "data_structures/unordered_id_table.h"
 
 #define TEST_ID_TABLE_SIZE 10
 

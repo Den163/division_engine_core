@@ -1,7 +1,7 @@
 #pragma once
 
-#include "division_engine/context.h"
-#include "division_engine/settings.h"
+#include "rendering/context.h"
+#include "rendering/settings.h"
 
 #include <division_engine_core_export.h>
 

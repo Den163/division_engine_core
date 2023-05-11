@@ -1,7 +1,7 @@
 #pragma once
 
-#include "division_engine/context.h"
-#include "division_engine/shader.h"
+#include "rendering/context.h"
+#include "rendering/shader.h"
 
 #include <division_engine_core_export.h>
 

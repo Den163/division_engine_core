@@ -1,6 +1,6 @@
-#include "division_engine/platform_internal/platform_vertex_buffer.h"
-#include "division_engine/render_pass.h"
-#include "division_engine/vertex_buffer.h"
+#include "rendering/platform_internal/platform_vertex_buffer.h"
+#include "rendering/render_pass.h"
+#include "rendering/vertex_buffer.h"
 #include "glfw_vertex_buffer.h"
 
 #include <stdlib.h>

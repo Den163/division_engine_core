@@ -1,4 +1,4 @@
-#include "division_id_table/unordered_id_table.h"
+#include "data_structures/unordered_id_table.h"
 
 #include <assert.h>
 #include <stdlib.h>

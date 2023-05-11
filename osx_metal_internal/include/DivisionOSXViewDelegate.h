@@ -4,8 +4,8 @@
 #include <MetalKit/MetalKit.h>
 #include <Metal/Metal.h>
 
-#include "division_engine/context.h"
-#include "division_engine/vertex_buffer.h"
+#include "rendering/context.h"
+#include "rendering/vertex_buffer.h"
 #include "osx_shader_context.h"
 
 @interface DivisionOSXViewDelegate : NSObject <MTKViewDelegate>

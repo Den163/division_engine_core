@@ -1,5 +1,5 @@
-#include "division_engine/platform_internal/platform_renderer.h"
-#include "division_engine/renderer.h"
+#include "rendering/platform_internal/platform_renderer.h"
+#include "rendering/renderer.h"
 
 #include <Foundation/Foundation.h>
 #include <AppKit/AppKit.h>

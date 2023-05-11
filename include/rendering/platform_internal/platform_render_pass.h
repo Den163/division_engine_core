@@ -1,7 +1,7 @@
 #pragma once
 
-#include "division_engine/context.h"
-#include "division_engine/render_pass.h"
+#include "rendering/context.h"
+#include "rendering/render_pass.h"
 #include "division_engine_core_export.h"
 
 #ifdef __cplusplus

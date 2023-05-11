@@ -1,4 +1,4 @@
-#include "division_id_table/ordered_id_table.h"
+#include "data_structures/ordered_id_table.h"
 
 #include <memory.h>
 #include <stdlib.h>

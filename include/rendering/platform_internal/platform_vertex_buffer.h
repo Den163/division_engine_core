@@ -2,9 +2,9 @@
 
 #include <stddef.h>
 
-#include "division_engine/context.h"
-#include "division_engine/settings.h"
-#import "division_engine/vertex_buffer.h"
+#include "rendering/context.h"
+#include "rendering/settings.h"
+#import "rendering/vertex_buffer.h"
 
 #include <division_engine_core_export.h>
 

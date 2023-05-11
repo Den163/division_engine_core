@@ -5,8 +5,8 @@
 
 #include "context.h"
 #include "division_engine_core_export.h"
-#include "division_engine/shader.h"
-#include "division_id_table/unordered_id_table.h"
+#include "rendering/shader.h"
+#include "data_structures/unordered_id_table.h"
 
 struct DivisionUniformBufferInternal_;
 

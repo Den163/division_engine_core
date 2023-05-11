@@ -1,8 +1,8 @@
 #pragma once
 
 #include "division_engine_core_export.h"
-#include "division_engine/context.h"
-#include "division_engine/uniform_buffer.h"
+#include "rendering/context.h"
+#include "rendering/uniform_buffer.h"
 
 #ifdef __cplusplus
 extern "C" {

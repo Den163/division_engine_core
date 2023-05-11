@@ -1,8 +1,8 @@
 #include "DivisionOSXViewDelegate.h"
 
-#include "division_engine/renderer.h"
-#include "division_engine/render_pass.h"
-#include "division_engine/uniform_buffer.h"
+#include "rendering/renderer.h"
+#include "rendering/render_pass.h"
+#include "rendering/uniform_buffer.h"
 #include "osx_render_pass.h"
 #include "osx_vertex_buffer.h"
 #include "osx_uniform_buffer.h"

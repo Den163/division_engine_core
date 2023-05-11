@@ -1,5 +1,5 @@
-#include "division_engine/vertex_buffer.h"
-#include "division_engine/platform_internal/platform_vertex_buffer.h"
+#include "rendering/vertex_buffer.h"
+#include "rendering/platform_internal/platform_vertex_buffer.h"
 
 #include <stdio.h>
 #include <stdlib.h>
