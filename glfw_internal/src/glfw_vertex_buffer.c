@@ -34,31 +34,36 @@ void division_engine_internal_platform_vertex_buffer_context_free(DivisionContex
     free(vertex_buffer_ctx->buffers_impl);
 }
 
-bool division_engine_internal_platform_vertex_buffer_alloc(DivisionContext* ctx, uint32_t buffer_id)
+bool division_engine_internal_platform_vertex_buffer_alloc(
+    DivisionContext* ctx, uint32_t buffer_id, DivisionVertexBuffer* vertex_buffer)
 {
     GLuint gl_buffer;
     glGenBuffers(1, &gl_buffer);
     glBindBuffer(GL_ARRAY_BUFFER, gl_buffer);
 
     struct DivisionVertexBufferSystemContext* vertex_ctx = ctx->vertex_buffer_context;
-    struct DivisionVertexBuffer* vertex_buffer = &vertex_ctx->buffers[vertex_ctx->buffers_count - 1];
     int attr_count = vertex_buffer->attribute_count;
 
-    vertex_buffer->attributes_impl = malloc(sizeof(VertexAttributeInternalPlatform_) * attr_count);
+    vertex_buffer->attributes_impl = malloc(sizeof(VertexAttributeInternalPlatform_[attr_count]));
     if (vertex_buffer->attributes_impl == NULL)
     {
         ctx->error_callback(DIVISION_INTERNAL_ERROR, "Failed to alloc Vertex Attribute Implementation array");
         return false;
     }
 
-    vertex_ctx->buffers_impl = realloc(
-        vertex_ctx->buffers_impl,
-        sizeof(DivisionVertexBufferInternalPlatform_[vertex_ctx->buffers_count])
-    );
-    if (vertex_ctx->buffers_impl == NULL)
+    if (buffer_id >= vertex_ctx->buffers_count)
     {
-        ctx->error_callback(DIVISION_INTERNAL_ERROR, "Failed to realloc Vertex Buffer Implementation array");
-        return false;
+        vertex_ctx->buffers_impl = realloc(
+            vertex_ctx->buffers_impl,
+            sizeof(DivisionVertexBufferInternalPlatform_[buffer_id + 1])
+        );
+
+        if (vertex_ctx->buffers_impl == NULL)
+        {
+            ctx->error_callback(DIVISION_INTERNAL_ERROR, "Failed to realloc Vertex Buffer Implementation array");
+            free(vertex_buffer->attributes_impl);
+            return false;
+        }
     }
 
     vertex_ctx->buffers_impl[buffer_id] = (DivisionVertexBufferInternalPlatform_) {
@@ -92,7 +97,12 @@ bool division_engine_internal_platform_vertex_buffer_alloc(DivisionContext* ctx,
         glEnableVertexAttribArray(at->location);
     }
 
-    glBufferData(GL_ARRAY_BUFFER, (GLsizei) (per_vertex_data_size * vertex_buffer->vertex_count), NULL, GL_DYNAMIC_DRAW);
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        (GLsizei) (per_vertex_data_size * vertex_buffer->vertex_count),
+        NULL,
+        GL_DYNAMIC_DRAW
+    );
 
     return true;
 }

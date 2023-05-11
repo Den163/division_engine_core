@@ -96,12 +96,11 @@ void renderer_draw(DivisionContext* ctx)
     DivisionUniformBufferSystemContext* uniform_buff_ctx = ctx->uniform_buffer_context;
     DivisionRenderPassSystemContext* render_pass_ctx = ctx->render_pass_context;
     DivisionShaderSystemContext* shader_ctx = ctx->shader_context;
-    int32_t pass_count = render_pass_ctx->render_pass_count;
 
     glClearBufferfv(GL_COLOR, 0, (const GLfloat*) &renderer_ctx->clear_color);
-    for (int32_t i = 0; i < pass_count; i++)
+    for (int32_t i = 0; i < render_pass_ctx->id_table.orders_count; i++)
     {
-        DivisionRenderPass pass = render_pass_ctx->render_passes[i];
+        DivisionRenderPass pass = render_pass_ctx->render_passes[render_pass_ctx->id_table.orders[i]];
         DivisionVertexBufferInternalPlatform_ vb_internal = vert_buff_ctx->buffers_impl[pass.vertex_buffer];
         DivisionShaderInternal_ shader_internal = shader_ctx->shaders_impl[pass.shader_program];
 

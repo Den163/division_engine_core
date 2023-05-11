@@ -10,7 +10,14 @@ void division_engine_internal_platform_render_pass_context_free(DivisionContext*
 {
 }
 
-bool division_engine_internal_platform_render_pass_alloc(DivisionContext* ctx, DivisionRenderPass* render_pass)
+bool division_engine_internal_platform_render_pass_alloc(
+    DivisionContext* ctx, DivisionRenderPass* render_pass, uint32_t buffer_id)
 {
     return true;
 }
+
+void division_engine_internal_platform_render_pass_free(DivisionContext* ctx, uint32_t buffer_id)
+{
+
+}
+
