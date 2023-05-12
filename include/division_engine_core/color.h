@@ -1,6 +1,6 @@
 #pragma once
 
-#ifdef __cpluspus
+#ifdef __cplusplus
 extern "C" {
 #endif
 
@@ -8,6 +8,6 @@ typedef struct DivisionColor {
     float r, g, b, a;
 } DivisionColor;
 
-#ifdef __cpluspus
+#ifdef __cplusplus
 }
 #endif

@@ -29,13 +29,13 @@ typedef struct DivisionContext {
     void* user_data;
 } DivisionContext;
 
-#ifdef __cpluspus
+#ifdef __cplusplus
 extern "C" {
 #endif
 
 DIVISION_EXPORT bool division_engine_context_alloc(const DivisionSettings* settings, DivisionContext** output_context);
 DIVISION_EXPORT void division_engine_context_free(DivisionContext* ctx);
 
-#ifdef __cpluspus
+#ifdef __cplusplus
 }
 #endif
