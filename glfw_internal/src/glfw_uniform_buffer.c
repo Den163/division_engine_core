@@ -1,4 +1,4 @@
-#include "rendering/platform_internal/platform_uniform_buffer.h"
+#include "division_engine_core/platform_internal/platform_uniform_buffer.h"
 
 #include <stdlib.h>
 #include "glfw_uniform_buffer.h"

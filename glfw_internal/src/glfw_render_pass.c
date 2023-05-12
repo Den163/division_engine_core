@@ -1,4 +1,4 @@
-#include "rendering/platform_internal/platform_render_pass.h"
+#include "division_engine_core/platform_internal/platform_render_pass.h"
 
 bool division_engine_internal_platform_render_pass_context_alloc(
     DivisionContext* ctx, const DivisionSettings* settings)

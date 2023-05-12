@@ -4,9 +4,9 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#include "rendering/context.h"
+#include "division_engine_core/context.h"
 #include <division_engine_core_export.h>
-#include <data_structures/unordered_id_table.h>
+#include <division_engine_core/data_structures/unordered_id_table.h>
 
 typedef enum {
     DIVISION_SHADER_VERTEX = 0,

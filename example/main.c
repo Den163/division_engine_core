@@ -2,11 +2,11 @@
 #include <memory.h>
 #include <assert.h>
 
-#include "rendering/render_pass.h"
-#include "rendering/renderer.h"
-#include "rendering/shader.h"
-#include "rendering/uniform_buffer.h"
-#include "rendering/vertex_buffer.h"
+#include "division_engine_core/render_pass.h"
+#include "division_engine_core/renderer.h"
+#include "division_engine_core/shader.h"
+#include "division_engine_core/uniform_buffer.h"
+#include "division_engine_core/vertex_buffer.h"
 
 void error_callback(int error_code, const char* message);
 void init_callback(DivisionContext* ctx);

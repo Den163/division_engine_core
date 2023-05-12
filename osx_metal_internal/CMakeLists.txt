@@ -13,6 +13,9 @@ set_target_properties(
         COMPILE_FLAGS "-fobjc-arc"
 )
 
-target_include_directories(osx_metal_internal PRIVATE include ${PROJECT_SOURCE_DIR}/include ${PROJECT_BINARY_DIR})
+target_include_directories(osx_metal_internal PRIVATE
+                           include ${PROJECT_SOURCE_DIR}/include
+                           ${PROJECT_SOURCE_DIR}/platform_internal_include
+                           ${PROJECT_BINARY_DIR})
 target_link_libraries(osx_metal_internal
                       "-framework Foundation -framework AppKit -framework Metal -framework MetalKit")

@@ -1,10 +1,10 @@
-#include "rendering/platform_internal/platfrom_shader.h"
+#include "division_engine_core/platform_internal/platfrom_shader.h"
 
 #include <stdlib.h>
 #include "glad/gl.h"
 #include <stdio.h>
 
-#include "rendering/shader.h"
+#include "division_engine_core/shader.h"
 #include "glfw_shader.h"
 
 static int create_shader_from_source(const char* source, size_t source_size, GLuint gl_shader_type);

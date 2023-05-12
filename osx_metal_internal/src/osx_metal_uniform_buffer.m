@@ -1,8 +1,8 @@
-#include "rendering/platform_internal/platform_uniform_buffer.h"
+#include "division_engine_core/platform_internal/platform_uniform_buffer.h"
 
 #include "osx_uniform_buffer.h"
 #include "osx_window_context.h"
-#include "rendering/renderer.h"
+#include "division_engine_core/renderer.h"
 
 bool division_engine_internal_platform_uniform_buffer_context_alloc(
     DivisionContext* ctx, const DivisionSettings* settings)

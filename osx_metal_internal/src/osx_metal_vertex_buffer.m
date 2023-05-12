@@ -1,7 +1,7 @@
 #include <MetalKit/MetalKit.h>
 
-#include "rendering/platform_internal/platform_vertex_buffer.h"
-#include "rendering/renderer.h"
+#include "division_engine_core/platform_internal/platform_vertex_buffer.h"
+#include "division_engine_core/renderer.h"
 #include "osx_window_context.h"
 #include "osx_vertex_buffer.h"
 

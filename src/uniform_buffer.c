@@ -1,5 +1,5 @@
-#include "rendering/uniform_buffer.h"
-#include "rendering/platform_internal/platform_uniform_buffer.h"
+#include "division_engine_core/uniform_buffer.h"
+#include "division_engine_core/platform_internal/platform_uniform_buffer.h"
 
 #include <stdlib.h>
 

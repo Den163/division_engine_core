@@ -25,7 +25,7 @@ set(SOURCES
 
 add_library(division_engine_core ${SOURCES})
 target_include_directories(division_engine_core PUBLIC ${PROJECT_SOURCE_DIR}/include ${PROJECT_BINARY_DIR})
-install(DIRECTORY ${PROJECT_SOURCE_DIR}/include DESTINATION ${CMAKE_BINARY_DIR})
+target_include_directories(division_engine_core PRIVATE ${PROJECT_SOURCE_DIR}/platform_internal_include)
 
 GENERATE_EXPORT_HEADER(division_engine_core EXPORT_MACRO_NAME DIVISION_EXPORT)
 

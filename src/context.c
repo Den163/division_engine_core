@@ -1,11 +1,11 @@
-#include "rendering/context.h"
+#include "division_engine_core/context.h"
 
 #include <stdlib.h>
-#include "rendering/render_pass.h"
-#include "rendering/renderer.h"
-#include "rendering/shader.h"
-#include "rendering/vertex_buffer.h"
-#include "rendering/uniform_buffer.h"
+#include "division_engine_core/render_pass.h"
+#include "division_engine_core/renderer.h"
+#include "division_engine_core/shader.h"
+#include "division_engine_core/vertex_buffer.h"
+#include "division_engine_core/uniform_buffer.h"
 
 bool division_engine_context_alloc(const DivisionSettings* settings, DivisionContext** output_context)
 {

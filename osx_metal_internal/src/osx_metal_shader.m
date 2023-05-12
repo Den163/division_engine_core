@@ -1,7 +1,7 @@
-#include "rendering/platform_internal/platfrom_shader.h"
+#include "division_engine_core/platform_internal/platfrom_shader.h"
 
 #include <MetalKit/MetalKit.h>
-#include "rendering/renderer.h"
+#include "division_engine_core/renderer.h"
 #include "osx_window_context.h"
 
 bool division_engine_internal_platform_shader_system_context_alloc(

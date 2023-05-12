@@ -5,7 +5,7 @@
 
 #include "division_engine_core_export.h"
 #include "context.h"
-#include "data_structures/ordered_id_table.h"
+#include "division_engine_core/data_structures/ordered_id_table.h"
 
 typedef struct DivisionRenderPass {
     size_t vertex_count;

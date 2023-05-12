@@ -1,7 +1,7 @@
-#include "rendering/platform_internal/platform_render_pass.h"
+#include "division_engine_core/platform_internal/platform_render_pass.h"
 #include "osx_render_pass.h"
 
-#include "rendering/renderer.h"
+#include "division_engine_core/renderer.h"
 
 #include "osx_vertex_buffer.h"
 #include "osx_window_context.h"
