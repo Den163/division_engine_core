@@ -1,7 +1,12 @@
 include(FetchContent)
 
+
 enable_testing()
 
+set(DIVISION_TESTS_SOURCES division_unordered_id_table_tests.cpp division_ordered_id_table_tests.cpp)
+add_executable(division_engine_core_tests ${DIVISION_TESTS_SOURCES})
+
+if(TARGET division_engine_core_tests)
 
 FetchContent_Declare(
         Catch2
@@ -10,16 +15,12 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(Catch2)
 
-set(DIVISION_TESTS_SOURCES division_unordered_id_table_tests.cpp division_ordered_id_table_tests.cpp)
-add_executable(division_engine_core_tests ${DIVISION_TESTS_SOURCES})
 target_link_libraries(division_engine_core_tests PRIVATE division_engine_core Catch2::Catch2WithMain)
 
-if(TARGET division_engine_core_tests)
 
 list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
+
 include(CTest)
 include(Catch)
 catch_discover_tests(division_engine_core_tests)
-
 endif()
-
