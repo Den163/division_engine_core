@@ -13,14 +13,14 @@ add_subdirectory(tests)
 endif()
 
 set(SOURCES
-    src/context.c include/division_engine_core/context.h
-    src/renderer.c include/division_engine_core/renderer.h
-    src/shader.c include/division_engine_core/shader.h
-    src/vertex_buffer.c include/division_engine_core/vertex_buffer.h
-    src/uniform_buffer.c include/division_engine_core/uniform_buffer.h
-    src/render_pass.c include/division_engine_core/render_pass.h
-    src/unordered_id_table.c include/division_engine_core/data_structures/unordered_id_table.h
-    src/ordered_id_table.c include/division_engine_core/data_structures/ordered_id_table.h
+    src/context.c
+    src/renderer.c
+    src/shader.c
+    src/vertex_buffer.c
+    src/uniform_buffer.c
+    src/render_pass.c
+    src/unordered_id_table.c
+    src/ordered_id_table.c
 )
 
 add_library(division_engine_core ${SOURCES})
