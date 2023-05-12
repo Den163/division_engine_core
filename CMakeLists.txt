@@ -1,5 +1,5 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.22.2)
-project(division_engine_core LANGUAGES C CXX)
+project(division_engine_core LANGUAGES C CXX OBJC)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 
@@ -20,9 +20,7 @@ set(SOURCES
 )
 
 add_library(division_engine_core STATIC ${SOURCES})
-
-target_include_directories(division_engine_core PUBLIC ${CMAKE_SOURCE_DIR}/include ${CMAKE_BINARY_DIR})
-
+target_include_directories(division_engine_core PUBLIC ${PROJECT_SOURCE_DIR}/include ${PROJECT_BINARY_DIR})
 GENERATE_EXPORT_HEADER(division_engine_core EXPORT_MACRO_NAME DIVISION_EXPORT)
 
 if(APPLE)

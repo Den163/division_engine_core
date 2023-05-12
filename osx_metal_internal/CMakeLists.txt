@@ -1,5 +1,3 @@
-project(osx_metal_internal LANGUAGES OBJC)
-
 set(OSX_METAL_INTERNAL_SOURCES
     src/osx_metal_renderer.m
     src/osx_metal_shader.m
@@ -15,6 +13,6 @@ set_target_properties(
         COMPILE_FLAGS "-fobjc-arc"
 )
 
-target_include_directories(osx_metal_internal PRIVATE include ${CMAKE_SOURCE_DIR}/include ${CMAKE_BINARY_DIR})
+target_include_directories(osx_metal_internal PRIVATE include ${PROJECT_SOURCE_DIR}/include ${PROJECT_BINARY_DIR})
 target_link_libraries(osx_metal_internal
                       "-framework Foundation -framework AppKit -framework Metal -framework MetalKit")
