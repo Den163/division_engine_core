@@ -26,7 +26,6 @@ set(SOURCES
 add_library(division_engine_core ${SOURCES})
 target_include_directories(division_engine_core PUBLIC ${PROJECT_SOURCE_DIR}/include ${PROJECT_BINARY_DIR})
 target_include_directories(division_engine_core PRIVATE ${PROJECT_SOURCE_DIR}/platform_internal_include)
-target_link_directories(division_engine_core PUBLIC ${PROJECT_BINARY_DIR})
 
 GENERATE_EXPORT_HEADER(division_engine_core EXPORT_MACRO_NAME DIVISION_EXPORT)
 
