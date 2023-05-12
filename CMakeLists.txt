@@ -6,8 +6,11 @@ set(CMAKE_CXX_STANDARD 17)
 
 include(GenerateExportHeader)
 
+
+if(${CMAKE_CURRENT_SOURCE_DIR} STREQUAL ${CMAKE_SOURCE_DIR})
 add_subdirectory(example)
 add_subdirectory(tests)
+endif()
 
 set(SOURCES
     src/context.c
