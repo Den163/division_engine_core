@@ -1,6 +1,6 @@
+project(division_engine_core_tests)
+
 include(FetchContent)
-
-
 enable_testing()
 
 set(DIVISION_TESTS_SOURCES division_unordered_id_table_tests.cpp division_ordered_id_table_tests.cpp)
