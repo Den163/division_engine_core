@@ -7,10 +7,6 @@
 #include "division_engine_core/vertex_buffer.h"
 #include "division_engine_core/uniform_buffer.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 bool division_engine_context_alloc(const DivisionSettings* settings, DivisionContext** output_context)
 {
     DivisionContext* ctx = (DivisionContext*) malloc(sizeof(DivisionContext));
@@ -36,7 +32,3 @@ void division_engine_context_free(DivisionContext* ctx)
     division_engine_internal_renderer_context_free(ctx);
     free(ctx);
 }
-
-#ifdef __cplusplus
-}
-#endif
