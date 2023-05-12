@@ -19,8 +19,10 @@ set(SOURCES
     src/ordered_id_table.c
 )
 
-add_library(division_engine_core STATIC ${SOURCES})
+add_library(division_engine_core ${SOURCES})
 target_include_directories(division_engine_core PUBLIC ${PROJECT_SOURCE_DIR}/include ${PROJECT_BINARY_DIR})
+install(TARGETS division_engine_core PUBLIC_HEADER DESTINATION ${CMAKE_BINARY_DIR})
+
 GENERATE_EXPORT_HEADER(division_engine_core EXPORT_MACRO_NAME DIVISION_EXPORT)
 
 if(APPLE)
