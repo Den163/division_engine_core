@@ -1,5 +1,5 @@
 add_executable(division_example main.cpp)
-target_link_libraries(division_example PRIVATE division_engine_core)
+target_link_libraries(division_example PRIVATE division_engine_core division_engine_shader_compiler)
 
 set(EXAMPLE_SHADERS
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/test.frag

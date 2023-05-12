@@ -12,6 +12,8 @@ add_subdirectory(example)
 add_subdirectory(tests)
 endif()
 
+add_subdirectory(shader_compiler)
+
 set(SOURCES
     src/context.c
     src/renderer.c
@@ -21,7 +23,7 @@ set(SOURCES
     src/render_pass.c
     src/unordered_id_table.c
     src/ordered_id_table.c
-)
+    src/io_utility.c)
 
 add_library(division_engine_core ${SOURCES})
 target_include_directories(division_engine_core PUBLIC ${PROJECT_SOURCE_DIR}/include ${PROJECT_BINARY_DIR})

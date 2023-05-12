@@ -6,6 +6,8 @@
 #include "division_engine_core/shader.h"
 #include "division_engine_core/uniform_buffer.h"
 #include "division_engine_core/vertex_buffer.h"
+#include "division_engine_core/io_utility.h"
+#include "division_engine_shader_compiler/interface.h"
 
 void error_callback(int error_code, const char* message);
 void init_callback(DivisionContext* ctx);
@@ -19,6 +21,26 @@ typedef struct VertexData
 
 int main()
 {
+    char* shader_data = nullptr;
+    void* spv_data = nullptr;
+    size_t shader_size = 0;
+    size_t spv_size = 0;
+
+    division_io_read_all_bytes_from_file("test.vert", (void**) &shader_data, &shader_size);
+    division_engine_shader_compiler_alloc();
+
+    bool ret = division_engine_shader_compiler_compile_glsl_to_spirv(
+        shader_data, DIVISION_SHADER_VERTEX, "vert", &spv_data, &spv_size);
+    if (ret)
+    {
+        printf("Compiled glsl to spirv. Total size: %zu\n", spv_size);
+    }
+
+    division_engine_shader_compiler_free();
+
+    free(shader_data);
+    free(spv_data);
+
     DivisionSettings settings = {
         .window_width = 512,
         .window_height = 512,
