@@ -1,6 +1,5 @@
-#include <stdio.h>
 #include <memory.h>
-#include <assert.h>
+#include <cstdio>
 
 #include "division_engine_core/render_pass.h"
 #include "division_engine_core/renderer.h"
@@ -12,11 +11,6 @@ void error_callback(int error_code, const char* message);
 void init_callback(DivisionContext* ctx);
 void update_callback(DivisionContext* ctx);
 
-typedef struct UserData
-{
-    int32_t shader_id;
-} UserData;
-
 typedef struct VertexData
 {
     float position[3];
@@ -26,15 +20,15 @@ typedef struct VertexData
 int main()
 {
     DivisionSettings settings = {
-        .window_title = "New window",
         .window_width = 512,
         .window_height = 512,
+        .window_title = "New window",
+        .error_callback = error_callback,
         .init_callback = init_callback,
         .update_callback = update_callback,
-        .error_callback = error_callback,
     };
 
-    DivisionContext* ctx = NULL;
+    DivisionContext* ctx = nullptr;
     division_engine_context_alloc(&settings, &ctx);
 
     division_engine_renderer_run_loop(ctx, &settings);
@@ -47,13 +41,13 @@ void init_callback(DivisionContext* ctx)
     DivisionShaderSettings shader_settings[] = {
         (DivisionShaderSettings) {
             .type = DIVISION_SHADER_VERTEX,
+            .file_path = "test.metal",
             .entry_point_name = "vertexMain",
-            .file_path = "test.metal"
         },
         (DivisionShaderSettings) {
             .type = DIVISION_SHADER_FRAGMENT,
+            .file_path = "test.metal",
             .entry_point_name = "fragmentMain",
-            .file_path = "test.metal"
         }
     };
 #else
@@ -95,7 +89,8 @@ void init_callback(DivisionContext* ctx)
     uint32_t vertex_buffer;
     division_engine_vertex_buffer_alloc(
         ctx, attr, attr_count, vertex_count, DIVISION_TOPOLOGY_TRIANGLES, &vertex_buffer);
-    VertexData* vert_buff_ptr = division_engine_vertex_buffer_borrow_data_pointer(ctx, vertex_buffer);
+    auto* vert_buff_ptr = static_cast<VertexData*>(
+        division_engine_vertex_buffer_borrow_data_pointer(ctx, vertex_buffer));
     memcpy(vert_buff_ptr, vd, sizeof(vd));
     division_engine_vertex_buffer_return_data_pointer(ctx, vertex_buffer, vert_buff_ptr);
 
@@ -110,18 +105,18 @@ void init_callback(DivisionContext* ctx)
     uint32_t uniform_buffer;
     division_engine_uniform_buffer_alloc(ctx, buff, &uniform_buffer);
 
-    float* uniform_ptr = division_engine_uniform_buffer_borrow_data_pointer(ctx, uniform_buffer);
+    auto* uniform_ptr = static_cast<float*>(division_engine_uniform_buffer_borrow_data_pointer(ctx, uniform_buffer));
     memcpy(uniform_ptr, testVec, sizeof(testVec));
     division_engine_uniform_buffer_return_data_pointer(ctx, uniform_buffer, uniform_ptr);
 
     uint32_t render_pass_id;
     division_engine_render_pass_alloc(ctx, (DivisionRenderPass) {
-        .vertex_buffer = vertex_buffer,
-        .shader_program = shader_program,
+        .first_vertex = 0,
+        .vertex_count = static_cast<size_t>(vertex_count),
         .uniform_buffers = &uniform_buffer,
         .uniform_buffer_count = 1,
-        .first_vertex = 0,
-        .vertex_count = vertex_count
+        .vertex_buffer = vertex_buffer,
+        .shader_program = shader_program,
     }, &render_pass_id);
 }
 

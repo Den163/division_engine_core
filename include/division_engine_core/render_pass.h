@@ -8,8 +8,8 @@
 #include "division_engine_core/data_structures/ordered_id_table.h"
 
 typedef struct DivisionRenderPass {
-    size_t vertex_count;
     size_t first_vertex;
+    size_t vertex_count;
     uint32_t* uniform_buffers;
     int32_t uniform_buffer_count;
     uint32_t vertex_buffer;

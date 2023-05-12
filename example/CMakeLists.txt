@@ -1,4 +1,4 @@
-add_executable(division_example main.c)
+add_executable(division_example main.cpp)
 target_link_libraries(division_example PRIVATE division_engine_core)
 
 set(EXAMPLE_SHADERS
