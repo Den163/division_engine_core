@@ -7,39 +7,24 @@
 #include "division_engine_core/uniform_buffer.h"
 #include "division_engine_core/vertex_buffer.h"
 #include "division_engine_core/io_utility.h"
-#include "division_engine_shader_compiler/interface.h"
+#include "division_shader_compiler/interface.h"
 
-void error_callback(int error_code, const char* message);
-void init_callback(DivisionContext* ctx);
-void update_callback(DivisionContext* ctx);
+static void compile_to_metal_shaders();
+static void error_callback(int error_code, const char* message);
+static void init_callback(DivisionContext* ctx);
+static void update_callback(DivisionContext* ctx);
 
 typedef struct VertexData
 {
-    float position[3];
+    float position[4];
     float color[4];
 } VertexData;
 
 int main()
 {
-    char* shader_data = nullptr;
-    void* spv_data = nullptr;
-    size_t shader_size = 0;
-    size_t spv_size = 0;
-
-    division_io_read_all_bytes_from_file("test.vert", (void**) &shader_data, &shader_size);
-    division_engine_shader_compiler_alloc();
-
-    bool ret = division_engine_shader_compiler_compile_glsl_to_spirv(
-        shader_data, DIVISION_SHADER_VERTEX, "vert", &spv_data, &spv_size);
-    if (ret)
-    {
-        printf("Compiled glsl to spirv. Total size: %zu\n", spv_size);
-    }
-
-    division_engine_shader_compiler_free();
-
-    free(shader_data);
-    free(spv_data);
+#ifdef __APPLE__
+    compile_to_metal_shaders();
+#endif
 
     DivisionSettings settings = {
         .window_width = 512,
@@ -57,19 +42,58 @@ int main()
     division_engine_context_free(ctx);
 }
 
+void compile_to_metal_shaders()
+{
+    division_shader_compiler_alloc();
+
+    const size_t shader_count = 2;
+    DivisionShaderSettings shader_to_compile[shader_count] = {
+        { .type = DIVISION_SHADER_VERTEX, .file_path = "test.vert", .entry_point_name = "vert", },
+        { .type = DIVISION_SHADER_FRAGMENT, .file_path = "test.frag", .entry_point_name = "frag" }
+    };
+    const char* output_names[shader_count] = { "./test.vert.metal", "./test.frag.metal" };
+
+    for (int i = 0; i < shader_count; i++)
+    {
+        char* shader_data = nullptr;
+        void* spv_data = nullptr;
+        char* msl_data = nullptr;
+
+        size_t shader_size = 0;
+        size_t spv_size = 0;
+        size_t msl_size = 0;
+
+        DivisionShaderSettings shader_setting = shader_to_compile[i];
+        division_io_read_all_bytes_from_file(shader_setting.file_path, (void**) &shader_data, &shader_size);
+
+        division_shader_compiler_compile_glsl_to_spirv(
+            shader_data, (int32_t) shader_size, shader_setting.type, shader_setting.entry_point_name, &spv_data, &spv_size);
+        division_shader_compiler_compile_spirv_to_metal(
+            spv_data, spv_size, shader_setting.type, shader_setting.entry_point_name, &msl_data, &msl_size);
+
+        division_io_write_all_bytes_to_file(output_names[i], msl_data, msl_size);
+
+        free(shader_data);
+        free(spv_data);
+        free(msl_data);
+    }
+
+    division_shader_compiler_free();
+}
+
 void init_callback(DivisionContext* ctx)
 {
 #if __APPLE__
     DivisionShaderSettings shader_settings[] = {
         (DivisionShaderSettings) {
             .type = DIVISION_SHADER_VERTEX,
-            .file_path = "test.metal",
-            .entry_point_name = "vertexMain",
+            .file_path = "test.vert.metal",
+            .entry_point_name = "vert",
         },
         (DivisionShaderSettings) {
             .type = DIVISION_SHADER_FRAGMENT,
-            .file_path = "test.metal",
-            .entry_point_name = "fragmentMain",
+            .file_path = "test.frag.metal",
+            .entry_point_name = "frag",
         }
     };
 #else
@@ -102,7 +126,7 @@ void init_callback(DivisionContext* ctx)
     int32_t vertex_count = sizeof(vd) / sizeof(VertexData);
 
     DivisionVertexAttributeSettings attr[] = {
-        {.type = DIVISION_FVEC3, .location = 0},
+        {.type = DIVISION_FVEC4, .location = 0},
         {.type = DIVISION_FVEC4, .location = 1}
     };
 

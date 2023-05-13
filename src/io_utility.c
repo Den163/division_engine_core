@@ -9,7 +9,7 @@ bool division_io_read_all_bytes_from_file(const char* path, void** out_data, siz
     FILE* srcFile = fopen(path, "rb");
     if (!srcFile)
     {
-        fprintf(stderr, "Cannot open the file `%s`\n", path);
+        fprintf(stderr, "Failed to open the file `%s`\n", path);
         return false;
     }
 
@@ -23,11 +23,32 @@ bool division_io_read_all_bytes_from_file(const char* path, void** out_data, siz
 
     if (readSize != data_size)
     {
-        fprintf(stderr, "Error while reading the file `%s`\n", path);
+        fprintf(stderr, "Failed to reading the file `%s`\n", path);
         return false;
     }
 
     *out_data = data;
     *out_data_byte_count = data_size;
+    return true;
+}
+
+bool division_io_write_all_bytes_to_file(const char* path, void* data, size_t data_byte_count)
+{
+    FILE* file = fopen(path, "wt");
+    if (file == NULL)
+    {
+        fprintf(stderr, "Failed to open the file `%s`\n", path);
+        return false;
+    }
+
+    size_t result_size = fwrite(data, 1, data_byte_count, file);
+    fclose(file);
+
+    if (result_size != data_byte_count)
+    {
+        fprintf(stderr, "Failed to write the file `%s`\n", path);
+        return false;
+    }
+
     return true;
 }

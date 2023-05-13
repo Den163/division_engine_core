@@ -1,8 +1,9 @@
 #version 450 core
+
 layout (location = 0) in vec3 pos;
 layout (location = 1) in vec4 fColor;
 
-layout (location = 3) out vec4 VertexColor;
+layout (location = 0) out vec4 VertexColor;
 
 void main() {
     VertexColor = fColor;
