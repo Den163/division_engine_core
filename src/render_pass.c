@@ -57,7 +57,7 @@ bool division_engine_render_pass_alloc(
         division_ordered_id_table_remove(&pass_ctx->id_table, render_pass_id);
         free(render_pass_copy.uniform_vertex_buffers);
         free(render_pass_copy.uniform_fragment_buffers);
-        ctx->error_callback(DIVISION_INTERNAL_ERROR, "Failed to allocate Render pass fragment buffers array");
+        ctx->error_callback(DIVISION_INTERNAL_ERROR, "Failed to allocate Render pass buffers array");
         return false;
     }
 
