@@ -16,7 +16,7 @@ static void update_callback(DivisionContext* ctx);
 
 typedef struct VertexData
 {
-    float position[4];
+    float position[3];
     float color[4];
 } VertexData;
 
@@ -126,7 +126,7 @@ void init_callback(DivisionContext* ctx)
     int32_t vertex_count = sizeof(vd) / sizeof(VertexData);
 
     DivisionVertexAttributeSettings attr[] = {
-        {.type = DIVISION_FVEC4, .location = 0},
+        {.type = DIVISION_FVEC3, .location = 0},
         {.type = DIVISION_FVEC4, .location = 1}
     };
 
