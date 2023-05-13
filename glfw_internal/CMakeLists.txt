@@ -20,6 +20,7 @@ target_include_directories(glfw_internal PRIVATE
                            ${PROJECT_SOURCE_DIR}/include
                            ${PROJECT_SOURCE_DIR}/platform_internal_include
                            ${CMAKE_CURRENT_SOURCE_DIR}/lib/glad/include
+                           ${CMAKE_CURRENT_SOURCE_DIR}/include
                            ${PROJECT_BINARY_DIR})
 
 target_link_libraries(glfw_internal PRIVATE glfw ${GLFW_STATIC_LIBRARIES})

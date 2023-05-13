@@ -100,13 +100,13 @@ void init_callback(DivisionContext* ctx)
     DivisionShaderSettings shader_settings[] = {
         (DivisionShaderSettings) {
             .type = DIVISION_SHADER_VERTEX,
+            .file_path = "test.vert",
             .entry_point_name = "main",
-            .file_path = "test.vert"
         },
         (DivisionShaderSettings) {
             .type = DIVISION_SHADER_FRAGMENT,
+            .file_path = "test.frag",
             .entry_point_name = "main",
-            .file_path = "test.frag"
         }
     };
 #endif
