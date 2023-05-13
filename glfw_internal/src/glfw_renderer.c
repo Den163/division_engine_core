@@ -15,6 +15,8 @@
 #include "division_engine_core/platform_internal/platform_renderer.h"
 
 static inline void renderer_draw(DivisionContext* ctx);
+static inline void
+bind_uniform_buffer(DivisionUniformBufferSystemContext* ctx, uint32_t buffer_id);
 
 typedef struct DivisionWindowContextPlatformInternal_* DivisionWindowContextPlatformInternalPtr_;
 
@@ -107,15 +109,23 @@ void renderer_draw(DivisionContext* ctx)
         glBindBuffer(GL_ARRAY_BUFFER, vb_internal.gl_buffer);
         glUseProgram(shader_internal.gl_shader_program);
 
-        for (int32_t uniform_idx = 0; uniform_idx < pass.uniform_buffer_count; uniform_idx++)
+        for (int uniform_idx = 0; uniform_idx < pass.uniform_vertex_buffer_count; uniform_idx++)
         {
-            uint32_t uniform_buffer_id = pass.uniform_buffers[uniform_idx];
-            GLuint gl_uniform_buff = uniform_buff_ctx->uniform_buffers_impl[uniform_buffer_id].gl_buffer;
-            DivisionUniformBuffer* uniform_buffer = &uniform_buff_ctx->uniform_buffers[uniform_buffer_id];
+            bind_uniform_buffer(uniform_buff_ctx, pass.uniform_vertex_buffers[uniform_idx]);
+        }
 
-            glBindBufferBase(GL_UNIFORM_BUFFER, uniform_buffer->binding, gl_uniform_buff);
+        for (int uniform_idx = 0; uniform_idx < pass.uniform_fragment_buffer_count; uniform_idx++)
+        {
+            bind_uniform_buffer(uniform_buff_ctx, pass.uniform_fragment_buffers[uniform_idx]);
         }
 
         glDrawArrays(vb_internal.gl_topology, (GLint) pass.first_vertex, (GLint) pass.vertex_count);
     }
+}
+void bind_uniform_buffer(DivisionUniformBufferSystemContext* ctx, uint32_t buffer_id)
+{
+    GLuint gl_uniform_buff = ctx->uniform_buffers_impl[buffer_id].gl_buffer;
+    DivisionUniformBufferDescriptor* uniform_buffer = &ctx->uniform_buffers[buffer_id];
+
+    glBindBufferBase(GL_UNIFORM_BUFFER, uniform_buffer->binding, gl_uniform_buff);
 }

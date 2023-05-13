@@ -26,7 +26,9 @@ void division_engine_internal_render_pass_context_free(DivisionContext* ctx)
     DivisionRenderPassSystemContext* render_pass_ctx = ctx->render_pass_context;
     for (int i = 0; i < render_pass_ctx->render_pass_count; i++)
     {
-        free(render_pass_ctx->render_passes[i].uniform_vertex_buffers);
+        DivisionRenderPass pass = render_pass_ctx->render_passes[i];
+        free(pass.uniform_vertex_buffers);
+        free(pass.uniform_fragment_buffers);
     }
     free(render_pass_ctx->render_passes);
     free(render_pass_ctx);
@@ -45,17 +47,27 @@ bool division_engine_render_pass_alloc(
     }
 
     DivisionRenderPass render_pass_copy = render_pass;
-    size_t uniform_buffers_size = sizeof(int32_t[render_pass.uniform_vertex_buffer_count]);
-    render_pass_copy.uniform_vertex_buffers = malloc(uniform_buffers_size);
+    size_t uniform_vert_buffs_size = sizeof(int32_t[render_pass.uniform_vertex_buffer_count]);
+    render_pass_copy.uniform_vertex_buffers = malloc(uniform_vert_buffs_size);
     if (render_pass_copy.uniform_vertex_buffers == NULL)
     {
         division_ordered_id_table_remove(&pass_ctx->id_table, render_pass_id);
-        ctx->error_callback(DIVISION_INTERNAL_ERROR, "Failed to allocate Render pass");
+        ctx->error_callback(DIVISION_INTERNAL_ERROR, "Failed to allocate Render pass vertex buffers array");
+        return false;
+    }
+
+    size_t uniform_frag_buffs_size = sizeof(int32_t[render_pass.uniform_fragment_buffer_count]);
+    render_pass_copy.uniform_fragment_buffers = malloc(uniform_frag_buffs_size);
+    if (render_pass_copy.uniform_fragment_buffers == NULL)
+    {
+        division_ordered_id_table_remove(&pass_ctx->id_table, render_pass_id);
+        free(render_pass_copy.uniform_vertex_buffers);
+        ctx->error_callback(DIVISION_INTERNAL_ERROR, "Failed to allocate Render pass fragment buffers array");
         return false;
     }
 
     render_pass_copy.uniform_vertex_buffer_count = render_pass.uniform_vertex_buffer_count;
-    memcpy(render_pass_copy.uniform_vertex_buffers, render_pass.uniform_vertex_buffers, uniform_buffers_size);
+    memcpy(render_pass_copy.uniform_vertex_buffers, render_pass.uniform_vertex_buffers, uniform_vert_buffs_size);
 
     int32_t render_pass_count = pass_ctx->render_pass_count;
     int32_t new_render_pass_count = render_pass_count + 1;
@@ -65,6 +77,8 @@ bool division_engine_render_pass_alloc(
         if (pass_ctx->render_passes == NULL)
         {
             division_ordered_id_table_remove(&pass_ctx->id_table, render_pass_id);
+            free(render_pass_copy.uniform_vertex_buffers);
+            free(render_pass_copy.uniform_fragment_buffers);
             ctx->error_callback(DIVISION_INTERNAL_ERROR, "Failed to realloc Render pass array");
             return false;
         }
@@ -87,5 +101,6 @@ void division_engine_render_pass_free(DivisionContext* ctx, uint32_t render_pass
 
     DivisionRenderPass* render_pass = &render_pass_ctx->render_passes[render_pass_id];
     free(render_pass->uniform_vertex_buffers);
+    free(render_pass->uniform_fragment_buffers);
     render_pass->uniform_vertex_buffers = NULL;
 }

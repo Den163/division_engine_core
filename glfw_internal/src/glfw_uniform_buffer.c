@@ -21,7 +21,7 @@ void division_engine_internal_platform_uniform_buffer_context_free(DivisionConte
 }
 
 bool division_engine_internal_platform_uniform_buffer_alloc(
-    DivisionContext* ctx, DivisionUniformBuffer buffer, uint32_t buffer_id)
+    DivisionContext* ctx, DivisionUniformBufferDescriptor buffer, uint32_t buffer_id)
 {
     GLuint gl_buff;
     glGenBuffers(1, &gl_buff);
