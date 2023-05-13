@@ -10,17 +10,16 @@
 
 struct DivisionUniformBufferInternal_;
 
-typedef struct DivisionUniformBuffer
+typedef struct DivisionUniformBufferDescriptor
 {
     size_t data_bytes;
     int32_t binding;
-    DivisionShaderType shaderType;
-} DivisionUniformBuffer;
+} DivisionUniformBufferDescriptor;
 
 typedef struct DivisionUniformBufferSystemContext
 {
     DivisionUnorderedIdTable id_table;
-    DivisionUniformBuffer* uniform_buffers;
+    DivisionUniformBufferDescriptor* uniform_buffers;
     struct DivisionUniformBufferInternal_* uniform_buffers_impl;
     size_t uniform_buffer_count;
 } DivisionUniformBufferSystemContext;
@@ -34,7 +33,7 @@ extern "C" {
 #endif
 
 DIVISION_EXPORT bool division_engine_uniform_buffer_alloc(
-    DivisionContext* ctx, DivisionUniformBuffer buffer, uint32_t* out_buffer_id);
+    DivisionContext* ctx, DivisionUniformBufferDescriptor buffer, uint32_t* out_buffer_id);
 
 DIVISION_EXPORT void division_engine_uniform_buffer_free(DivisionContext* ctx, uint32_t buffer_id);
 

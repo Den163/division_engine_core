@@ -14,7 +14,7 @@ DIVISION_EXPORT void division_engine_internal_platform_uniform_buffer_context_fr
 
 
 DIVISION_EXPORT bool division_engine_internal_platform_uniform_buffer_alloc(
-    DivisionContext* ctx, DivisionUniformBuffer buffer, uint32_t buffer_id);
+    DivisionContext* ctx, DivisionUniformBufferDescriptor buffer, uint32_t buffer_id);
 
 DIVISION_EXPORT void division_engine_internal_platform_uniform_buffer_free(DivisionContext* ctx, uint32_t buffer_id);
 

@@ -142,11 +142,7 @@ void init_callback(DivisionContext* ctx)
 
     float testVec[] = { 0, 1, 0, 1 };
 
-    DivisionUniformBuffer buff = {
-        .data_bytes = sizeof(testVec),
-        .binding = 1,
-        .shaderType = DIVISION_SHADER_FRAGMENT
-    };
+    DivisionUniformBufferDescriptor buff = { .data_bytes = sizeof(testVec), .binding = 1, };
 
     uint32_t uniform_buffer;
     division_engine_uniform_buffer_alloc(ctx, buff, &uniform_buffer);
@@ -159,8 +155,9 @@ void init_callback(DivisionContext* ctx)
     division_engine_render_pass_alloc(ctx, (DivisionRenderPass) {
         .first_vertex = 0,
         .vertex_count = static_cast<size_t>(vertex_count),
-        .uniform_buffers = &uniform_buffer,
-        .uniform_buffer_count = 1,
+        .uniform_vertex_buffer_count = 0,
+        .uniform_fragment_buffers = &uniform_buffer,
+        .uniform_fragment_buffer_count = 1,
         .vertex_buffer = vertex_buffer,
         .shader_program = shader_program,
     }, &render_pass_id);

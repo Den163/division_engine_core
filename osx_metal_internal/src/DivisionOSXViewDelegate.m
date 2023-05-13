@@ -186,23 +186,20 @@ static char* readFromFile(const char* path);
             [renderEnc setRenderPipelineState:pipelineState];
             [renderEnc setVertexBuffer:vertDataMtlBuffer offset:0 atIndex:MTL_VERTEX_DATA_BUFFER_INDEX];
 
-            for (int ubIdx = 0; ubIdx < pass->uniform_buffer_count; ubIdx++)
+            for (int ubIdx = 0; ubIdx < pass->uniform_vertex_buffer_count; ubIdx++)
             {
-                uint32_t buff_id = pass->uniform_buffers[ubIdx];
-                id <MTLBuffer> uniformMtlBuffer = uniform_buff_ctx->uniform_buffers_impl[buff_id].mtl_buffer;
-                DivisionUniformBuffer buffDesc = uniform_buff_ctx->uniform_buffers[buff_id];
-                switch (buffDesc.shaderType)
-                {
-                    case DIVISION_SHADER_VERTEX:
-                        [renderEnc setVertexBuffer:uniformMtlBuffer offset:0 atIndex:buffDesc.binding];
-                        break;
-                    case DIVISION_SHADER_FRAGMENT:
-                        [renderEnc setFragmentBuffer:uniformMtlBuffer offset:0 atIndex:buffDesc.binding];
-                        break;
-                    default:
-                        fprintf(stderr, "Unknown shader type in the pass");
-                        break;
-                }
+                uint32_t buff_id = pass->uniform_vertex_buffers[ubIdx];
+                id <MTLBuffer> uniformBuff = uniform_buff_ctx->uniform_buffers_impl[buff_id].mtl_buffer;
+                DivisionUniformBufferDescriptor buffDesc = uniform_buff_ctx->uniform_buffers[buff_id];
+                [renderEnc setVertexBuffer:uniformBuff offset:0 atIndex:buffDesc.binding];
+            }
+
+            for (int ubIdx = 0; ubIdx < pass->uniform_fragment_buffer_count; ubIdx++)
+            {
+                uint32_t buff_id = pass->uniform_fragment_buffers[ubIdx];
+                id <MTLBuffer> uniformBuff = uniform_buff_ctx->uniform_buffers_impl[buff_id].mtl_buffer;
+                DivisionUniformBufferDescriptor buffDesc = uniform_buff_ctx->uniform_buffers[buff_id];
+                [renderEnc setFragmentBuffer:uniformBuff offset:0 atIndex:buffDesc.binding];
             }
 
             [renderEnc

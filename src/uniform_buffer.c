@@ -26,7 +26,7 @@ void division_engine_internal_uniform_buffer_context_free(DivisionContext* ctx)
     free(ctx->uniform_buffer_context);
 }
 
-bool division_engine_uniform_buffer_alloc(DivisionContext* ctx, DivisionUniformBuffer buffer, uint32_t* out_buffer_id)
+bool division_engine_uniform_buffer_alloc(DivisionContext* ctx, DivisionUniformBufferDescriptor buffer, uint32_t* out_buffer_id)
 {
     DivisionUniformBufferSystemContext* uniform_buffer_ctx = ctx->uniform_buffer_context;
     const uint32_t buff_id = division_unordered_id_table_insert(&uniform_buffer_ctx->id_table);
@@ -42,7 +42,7 @@ bool division_engine_uniform_buffer_alloc(DivisionContext* ctx, DivisionUniformB
         uniform_buffer_ctx->uniform_buffer_count = buff_id + 1;
         uniform_buffer_ctx->uniform_buffers = realloc(
             uniform_buffer_ctx->uniform_buffers,
-            sizeof(DivisionUniformBuffer[uniform_buffer_ctx->uniform_buffer_count])
+            sizeof(DivisionUniformBufferDescriptor[uniform_buffer_ctx->uniform_buffer_count])
         );
 
         if (uniform_buffer_ctx->uniform_buffers == NULL)

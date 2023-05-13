@@ -26,7 +26,7 @@ void division_engine_internal_render_pass_context_free(DivisionContext* ctx)
     DivisionRenderPassSystemContext* render_pass_ctx = ctx->render_pass_context;
     for (int i = 0; i < render_pass_ctx->render_pass_count; i++)
     {
-        free(render_pass_ctx->render_passes[i].uniform_buffers);
+        free(render_pass_ctx->render_passes[i].uniform_vertex_buffers);
     }
     free(render_pass_ctx->render_passes);
     free(render_pass_ctx);
@@ -45,17 +45,17 @@ bool division_engine_render_pass_alloc(
     }
 
     DivisionRenderPass render_pass_copy = render_pass;
-    size_t uniform_buffers_size = sizeof(int32_t[render_pass.uniform_buffer_count]);
-    render_pass_copy.uniform_buffers = malloc(uniform_buffers_size);
-    if (render_pass_copy.uniform_buffers == NULL)
+    size_t uniform_buffers_size = sizeof(int32_t[render_pass.uniform_vertex_buffer_count]);
+    render_pass_copy.uniform_vertex_buffers = malloc(uniform_buffers_size);
+    if (render_pass_copy.uniform_vertex_buffers == NULL)
     {
         division_ordered_id_table_remove(&pass_ctx->id_table, render_pass_id);
         ctx->error_callback(DIVISION_INTERNAL_ERROR, "Failed to allocate Render pass");
         return false;
     }
 
-    render_pass_copy.uniform_buffer_count = render_pass.uniform_buffer_count;
-    memcpy(render_pass_copy.uniform_buffers, render_pass.uniform_buffers, uniform_buffers_size);
+    render_pass_copy.uniform_vertex_buffer_count = render_pass.uniform_vertex_buffer_count;
+    memcpy(render_pass_copy.uniform_vertex_buffers, render_pass.uniform_vertex_buffers, uniform_buffers_size);
 
     int32_t render_pass_count = pass_ctx->render_pass_count;
     int32_t new_render_pass_count = render_pass_count + 1;
@@ -86,6 +86,6 @@ void division_engine_render_pass_free(DivisionContext* ctx, uint32_t render_pass
     division_ordered_id_table_remove(&render_pass_ctx->id_table, render_pass_id);
 
     DivisionRenderPass* render_pass = &render_pass_ctx->render_passes[render_pass_id];
-    free(render_pass->uniform_buffers);
-    render_pass->uniform_buffers = NULL;
+    free(render_pass->uniform_vertex_buffers);
+    render_pass->uniform_vertex_buffers = NULL;
 }

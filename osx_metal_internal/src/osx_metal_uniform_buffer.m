@@ -26,7 +26,7 @@ void division_engine_internal_platform_uniform_buffer_context_free(DivisionConte
 }
 
 bool division_engine_internal_platform_uniform_buffer_alloc(
-    DivisionContext* ctx, DivisionUniformBuffer buffer, uint32_t buffer_id)
+    DivisionContext* ctx, DivisionUniformBufferDescriptor buffer, uint32_t buffer_id)
 {
     DivisionOSXWindowContext* window_ctx = ctx->renderer_context->window_data;
     id<MTLBuffer> mtl_buffer = [window_ctx->app_delegate->viewDelegate createBufferWithSize:buffer.data_bytes];
