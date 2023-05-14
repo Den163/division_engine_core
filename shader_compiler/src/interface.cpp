@@ -116,8 +116,10 @@ bool division_shader_compiler_compile_spirv_to_metal(
         {
             msl.set_entry_point(entry_point, division_shader_type_to_spv_cross_type(shader_type));
         }
-        spirv_cross::CompilerMSL::Options opt {};
-        opt.enable_decoration_binding = true;
+        spirv_cross::CompilerMSL::Options opt {
+            .msl_version = spirv_cross::CompilerMSL::Options::make_msl_version(3, 0),
+            .enable_decoration_binding = true,
+        };
 
         msl.set_msl_options(opt);
         std::string out_metal = msl.compile();

@@ -18,12 +18,18 @@ DIVISION_EXPORT bool division_engine_internal_platform_vertex_buffer_context_all
 DIVISION_EXPORT void division_engine_internal_platform_vertex_buffer_context_free(DivisionContext* ctx);
 
 DIVISION_EXPORT bool division_engine_internal_platform_vertex_buffer_alloc(
-    DivisionContext* ctx, uint32_t buffer_id, DivisionVertexBuffer* vertex_buffer);
+    DivisionContext* ctx, uint32_t buffer_id, const DivisionVertexBuffer* vertex_buffer);
 DIVISION_EXPORT void division_engine_internal_platform_vertex_buffer_free(DivisionContext* ctx, uint32_t buffer_id);
 
-DIVISION_EXPORT void* division_engine_internal_platform_vertex_buffer_borrow_data_pointer(
+DIVISION_EXPORT void* division_engine_internal_platform_vertex_buffer_borrow_per_vertex_data_pointer(
     DivisionContext* ctx, uint32_t buffer_id);
-DIVISION_EXPORT void division_engine_internal_platform_vertex_buffer_return_data_pointer(
+DIVISION_EXPORT void division_engine_internal_platform_vertex_buffer_return_per_vertex_data_pointer(
+    DivisionContext* ctx, uint32_t buffer_id, void* data_pointer);
+
+DIVISION_EXPORT void* division_engine_internal_platform_vertex_buffer_borrow_per_instance_data_pointer(
+    DivisionContext* ctx, uint32_t buffer_id);
+
+DIVISION_EXPORT void division_engine_internal_platform_vertex_buffer_return_per_instance_data_pointer(
     DivisionContext* ctx, uint32_t buffer_id, void* data_pointer);
 
 #ifdef __cplusplus
