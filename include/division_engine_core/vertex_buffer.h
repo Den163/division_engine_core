@@ -67,7 +67,12 @@ void division_engine_internal_vertex_buffer_context_free(DivisionContext* ctx);
 extern "C" {
 #endif
 
-
+/*
+ *  Vertex specification:
+ *  1. Non-instanced rendering buffer. Attributes are interleaved, consecutive in the order they are received
+ *  2. Instanced rendering buffer. First goes vertex data,
+ *  after - interleaved instance data attributes in the order they are received
+ */
 DIVISION_EXPORT bool division_engine_vertex_buffer_alloc(
     DivisionContext* ctx, const DivisionVertexBufferSettings* vertex_buffer_settings, uint32_t* out_vertex_buffer_id);
 
