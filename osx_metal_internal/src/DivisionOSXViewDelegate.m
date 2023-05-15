@@ -19,7 +19,7 @@ typedef struct DivisionToMslAttrTraits_
 
 static inline void define_msl_vertex_attributes(
     const DivisionVertexAttribute* attributes, int32_t attribute_count,
-    MTLVertexAttributeDescriptorArray* attr_desc_arr, int32_t buffer_index);
+    MTLVertexAttributeDescriptorArray* attr_desc_arr, size_t attributes_offset, int32_t buffer_index);
 
 static inline DivisionToMslAttrTraits_ get_vert_attr_msl_traits_(DivisionShaderVariableType attrType);
 
@@ -51,6 +51,7 @@ static inline DivisionToMslAttrTraits_ get_vert_attr_msl_traits_(DivisionShaderV
         vertexBuffer->per_vertex_attributes,
         vertexBuffer->per_vertex_attribute_count,
         attrDescArray,
+        0,
         MTL_VERTEX_DATA_BUFFER_INDEX
     );
 
@@ -66,6 +67,7 @@ static inline DivisionToMslAttrTraits_ get_vert_attr_msl_traits_(DivisionShaderV
             vertexBuffer->per_instance_attributes,
             vertexBuffer->per_instance_attribute_count,
             attrDescArray,
+            vertexBuffer->per_vertex_data_size * vertexBuffer->vertex_count,
             MTL_VERTEX_DATA_INSTANCE_ARRAY_INDEX
         );
 
@@ -202,10 +204,10 @@ static inline DivisionToMslAttrTraits_ get_vert_attr_msl_traits_(DivisionShaderV
             if (pass->vertex_count == 0) continue;
 
             DivisionRenderPassInternalPlatform_* pass_impl = &render_pass_ctx->render_passes_impl[i];
-            DivisionVertexBufferInternalPlatform_ vert_buffer = vert_buff_ctx->buffers_impl[pass->vertex_buffer];
+            DivisionVertexBufferInternalPlatform_ vert_buffer_impl = vert_buff_ctx->buffers_impl[pass->vertex_buffer];
 
             id <MTLRenderPipelineState> pipelineState = pass_impl->mtl_pipeline_state;
-            id <MTLBuffer> vertDataMtlBuffer = vert_buffer.mtl_vertex_buffer;
+            id <MTLBuffer> vertDataMtlBuffer = vert_buffer_impl.mtl_vertex_buffer;
 
             [renderEnc setRenderPipelineState:pipelineState];
             [renderEnc setVertexBuffer:vertDataMtlBuffer offset:0 atIndex:MTL_VERTEX_DATA_BUFFER_INDEX];
@@ -228,12 +230,11 @@ static inline DivisionToMslAttrTraits_ get_vert_attr_msl_traits_(DivisionShaderV
 
             if (pass->instance_count > 0)
             {
-                [renderEnc setVertexBuffer:vert_buffer.mtl_instance_buffer
+                [renderEnc setVertexBuffer:vertDataMtlBuffer
                                     offset:0
                                    atIndex:MTL_VERTEX_DATA_INSTANCE_ARRAY_INDEX];
 
-
-                [renderEnc drawPrimitives:vert_buffer.mtl_primitive_type
+                [renderEnc drawPrimitives:vert_buffer_impl.mtl_primitive_type
                               vertexStart:pass->first_vertex
                               vertexCount:pass->vertex_count
                             instanceCount:pass->instance_count
@@ -241,7 +242,7 @@ static inline DivisionToMslAttrTraits_ get_vert_attr_msl_traits_(DivisionShaderV
             }
             else
             {
-                [renderEnc drawPrimitives:vert_buffer.mtl_primitive_type
+                [renderEnc drawPrimitives:vert_buffer_impl.mtl_primitive_type
                               vertexStart:pass->first_vertex
                               vertexCount:pass->vertex_count
                 ];
@@ -261,19 +262,20 @@ static inline DivisionToMslAttrTraits_ get_vert_attr_msl_traits_(DivisionShaderV
 
 void define_msl_vertex_attributes(
     const DivisionVertexAttribute* attributes, int32_t attribute_count,
-    MTLVertexAttributeDescriptorArray* attr_desc_arr,
-    int32_t buffer_index)
+    MTLVertexAttributeDescriptorArray* attr_desc_arr, size_t attributes_offset, int32_t buffer_index)
 {
     for (int i = 0; i < attribute_count; i++)
     {
         const DivisionVertexAttribute* attr = &attributes[i];
         DivisionToMslAttrTraits_ traits = get_vert_attr_msl_traits_(attr->type);
-        int comp_size = attr->base_size * traits.divide_by_components;
+        size_t gl_attr_comp_count = (attr->component_count / traits.divide_by_components);
+        size_t comp_size = attr->base_size * gl_attr_comp_count;
+        size_t offset = attributes_offset + attr->offset;
 
-        for (int comp_idx = 0; comp_idx < traits.divide_by_components; comp_idx++)
+        for (int comp_idx = 0; comp_idx < gl_attr_comp_count; comp_idx++)
         {
             MTLVertexAttributeDescriptor* attrDesc = [attr_desc_arr objectAtIndexedSubscript:attr->location + comp_idx];
-            [attrDesc setOffset:attr->offset + comp_idx * comp_size];
+            [attrDesc setOffset:offset + comp_idx * comp_size];
             [attrDesc setBufferIndex:buffer_index];
             [attrDesc setFormat:traits.vertex_format];
         }
