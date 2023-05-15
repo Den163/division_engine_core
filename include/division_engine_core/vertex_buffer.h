@@ -28,12 +28,10 @@ typedef struct DivisionVertexAttribute {
 } DivisionVertexAttribute;
 
 typedef struct DivisionVertexBuffer {
-    struct VertexAttributeInternalPlatform_* per_vertex_attributes_impl;
     DivisionVertexAttribute* per_vertex_attributes;
     int32_t per_vertex_attribute_count;
     size_t per_vertex_data_size;
 
-    struct VertexAttributeInternalPlatform_* per_instance_attributes_impl;
     DivisionVertexAttribute* per_instance_attributes;
     int32_t per_instance_attribute_count;
     size_t per_instance_data_size;
@@ -75,14 +73,9 @@ DIVISION_EXPORT bool division_engine_vertex_buffer_alloc(
 
 DIVISION_EXPORT void division_engine_vertex_buffer_free(DivisionContext* ctx, uint32_t vertex_buffer_id);
 
-DIVISION_EXPORT void* division_engine_vertex_buffer_borrow_per_vertex_data_pointer(
+DIVISION_EXPORT void* division_engine_vertex_buffer_borrow_data_pointer(
     DivisionContext* ctx, uint32_t vertex_buffer);
-DIVISION_EXPORT void division_engine_vertex_buffer_return_per_vertex_data_pointer(
-    DivisionContext* ctx, uint32_t vertex_buffer, void* data_pointer);
-
-DIVISION_EXPORT void* division_engine_vertex_buffer_borrow_per_instance_data_pointer(
-    DivisionContext* ctx, uint32_t vertex_buffer);
-DIVISION_EXPORT void division_engine_vertex_buffer_return_per_instance_data_pointer(
+DIVISION_EXPORT void division_engine_vertex_buffer_return_data_pointer(
     DivisionContext* ctx, uint32_t vertex_buffer, void* data_pointer);
 
 #ifdef __cplusplus

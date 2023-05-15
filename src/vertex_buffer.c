@@ -195,23 +195,12 @@ void division_engine_vertex_buffer_free(DivisionContext* ctx, uint32_t vertex_bu
     division_unordered_id_table_remove(&ctx->vertex_buffer_context->id_table, vertex_buffer_id);
 }
 
-void* division_engine_vertex_buffer_borrow_per_vertex_data_pointer(DivisionContext* ctx, uint32_t vertex_buffer)
+void* division_engine_vertex_buffer_borrow_data_pointer(DivisionContext* ctx, uint32_t vertex_buffer)
 {
-    return division_engine_internal_platform_vertex_buffer_borrow_per_vertex_data_pointer(ctx, vertex_buffer);
+    return division_engine_internal_platform_vertex_buffer_borrow_data_pointer(ctx, vertex_buffer);
 }
 
-void division_engine_vertex_buffer_return_per_vertex_data_pointer(DivisionContext* ctx, uint32_t vertex_buffer, void* data_pointer)
+void division_engine_vertex_buffer_return_data_pointer(DivisionContext* ctx, uint32_t vertex_buffer, void* data_pointer)
 {
-    division_engine_internal_platform_vertex_buffer_return_per_vertex_data_pointer(ctx, vertex_buffer, data_pointer);
-}
-
-void* division_engine_vertex_buffer_borrow_per_instance_data_pointer(DivisionContext* ctx, uint32_t vertex_buffer)
-{
-    return division_engine_internal_platform_vertex_buffer_borrow_per_instance_data_pointer(ctx, vertex_buffer);
-}
-
-void division_engine_vertex_buffer_return_per_instance_data_pointer(
-    DivisionContext* ctx, uint32_t vertex_buffer, void* data_pointer)
-{
-    division_engine_internal_platform_vertex_buffer_return_per_instance_data_pointer(ctx, vertex_buffer, data_pointer);
+    division_engine_internal_platform_vertex_buffer_return_data_pointer(ctx, vertex_buffer, data_pointer);
 }

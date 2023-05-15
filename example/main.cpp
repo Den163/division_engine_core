@@ -162,15 +162,16 @@ void init_callback(DivisionContext* ctx)
 
     uint32_t vertex_buffer;
     division_engine_vertex_buffer_alloc(ctx, &vertex_buffer_settings, &vertex_buffer);
-    auto* vert_buff_ptr = static_cast<VertexData*>(
-        division_engine_vertex_buffer_borrow_per_vertex_data_pointer(ctx, vertex_buffer));
-    memcpy(vert_buff_ptr, vd, sizeof(vd));
-    division_engine_vertex_buffer_return_per_vertex_data_pointer(ctx, vertex_buffer, vert_buff_ptr);
 
-    auto* per_inst_ptr = static_cast<float*>(division_engine_vertex_buffer_borrow_per_instance_data_pointer(
-        ctx, vertex_buffer));
-    memcpy(per_inst_ptr, local_to_word_mat, sizeof(float[32]));
-    division_engine_vertex_buffer_return_per_instance_data_pointer(ctx, vertex_buffer, per_inst_ptr);
+    auto* vert_buff_ptr = static_cast<int8_t*>(
+        division_engine_vertex_buffer_borrow_data_pointer(ctx, vertex_buffer));
+
+    memcpy(vert_buff_ptr, vd, sizeof(vd));
+
+    auto* per_inst_ptr = vert_buff_ptr + sizeof(vd);
+    memcpy(per_inst_ptr, local_to_word_mat, sizeof(local_to_word_mat));
+
+    division_engine_vertex_buffer_return_data_pointer(ctx, vertex_buffer, vert_buff_ptr);
 
     float testVec[] = {0, 1, 0, 1};
 

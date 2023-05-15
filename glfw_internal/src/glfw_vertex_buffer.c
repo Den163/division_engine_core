@@ -7,12 +7,20 @@
 #include <stdio.h>
 #include <string.h>
 
-typedef struct VertexAttributeInternalPlatform_ {
-    GLenum gl_type;
-} VertexAttributeInternalPlatform_;
+typedef struct GlAttrTraits_ {
+    GLenum type;
+    int32_t divide_by_components;
+} GlAttrTraits_;
 
-static inline GLenum division_attribute_to_gl_type(DivisionShaderVariableType attributeType);
+static inline GlAttrTraits_ get_gl_attr_traits(DivisionShaderVariableType attributeType);
 static inline GLenum topology_to_gl_type(DivisionRenderTopology t);
+static inline void enable_gl_attributes(
+    const DivisionVertexAttribute* attributes,
+    int32_t attribute_count,
+    size_t attributes_offset,
+    size_t attributes_data_size,
+    bool enable_divisor
+);
 
 bool division_engine_internal_platform_vertex_buffer_context_alloc(
     DivisionContext* ctx, const DivisionSettings* settings)
@@ -24,32 +32,13 @@ void division_engine_internal_platform_vertex_buffer_context_free(DivisionContex
 {
     DivisionVertexBufferSystemContext* vertex_buffer_ctx = ctx->vertex_buffer_context;
 
-    for (int i = 0; i < vertex_buffer_ctx->buffers_count; i++)
-    {
-        DivisionVertexBuffer* buffer = &vertex_buffer_ctx->buffers[i];
-
-        free(buffer->attributes_impl);
-    }
-
     free(vertex_buffer_ctx->buffers_impl);
 }
 
 bool division_engine_internal_platform_vertex_buffer_alloc(
-    DivisionContext* ctx, uint32_t buffer_id, DivisionVertexBuffer* vertex_buffer)
+    DivisionContext* ctx, uint32_t buffer_id, const DivisionVertexBuffer* vertex_buffer)
 {
-    GLuint gl_buffer;
-    glGenBuffers(1, &gl_buffer);
-    glBindBuffer(GL_ARRAY_BUFFER, gl_buffer);
-
-    struct DivisionVertexBufferSystemContext* vertex_ctx = ctx->vertex_buffer_context;
-    int attr_count = vertex_buffer->attribute_count;
-
-    vertex_buffer->attributes_impl = malloc(sizeof(VertexAttributeInternalPlatform_[attr_count]));
-    if (vertex_buffer->attributes_impl == NULL)
-    {
-        ctx->error_callback(DIVISION_INTERNAL_ERROR, "Failed to alloc Vertex Attribute Implementation array");
-        return false;
-    }
+    DivisionVertexBufferSystemContext* vertex_ctx = ctx->vertex_buffer_context;
 
     if (buffer_id >= vertex_ctx->buffers_count)
     {
@@ -61,66 +50,68 @@ bool division_engine_internal_platform_vertex_buffer_alloc(
         if (vertex_ctx->buffers_impl == NULL)
         {
             ctx->error_callback(DIVISION_INTERNAL_ERROR, "Failed to realloc Vertex Buffer Implementation array");
-            free(vertex_buffer->attributes_impl);
             return false;
         }
     }
 
-    vertex_ctx->buffers_impl[buffer_id] = (DivisionVertexBufferInternalPlatform_) {
-        .gl_buffer = gl_buffer,
+    DivisionVertexBufferInternalPlatform_ vertex_buffer_impl = {
         .gl_topology = topology_to_gl_type(vertex_buffer->topology)
     };
 
-    int per_vertex_data_size = (int) vertex_buffer->per_vertex_data_size;
+    glGenVertexArrays(1, &vertex_buffer_impl.gl_vao);
+    glBindVertexArray(vertex_buffer_impl.gl_vao);
+    glGenBuffers(1, &vertex_buffer_impl.gl_vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_impl.gl_vbo);
 
-    for (int32_t i = 0; i < attr_count; i++)
+    size_t per_vertex_data_size = vertex_buffer->per_vertex_data_size;
+    size_t per_instance_data_size = vertex_buffer->per_instance_data_size;
+    size_t vertex_count = vertex_buffer->vertex_count;
+    size_t instance_count = vertex_buffer->instance_count;
+
+    enable_gl_attributes(
+        vertex_buffer->per_vertex_attributes,
+        vertex_buffer->per_vertex_attribute_count,
+        0,
+        vertex_buffer->per_vertex_data_size,
+        false
+    );
+
+    if (vertex_buffer->per_instance_attribute_count > 0)
     {
-        DivisionVertexAttribute* at = &vertex_buffer->attributes[i];
-        VertexAttributeInternalPlatform_ at_impl = {
-            .gl_type = division_attribute_to_gl_type(vertex_buffer->attributes[i].type)
-        };
-        vertex_buffer->attributes_impl[i] = at_impl;
-
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wint-to-pointer-cast"
-        void* offset = (void*) at->offset;
-#pragma clang diagnostic pop
-
-        glVertexAttribPointer(
-            at->location,
-            at->component_count,
-            at_impl.gl_type,
-            GL_FALSE,
-            (int) vertex_buffer->per_vertex_data_size,
-            offset
+        enable_gl_attributes(
+            vertex_buffer->per_instance_attributes,
+            vertex_buffer->per_instance_attribute_count,
+            vertex_buffer->per_vertex_data_size * vertex_count,
+            vertex_buffer->per_instance_data_size,
+            true
         );
-        glEnableVertexAttribArray(at->location);
     }
 
     glBufferData(
         GL_ARRAY_BUFFER,
-        (GLsizei) (per_vertex_data_size * vertex_buffer->vertex_count),
+        (GLsizei) (per_vertex_data_size * vertex_count + per_instance_data_size * instance_count),
         NULL,
         GL_DYNAMIC_DRAW
     );
 
+    vertex_ctx->buffers_impl[buffer_id] = vertex_buffer_impl;
+
     return true;
 }
 
-GLenum division_attribute_to_gl_type(DivisionShaderVariableType attributeType)
+GlAttrTraits_ get_gl_attr_traits(DivisionShaderVariableType attributeType)
 {
     switch (attributeType)
     {
-        case DIVISION_DOUBLE:
-            return GL_DOUBLE;
-        case DIVISION_INTEGER:
-            return GL_INT;
+        case DIVISION_DOUBLE: return (GlAttrTraits_) { GL_DOUBLE , 1 };
+        case DIVISION_INTEGER: return (GlAttrTraits_) { GL_INT, 1 };
         case DIVISION_FLOAT:
         case DIVISION_FVEC2:
         case DIVISION_FVEC3:
         case DIVISION_FVEC4:
+            return (GlAttrTraits_) { GL_FLOAT, 1 };
         case DIVISION_FMAT4X4:
-            return GL_FLOAT;
+            return (GlAttrTraits_) { GL_FLOAT, 4 };
         default:
         {
             fprintf(stderr, "Unknown attribute type");
@@ -148,14 +139,16 @@ GLenum topology_to_gl_type(DivisionRenderTopology t)
 
 void division_engine_internal_platform_vertex_buffer_free(DivisionContext* ctx, uint32_t buffer_id)
 {
-    glDeleteBuffers(1, &ctx->vertex_buffer_context->buffers_impl[buffer_id].gl_buffer);
+    DivisionVertexBufferInternalPlatform_ buffer_impl = ctx->vertex_buffer_context->buffers_impl[buffer_id];
+    glDeleteBuffers(1, &buffer_impl.gl_vbo);
+    glDeleteVertexArrays(1, &buffer_impl.gl_vao);
 }
 
 void* division_engine_internal_platform_vertex_buffer_borrow_data_pointer(
     DivisionContext* ctx, uint32_t buffer_id)
 {
     DivisionVertexBufferInternalPlatform_* vb = &ctx->vertex_buffer_context->buffers_impl[buffer_id];
-    glBindBuffer(GL_ARRAY_BUFFER, vb->gl_buffer);
+    glBindBuffer(GL_ARRAY_BUFFER, vb->gl_vbo);
     return glMapBuffer(GL_ARRAY_BUFFER, GL_READ_WRITE);
 }
 
@@ -163,6 +156,44 @@ void division_engine_internal_platform_vertex_buffer_return_data_pointer(
     DivisionContext* ctx, uint32_t buffer_id, void* data_pointer)
 {
     DivisionVertexBufferInternalPlatform_* vb = &ctx->vertex_buffer_context->buffers_impl[buffer_id];
-    glBindBuffer(GL_ARRAY_BUFFER, vb->gl_buffer);
+    glBindBuffer(GL_ARRAY_BUFFER, vb->gl_vbo);
     glUnmapBuffer(GL_ARRAY_BUFFER);
+}
+
+void enable_gl_attributes(
+    const DivisionVertexAttribute* attributes,
+    int32_t attribute_count,
+    size_t attributes_offset,
+    size_t attributes_data_size,
+    bool enable_divisor
+)
+{
+    for (int32_t i = 0; i < attribute_count; i++)
+    {
+        const DivisionVertexAttribute* at = &attributes[i];
+        GlAttrTraits_ gl_attr_traits = get_gl_attr_traits(at->type);
+        int gl_comp_count = at->component_count / gl_attr_traits.divide_by_components;
+        size_t gl_comp_size = gl_comp_count * at->base_size;
+        size_t attr_base_offset = attributes_offset + at->offset;
+
+        for (int comp_idx = 0; comp_idx < gl_attr_traits.divide_by_components; comp_idx++ )
+        {
+            GLuint gl_location = at->location + comp_idx;
+
+            glEnableVertexAttribArray(gl_location);
+            glVertexAttribPointer(
+                gl_location,
+                gl_comp_count,
+                gl_attr_traits.type,
+                GL_FALSE,
+                (GLsizei) (attributes_data_size),
+                (void*) (attr_base_offset + comp_idx * gl_comp_size)
+            );
+
+            if (enable_divisor)
+            {
+                glVertexAttribDivisor(gl_location, 1);
+            }
+        }
+    }
 }
