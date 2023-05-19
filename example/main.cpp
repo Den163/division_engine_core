@@ -21,6 +21,7 @@ typedef struct VertexData
 {
     float position[3];
     float color[4];
+    float uv[2];
 } VertexData;
 
 int main()
@@ -124,12 +125,12 @@ void init_callback(DivisionContext* ctx)
     division_engine_shader_program_alloc(ctx, shader_settings, source_count, &shader_program);
 
     VertexData vd[] = {
-        {.position = {-0.5f, -0.5f, 0}, .color = {1, 1, 1, 1}},
-        {.position = {0, 0, 0}, .color = {1, 1, 1, 1}},
-        {.position = {-0.5f, 0, 0}, .color = {1, 1, 1, 1}},
-        {.position = {0, 0, 0}, .color = {1, 1, 1, 1}},
-        {.position = {-0.5f, -0.5f, 0}, .color = {1, 1, 1, 1}},
-        { .position = {0, -0.5f, 0}, .color = {1, 1, 1, 1} },
+        {.position = {-0.5f, -0.5f, 0}, .color = {1, 1, 1, 1}, .uv = {0, 1}},
+        {.position = {0, 0, 0}, .color = {1, 1, 1, 1}, .uv = {1, 1}},
+        {.position = {-0.5f, 0, 0}, .color = {1, 1, 1, 1}, .uv = {0, 0}},
+        {.position = {0, 0, 0}, .color = {1, 1, 1, 1}, .uv = {1, 1}},
+        {.position = {-0.5f, -0.5f, 0}, .color = {1, 1, 1, 1}, .uv = {0, 1}},
+        {.position = {0, -0.5f, 0}, .color = {1, 1, 1, 1}, .uv = {1, 0}},
     };
     float local_to_word_mat[] = {
         1, 0, 0, 0,
@@ -146,14 +147,15 @@ void init_callback(DivisionContext* ctx)
 
     DivisionVertexAttributeSettings vertex_attrs[] = {
         {.type = DIVISION_FVEC3, .location = 0},
-        {.type = DIVISION_FVEC4, .location = 1}
+        {.type = DIVISION_FVEC4, .location = 1},
+        {.type = DIVISION_FVEC2, .location = 2},
     };
     DivisionVertexAttributeSettings instance_attrs[] = {{.type = DIVISION_FMAT4X4, .location = 3}};
 
     DivisionVertexBufferSettings vertex_buffer_settings = {
         .per_vertex_attributes = vertex_attrs,
         .per_instance_attributes = instance_attrs,
-        .per_vertex_attribute_count = 2,
+        .per_vertex_attribute_count = 3,
         .per_instance_attribute_count = 1,
         .vertex_count = vertex_count,
         .instance_count = instance_count,
