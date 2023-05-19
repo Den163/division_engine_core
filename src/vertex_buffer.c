@@ -11,8 +11,8 @@ typedef struct AttrTraits_
 } AttrTraits_;
 
 static inline AttrTraits_ division_attribute_get_traits(DivisionShaderVariableType attributeType);
-static inline void
-free_buffer_data_and_handle_error(DivisionContext* ctx, DivisionVertexBuffer* buffer, uint32_t buffer_id);
+static inline void free_buffer_data_and_handle_error(
+    DivisionContext* ctx, DivisionVertexBuffer* buffer, uint32_t buffer_id);
 
 static inline bool alloc_vert_attrs_(
     const DivisionVertexAttributeSettings* input_attributes,
@@ -85,27 +85,22 @@ bool division_engine_vertex_buffer_alloc(
         return false;
     }
 
-    if (!division_engine_internal_platform_vertex_buffer_alloc(ctx, vertex_buffer_id, &vertex_buffer))
-    {
-        free_buffer_data_and_handle_error(ctx, &vertex_buffer, vertex_buffer_id);
-        return false;
-    }
-
     if (vertex_buffer_id >= vertex_ctx->buffers_count) {
-        vertex_ctx->buffers_count = vertex_buffer_id + 1;
-        vertex_ctx->buffers = realloc(vertex_ctx->buffers, sizeof(DivisionVertexBuffer[vertex_ctx->buffers_count]));
+        uint32_t new_buffers_count = vertex_buffer_id + 1;
+        vertex_ctx->buffers_count = new_buffers_count;
+        vertex_ctx->buffers = realloc(vertex_ctx->buffers, sizeof(DivisionVertexBuffer[new_buffers_count]));
 
-        if (vertex_ctx->buffers == NULL)
+        if (vertex_ctx->buffers == NULL ||
+            division_engine_internal_platform_vertex_buffer_realloc(ctx, new_buffers_count) == false)
         {
             free_buffer_data_and_handle_error(ctx, &vertex_buffer, vertex_buffer_id);
             return false;
         }
     }
 
-    vertex_ctx->buffers[vertex_buffer_id] = vertex_buffer;
-
     *out_vertex_buffer_id = vertex_buffer_id;
-    return true;
+    vertex_ctx->buffers[vertex_buffer_id] = vertex_buffer;
+    return division_engine_internal_platform_vertex_buffer_impl_init_element(ctx, vertex_buffer_id);
 }
 
 bool alloc_vert_attrs_(

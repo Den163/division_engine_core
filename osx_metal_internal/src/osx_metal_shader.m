@@ -15,7 +15,6 @@ bool division_engine_internal_platform_shader_system_context_alloc(
 void division_engine_internal_platform_shader_system_context_free(DivisionContext* ctx)
 {
     DivisionShaderSystemContext* shader_context = ctx->shader_context;
-    DivisionOSXWindowContext* window_context = ctx->renderer_context->window_data;
 
     for (int32_t i = 0; i < shader_context->shader_count; i++)
     {

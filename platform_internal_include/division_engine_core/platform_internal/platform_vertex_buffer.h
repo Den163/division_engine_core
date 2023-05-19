@@ -17,9 +17,11 @@ DIVISION_EXPORT bool division_engine_internal_platform_vertex_buffer_context_all
 
 DIVISION_EXPORT void division_engine_internal_platform_vertex_buffer_context_free(DivisionContext* ctx);
 
-DIVISION_EXPORT bool division_engine_internal_platform_vertex_buffer_alloc(
-    DivisionContext* ctx, uint32_t buffer_id, const DivisionVertexBuffer* vertex_buffer);
 DIVISION_EXPORT void division_engine_internal_platform_vertex_buffer_free(DivisionContext* ctx, uint32_t buffer_id);
+
+DIVISION_EXPORT bool division_engine_internal_platform_vertex_buffer_realloc(DivisionContext* ctx, size_t new_size);
+DIVISION_EXPORT bool division_engine_internal_platform_vertex_buffer_impl_init_element(
+    DivisionContext* ctx, uint32_t buffer_id);
 
 DIVISION_EXPORT void* division_engine_internal_platform_vertex_buffer_borrow_data_pointer(
     DivisionContext* ctx, uint32_t buffer_id);
