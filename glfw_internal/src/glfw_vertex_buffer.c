@@ -35,24 +35,59 @@ void division_engine_internal_platform_vertex_buffer_context_free(DivisionContex
     free(vertex_buffer_ctx->buffers_impl);
 }
 
-bool division_engine_internal_platform_vertex_buffer_alloc(
-    DivisionContext* ctx, uint32_t buffer_id, const DivisionVertexBuffer* vertex_buffer)
+GlAttrTraits_ get_gl_attr_traits(DivisionShaderVariableType attributeType)
 {
-    DivisionVertexBufferSystemContext* vertex_ctx = ctx->vertex_buffer_context;
-
-    if (buffer_id >= vertex_ctx->buffers_count)
+    switch (attributeType)
     {
-        vertex_ctx->buffers_impl = realloc(
-            vertex_ctx->buffers_impl,
-            sizeof(DivisionVertexBufferInternalPlatform_[buffer_id + 1])
-        );
-
-        if (vertex_ctx->buffers_impl == NULL)
+        case DIVISION_DOUBLE: return (GlAttrTraits_) { GL_DOUBLE , 1 };
+        case DIVISION_INTEGER: return (GlAttrTraits_) { GL_INT, 1 };
+        case DIVISION_FLOAT:
+        case DIVISION_FVEC2:
+        case DIVISION_FVEC3:
+        case DIVISION_FVEC4:
+            return (GlAttrTraits_) { GL_FLOAT, 1 };
+        case DIVISION_FMAT4X4:
+            return (GlAttrTraits_) { GL_FLOAT, 4 };
+        default:
         {
-            ctx->error_callback(DIVISION_INTERNAL_ERROR, "Failed to realloc Vertex Buffer Implementation array");
-            return false;
+            fprintf(stderr, "Unknown attribute type");
         }
     }
+}
+
+GLenum topology_to_gl_type(DivisionRenderTopology t)
+{
+    switch (t)
+    {
+        case DIVISION_TOPOLOGY_TRIANGLES:
+            return GL_TRIANGLES;
+        case DIVISION_TOPOLOGY_LINES:
+            return GL_LINES;
+        case DIVISION_TOPOLOGY_POINTS:
+            return GL_POINTS;
+        default:
+        {
+            fprintf(stderr, "Unknown type of topology");
+            exit(EXIT_FAILURE);
+        }
+    }
+}
+
+bool division_engine_internal_platform_vertex_buffer_realloc(DivisionContext* ctx, size_t new_size)
+{
+    DivisionVertexBufferSystemContext* vertex_ctx = ctx->vertex_buffer_context;
+    vertex_ctx->buffers_impl = realloc(
+        vertex_ctx->buffers_impl,
+        sizeof(DivisionVertexBufferInternalPlatform_[new_size])
+    );
+
+    return vertex_ctx->buffers_impl != NULL;
+}
+
+bool division_engine_internal_platform_vertex_buffer_impl_init_element(DivisionContext* ctx, uint32_t buffer_id)
+{
+    DivisionVertexBufferSystemContext* vertex_ctx = ctx->vertex_buffer_context;
+    DivisionVertexBuffer* vertex_buffer = &vertex_ctx->buffers[buffer_id];
 
     DivisionVertexBufferInternalPlatform_ vertex_buffer_impl = {
         .gl_topology = topology_to_gl_type(vertex_buffer->topology)
@@ -97,44 +132,6 @@ bool division_engine_internal_platform_vertex_buffer_alloc(
     vertex_ctx->buffers_impl[buffer_id] = vertex_buffer_impl;
 
     return true;
-}
-
-GlAttrTraits_ get_gl_attr_traits(DivisionShaderVariableType attributeType)
-{
-    switch (attributeType)
-    {
-        case DIVISION_DOUBLE: return (GlAttrTraits_) { GL_DOUBLE , 1 };
-        case DIVISION_INTEGER: return (GlAttrTraits_) { GL_INT, 1 };
-        case DIVISION_FLOAT:
-        case DIVISION_FVEC2:
-        case DIVISION_FVEC3:
-        case DIVISION_FVEC4:
-            return (GlAttrTraits_) { GL_FLOAT, 1 };
-        case DIVISION_FMAT4X4:
-            return (GlAttrTraits_) { GL_FLOAT, 4 };
-        default:
-        {
-            fprintf(stderr, "Unknown attribute type");
-        }
-    }
-}
-
-GLenum topology_to_gl_type(DivisionRenderTopology t)
-{
-    switch (t)
-    {
-        case DIVISION_TOPOLOGY_TRIANGLES:
-            return GL_TRIANGLES;
-        case DIVISION_TOPOLOGY_LINES:
-            return GL_LINES;
-        case DIVISION_TOPOLOGY_POINTS:
-            return GL_POINTS;
-        default:
-        {
-            fprintf(stderr, "Unknown type of topology");
-            exit(EXIT_FAILURE);
-        }
-    }
 }
 
 void division_engine_internal_platform_vertex_buffer_free(DivisionContext* ctx, uint32_t buffer_id)

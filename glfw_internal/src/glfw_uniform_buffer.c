@@ -20,28 +20,31 @@ void division_engine_internal_platform_uniform_buffer_context_free(DivisionConte
     free(ctx->uniform_buffer_context->uniform_buffers_impl);
 }
 
-bool division_engine_internal_platform_uniform_buffer_alloc(
-    DivisionContext* ctx, DivisionUniformBufferDescriptor buffer, uint32_t buffer_id)
+bool division_engine_internal_platform_uniform_buffer_realloc(
+    DivisionContext* ctx, size_t new_size)
 {
-    GLuint gl_buff;
-    glGenBuffers(1, &gl_buff);
-    glBindBuffer(GL_UNIFORM_BUFFER, gl_buff);
-    glNamedBufferData(gl_buff, (GLsizeiptr) buffer.data_bytes, NULL, GL_DYNAMIC_COPY);
-
     DivisionUniformBufferSystemContext* uniform_buffer_ctx = ctx->uniform_buffer_context;
     uniform_buffer_ctx->uniform_buffers_impl = realloc(
         uniform_buffer_ctx->uniform_buffers_impl,
-        sizeof(DivisionUniformBufferInternal_[uniform_buffer_ctx->uniform_buffer_count])
+        sizeof(DivisionUniformBufferInternal_[new_size])
     );
+    return uniform_buffer_ctx->uniform_buffers_impl != NULL;
+}
 
-    if (uniform_buffer_ctx == NULL)
-    {
-        ctx->error_callback(DIVISION_INTERNAL_ERROR, "Failed to realloc Uniform Buffer Implementation array");
-        return false;
-    }
+bool division_engine_internal_platform_uniform_buffer_impl_init_element(
+    DivisionContext* ctx, uint32_t buffer_id)
+{
+    DivisionUniformBufferSystemContext* uniform_buffer_ctx = ctx->uniform_buffer_context;
+    DivisionUniformBufferDescriptor* buffer = &uniform_buffer_ctx->uniform_buffers[buffer_id];
+    
+    GLuint gl_buff;
+    glGenBuffers(1, &gl_buff);
+    glBindBuffer(GL_UNIFORM_BUFFER, gl_buff);
+    glNamedBufferData(gl_buff, (GLsizeiptr) buffer->data_bytes, NULL, GL_DYNAMIC_COPY);
 
-    uniform_buffer_ctx->uniform_buffers_impl[buffer_id] =
-        (DivisionUniformBufferInternal_) { .gl_buffer = gl_buff };
+    uniform_buffer_ctx->uniform_buffers_impl[buffer_id] = (DivisionUniformBufferInternal_) {
+        .gl_buffer = gl_buff
+    };
 
     return true;
 }
