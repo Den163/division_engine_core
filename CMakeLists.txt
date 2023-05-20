@@ -24,7 +24,8 @@ set(SOURCES
     src/unordered_id_table.c
     src/ordered_id_table.c
     src/io_utility.c
-    src/hash_table.c)
+    src/hash_table.c
+    src/texture.c)
 
 add_library(division_engine_core ${SOURCES})
 target_include_directories(division_engine_core PUBLIC ${PROJECT_SOURCE_DIR}/include ${PROJECT_BINARY_DIR})

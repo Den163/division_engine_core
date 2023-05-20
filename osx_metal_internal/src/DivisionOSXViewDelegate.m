@@ -2,9 +2,11 @@
 
 #include "division_engine_core/renderer.h"
 #include "division_engine_core/render_pass.h"
+#include "division_engine_core/texture.h"
 #include "division_engine_core/uniform_buffer.h"
 #include "division_engine_core/io_utility.h"
 #include "osx_render_pass.h"
+#include "osx_texture.h"
 #include "osx_vertex_buffer.h"
 #include "osx_uniform_buffer.h"
 
@@ -196,6 +198,7 @@ static inline DivisionToMslAttrTraits_ get_vert_attr_msl_traits_(DivisionShaderV
         DivisionRenderPassSystemContext* render_pass_ctx = context->render_pass_context;
         DivisionVertexBufferSystemContext* vert_buff_ctx = context->vertex_buffer_context;
         DivisionUniformBufferSystemContext* uniform_buff_ctx = context->uniform_buffer_context;
+        DivisionTextureSystemContext* tex_ctx = context->texture_context;
 
         uint32_t* render_pass_ids = render_pass_ctx->id_table.orders;
         for (int32_t i = 0; i < render_pass_ctx->id_table.orders_count; i++)
@@ -226,6 +229,14 @@ static inline DivisionToMslAttrTraits_ get_vert_attr_msl_traits_(DivisionShaderV
                 id <MTLBuffer> uniformBuff = uniform_buff_ctx->uniform_buffers_impl[buff_id].mtl_buffer;
                 DivisionUniformBufferDescriptor buffDesc = uniform_buff_ctx->uniform_buffers[buff_id];
                 [renderEnc setFragmentBuffer:uniformBuff offset:0 atIndex:buffDesc.binding];
+            }
+
+            for (int texIdx = 0; texIdx < pass->fragment_texture_count; texIdx++)
+            {
+                const DivisionIdWithBinding* texture_binding = &pass->fragment_textures[texIdx];
+                const DivisionTextureImpl_* tex_impl = &tex_ctx->textures_impl[texture_binding->id];
+
+                [renderEnc setFragmentTexture:tex_impl->mtl_texture atIndex: texture_binding->shader_location];
             }
 
             if (pass->instance_count > 0)

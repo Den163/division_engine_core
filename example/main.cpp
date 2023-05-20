@@ -1,21 +1,24 @@
 #include <memory.h>
 #include <cstdio>
 
-#include "division_engine_core/render_pass.h"
-#include "division_engine_core/renderer.h"
-#include "division_engine_core/shader.h"
-#include "division_engine_core/uniform_buffer.h"
-#include "division_engine_core/vertex_buffer.h"
-#include "division_engine_core/io_utility.h"
-#include "division_shader_compiler/interface.h"
+#include <division_engine_core/render_pass.h>
+#include <division_engine_core/renderer.h>
+#include <division_engine_core/shader.h>
+#include <division_engine_core/texture.h>
+#include <division_engine_core/uniform_buffer.h>
+#include <division_engine_core/vertex_buffer.h>
+#include <division_engine_core/io_utility.h>
+#include <division_shader_compiler/interface.h>
+
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
 
 static void compile_to_metal_shaders();
-
 static void error_callback(int error_code, const char* message);
-
 static void init_callback(DivisionContext* ctx);
-
 static void update_callback(DivisionContext* ctx);
+
+static inline void generate_rgba_solid_image(void* data, int width, int height, uint8_t color[4]);
 
 typedef struct VertexData
 {
@@ -126,11 +129,11 @@ void init_callback(DivisionContext* ctx)
 
     VertexData vd[] = {
         {.position = {-0.5f, -0.5f, 0}, .color = {1, 1, 1, 1}, .uv = {0, 1}},
-        {.position = {0, 0, 0}, .color = {1, 1, 1, 1}, .uv = {1, 1}},
+        {.position = {0, 0, 0}, .color = {1, 1, 1, 1}, .uv = {1, 0}},
         {.position = {-0.5f, 0, 0}, .color = {1, 1, 1, 1}, .uv = {0, 0}},
-        {.position = {0, 0, 0}, .color = {1, 1, 1, 1}, .uv = {1, 1}},
+        {.position = {0, 0, 0}, .color = {1, 1, 1, 1}, .uv = {1, 0}},
         {.position = {-0.5f, -0.5f, 0}, .color = {1, 1, 1, 1}, .uv = {0, 1}},
-        {.position = {0, -0.5f, 0}, .color = {1, 1, 1, 1}, .uv = {1, 0}},
+        {.position = {0, -0.5f, 0}, .color = {1, 1, 1, 1}, .uv = {1, 1}},
     };
     float local_to_word_mat[] = {
         1, 0, 0, 0,
@@ -186,6 +189,20 @@ void init_callback(DivisionContext* ctx)
     memcpy(uniform_ptr, testVec, sizeof(testVec));
     division_engine_uniform_buffer_return_data_pointer(ctx, uniform_buffer, uniform_ptr);
 
+    int image_width, image_height, channels_in_file;
+    void* tex_data = stbi_load("nevsky.jpg", &image_width, &image_height, &channels_in_file, 4);
+
+
+    DivisionTexture texture = {
+        .texture_format = DIVISION_TEXTURE_FORMAT_RGBA32Uint, .width = (uint32_t) image_width, .height = (uint32_t) image_height
+    };
+    uint32_t tex_id;
+    division_engine_texture_alloc(ctx, &texture, &tex_id);
+    division_engine_texture_set_data(ctx, tex_id, tex_data);
+    free(tex_data);
+
+    DivisionIdWithBinding frag_textures[] = { DivisionIdWithBinding { .id = tex_id, .shader_location = 0 } };
+
     uint32_t render_pass_id;
     division_engine_render_pass_alloc(ctx, (DivisionRenderPass) {
         .first_vertex = 0,
@@ -194,6 +211,8 @@ void init_callback(DivisionContext* ctx)
         .uniform_vertex_buffer_count = 0,
         .uniform_fragment_buffers = &uniform_buffer,
         .uniform_fragment_buffer_count = 1,
+        .fragment_textures = frag_textures,
+        .fragment_texture_count = 1,
         .vertex_buffer = vertex_buffer,
         .shader_program = shader_program,
     }, &render_pass_id);
@@ -206,4 +225,15 @@ void update_callback(DivisionContext* ctx)
 void error_callback(int error_code, const char* message)
 {
     fprintf(stderr, "Error code: %d, error message: %s\n", error_code, message);
+}
+
+void generate_rgba_solid_image(void* data, int width, int height, uint8_t color[4])
+{
+    int size = width * height;
+
+    for(int i = 0; i < size; i++)
+    {
+        void* dst_ptr = (uint8_t*) data + i * 4;
+        memcpy(dst_ptr, color, sizeof(uint8_t[4]));
+    }
 }

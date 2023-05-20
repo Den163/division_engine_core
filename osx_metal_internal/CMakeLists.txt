@@ -1,11 +1,13 @@
 set(OSX_METAL_INTERNAL_SOURCES
+    src/DivisionOSXAppDelegate.m
+    src/DivisionOSXViewDelegate.m
     src/osx_metal_renderer.m
     src/osx_metal_shader.m
     src/osx_metal_vertex_buffer.m
-    src/DivisionOSXAppDelegate.m
-    src/DivisionOSXViewDelegate.m
     src/osx_metal_uniform_buffer.m
-    src/osx_render_pass.m)
+    src/osx_render_pass.m
+    src/osx_metal_texture.m
+)
 
 add_library(osx_metal_internal STATIC ${OSX_METAL_INTERNAL_SOURCES})
 set_target_properties(

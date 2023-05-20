@@ -61,12 +61,12 @@ void division_engine_uniform_buffer_free(DivisionContext* ctx, uint32_t buffer_i
     division_unordered_id_table_remove(&ctx->uniform_buffer_context->id_table, buffer_id);
 }
 
-void* division_engine_uniform_buffer_borrow_data_pointer(DivisionContext* ctx, uint32_t buffer)
+void* division_engine_uniform_buffer_borrow_data_pointer(DivisionContext* ctx, uint32_t buffer_id)
 {
-    return division_engine_internal_platform_uniform_buffer_borrow_data_pointer(ctx, buffer);
+    return division_engine_internal_platform_uniform_buffer_borrow_data_pointer(ctx, buffer_id);
 }
 
-void division_engine_uniform_buffer_return_data_pointer(DivisionContext* ctx, uint32_t buffer, void* data_pointer)
+void division_engine_uniform_buffer_return_data_pointer(DivisionContext* ctx, uint32_t buffer_id, void* data_pointer)
 {
-    division_engine_internal_platform_uniform_buffer_return_data_pointer(ctx, buffer, data_pointer);
+    division_engine_internal_platform_uniform_buffer_return_data_pointer(ctx, buffer_id, data_pointer);
 }

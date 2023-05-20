@@ -7,6 +7,11 @@
 #include "context.h"
 #include "division_engine_core/data_structures/ordered_id_table.h"
 
+typedef struct DivisionIdWithBinding {
+    uint32_t id;
+    uint32_t shader_location;
+} DivisionIdWithBinding;
+
 typedef struct DivisionRenderPass {
     size_t first_vertex;
     size_t vertex_count;
@@ -15,6 +20,8 @@ typedef struct DivisionRenderPass {
     int32_t uniform_vertex_buffer_count;
     uint32_t* uniform_fragment_buffers;
     int32_t uniform_fragment_buffer_count;
+    DivisionIdWithBinding* fragment_textures;
+    int32_t fragment_texture_count;
     uint32_t vertex_buffer;
     uint32_t shader_program;
 } DivisionRenderPass;

@@ -37,10 +37,9 @@ DIVISION_EXPORT bool division_engine_uniform_buffer_alloc(
 
 DIVISION_EXPORT void division_engine_uniform_buffer_free(DivisionContext* ctx, uint32_t buffer_id);
 
-DIVISION_EXPORT void* division_engine_uniform_buffer_borrow_data_pointer(DivisionContext* ctx, uint32_t buffer);
-
+DIVISION_EXPORT void* division_engine_uniform_buffer_borrow_data_pointer(DivisionContext* ctx, uint32_t buffer_id);
 DIVISION_EXPORT void division_engine_uniform_buffer_return_data_pointer(
-    DivisionContext* ctx, uint32_t buffer, void* data_pointer);
+    DivisionContext* ctx, uint32_t buffer_id, void* data_pointer);
 
 #ifdef __cplusplus
 }
