@@ -18,8 +18,6 @@ static void error_callback(int error_code, const char* message);
 static void init_callback(DivisionContext* ctx);
 static void update_callback(DivisionContext* ctx);
 
-static inline void generate_rgba_solid_image(void* data, int width, int height, uint8_t color[4]);
-
 typedef struct VertexData
 {
     float position[3];
@@ -178,7 +176,7 @@ void init_callback(DivisionContext* ctx)
 
     division_engine_vertex_buffer_return_data_pointer(ctx, vertex_buffer, vert_buff_ptr);
 
-    float testVec[] = {0, 1, 0, 1};
+    float testVec[] = {0, 0.5f, 0, 1};
 
     DivisionUniformBufferDescriptor buff = {.data_bytes = sizeof(testVec), .binding = 1,};
 
@@ -192,14 +190,13 @@ void init_callback(DivisionContext* ctx)
     int image_width, image_height, channels_in_file;
     void* tex_data = stbi_load("nevsky.jpg", &image_width, &image_height, &channels_in_file, 4);
 
-
     DivisionTexture texture = {
         .texture_format = DIVISION_TEXTURE_FORMAT_RGBA32Uint, .width = (uint32_t) image_width, .height = (uint32_t) image_height
     };
     uint32_t tex_id;
     division_engine_texture_alloc(ctx, &texture, &tex_id);
     division_engine_texture_set_data(ctx, tex_id, tex_data);
-    free(tex_data);
+    stbi_image_free(tex_data);
 
     DivisionIdWithBinding frag_textures[] = { DivisionIdWithBinding { .id = tex_id, .shader_location = 0 } };
 
@@ -225,15 +222,4 @@ void update_callback(DivisionContext* ctx)
 void error_callback(int error_code, const char* message)
 {
     fprintf(stderr, "Error code: %d, error message: %s\n", error_code, message);
-}
-
-void generate_rgba_solid_image(void* data, int width, int height, uint8_t color[4])
-{
-    int size = width * height;
-
-    for(int i = 0; i < size; i++)
-    {
-        void* dst_ptr = (uint8_t*) data + i * 4;
-        memcpy(dst_ptr, color, sizeof(uint8_t[4]));
-    }
 }

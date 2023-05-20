@@ -6,6 +6,7 @@
 bool division_engine_internal_texture_context_alloc(DivisionContext* ctx, const DivisionSettings* settings)
 {
     ctx->texture_context = (DivisionTextureSystemContext*) malloc(sizeof(DivisionTextureSystemContext));
+    ctx->texture_context->textures = NULL;
     ctx->texture_context->texture_count = 0;
     division_unordered_id_table_alloc(&ctx->texture_context->id_table, 10);
 

@@ -12,7 +12,7 @@ set(GLFW_INTERNAL_SOURCES
     lib/glad/include/glad/gl.h
     src/glfw_renderer.c
     src/glfw_vertex_buffer.c
-    src/glfw_shader.c src/glfw_uniform_buffer.c include/glfw_uniform_buffer.h src/glfw_render_pass.c)
+    src/glfw_shader.c src/glfw_uniform_buffer.c include/glfw_uniform_buffer.h src/glfw_render_pass.c src/glfw_texture.c)
 
 add_library(glfw_internal STATIC ${GLFW_INTERNAL_SOURCES})
 

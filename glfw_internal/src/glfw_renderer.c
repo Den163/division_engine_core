@@ -5,10 +5,12 @@
 
 #include "division_engine_core/render_pass.h"
 #include "division_engine_core/renderer.h"
+#include "division_engine_core/texture.h"
 #include "division_engine_core/uniform_buffer.h"
 #include "division_engine_core/vertex_buffer.h"
 
 #include "glfw_shader.h"
+#include "glfw_texture.h"
 #include "glfw_uniform_buffer.h"
 #include "glfw_vertex_buffer.h"
 
@@ -98,6 +100,7 @@ void renderer_draw(DivisionContext* ctx)
     DivisionUniformBufferSystemContext* uniform_buff_ctx = ctx->uniform_buffer_context;
     DivisionRenderPassSystemContext* render_pass_ctx = ctx->render_pass_context;
     DivisionShaderSystemContext* shader_ctx = ctx->shader_context;
+    DivisionTextureSystemContext* tex_ctx = ctx->texture_context;
 
     glClearBufferfv(GL_COLOR, 0, (const GLfloat*) &renderer_ctx->clear_color);
     for (int32_t i = 0; i < render_pass_ctx->id_table.orders_count; i++)
@@ -118,6 +121,14 @@ void renderer_draw(DivisionContext* ctx)
         for (int uniform_idx = 0; uniform_idx < pass.uniform_fragment_buffer_count; uniform_idx++)
         {
             bind_uniform_buffer(uniform_buff_ctx, pass.uniform_fragment_buffers[uniform_idx]);
+        }
+
+        for (int frag_tex_idx = 0; frag_tex_idx < pass.fragment_texture_count; frag_tex_idx++)
+        {
+            DivisionIdWithBinding tex_bind = pass.fragment_textures[frag_tex_idx];
+            DivisionTextureImpl_* tex_impl = &tex_ctx->textures_impl[tex_bind.id];
+
+            glBindTextureUnit(tex_bind.shader_location, tex_impl->gl_texture);
         }
 
         if (pass.instance_count > 0)
