@@ -188,10 +188,11 @@ void init_callback(DivisionContext* ctx)
     division_engine_uniform_buffer_return_data_pointer(ctx, uniform_buffer, uniform_ptr);
 
     int image_width, image_height, channels_in_file;
-    void* tex_data = stbi_load("nevsky.jpg", &image_width, &image_height, &channels_in_file, 4);
+    void* tex_data = stbi_load("nevsky.jpg", &image_width, &image_height, &channels_in_file, 3);
 
     DivisionTexture texture = {
-        .texture_format = DIVISION_TEXTURE_FORMAT_RGBA32Uint, .width = (uint32_t) image_width, .height = (uint32_t) image_height
+        .texture_format = DIVISION_TEXTURE_FORMAT_RGB24Uint, .width = (uint32_t) image_width, .height = (uint32_t)
+            image_height
     };
     uint32_t tex_id;
     division_engine_texture_alloc(ctx, &texture, &tex_id);

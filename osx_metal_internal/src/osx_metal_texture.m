@@ -9,7 +9,8 @@
 typedef struct
 {
     MTLPixelFormat pixel_format;
-    int32_t bytes_per_pixel;
+    int32_t mtl_bytes_per_pixel;
+    int32_t src_data_bytes_per_pixel;
 } DivisionMTLTexTraits_;
 
 static inline bool try_get_texture_traits(
@@ -61,7 +62,8 @@ bool division_engine_internal_platform_texture_impl_init_new_element(DivisionCon
 
         tex_impl->mtl_texture = [device newTextureWithDescriptor:descriptor];
     }
-    tex_impl->bytes_per_pixel = traits.bytes_per_pixel;
+    tex_impl->bytes_per_pixel = traits.mtl_bytes_per_pixel;
+    tex_impl->src_data_bytes_per_pixel = traits.src_data_bytes_per_pixel;
 
     return true;
 }
@@ -77,16 +79,35 @@ void division_engine_internal_platform_texture_set_data(DivisionContext* ctx, ui
     DivisionTextureSystemContext* tex_ctx = ctx->texture_context;
     DivisionTexture* tex = &tex_ctx->textures[texture_id];
     DivisionTextureImpl_* tex_impl = &tex_ctx->textures_impl[texture_id];
-    MTLRegion region = {
-        {0,          0,           0},
-        {tex->width, tex->height, 1}
-    };
-
+    uint32_t src_data_bytes_per_pixel = tex_impl->src_data_bytes_per_pixel;
     uint32_t bytes_per_row = tex_impl->bytes_per_pixel * tex->width;
-    [tex_impl->mtl_texture replaceRegion:region
-                             mipmapLevel:0
-                               withBytes:data
-                             bytesPerRow:bytes_per_row];
+
+    if (tex_impl->bytes_per_pixel == src_data_bytes_per_pixel)
+    {
+        MTLRegion region = {{0,          0,           0},
+                            {tex->width, tex->height, 1}};
+
+        [tex_impl->mtl_texture replaceRegion:region mipmapLevel:0 withBytes:data bytesPerRow:bytes_per_row];
+    }
+    else
+    {
+        int width = (int) tex->width,
+            height = (int) tex->height;
+        int texels = width * height;
+        MTLRegion region = {{0, 0, 0},
+                            {0, 0, 1}};
+        for (int i = 0; i < texels; i++)
+        {
+            int xOffset = i % width;
+            int yOffset = i / width;
+            region.size.width = region.size.height = 1;
+            region.origin.x = xOffset;
+            region.origin.y = yOffset;
+
+            void* src_ptr = data + i * src_data_bytes_per_pixel;
+            [tex_impl->mtl_texture replaceRegion:region mipmapLevel:0 withBytes:src_ptr bytesPerRow:bytes_per_row];
+        }
+    }
 }
 
 bool try_get_texture_traits(
@@ -95,10 +116,13 @@ bool try_get_texture_traits(
     switch (texture_format)
     {
         case DIVISION_TEXTURE_FORMAT_R8Uint:
-            *out_traits = (DivisionMTLTexTraits_) {MTLPixelFormatR8Uint, 1};
+            *out_traits = (DivisionMTLTexTraits_) {MTLPixelFormatR8Uint, 1, 1};
+            return true;
+        case DIVISION_TEXTURE_FORMAT_RGB24Uint:
+            *out_traits = (DivisionMTLTexTraits_) {MTLPixelFormatRGBA8Uint, 4, 3};
             return true;
         case DIVISION_TEXTURE_FORMAT_RGBA32Uint:
-            *out_traits = (DivisionMTLTexTraits_) {MTLPixelFormatRGBA8Uint, 4};
+            *out_traits = (DivisionMTLTexTraits_) {MTLPixelFormatRGBA8Uint, 4, 4};
             return true;
         default:
             ctx->error_callback(DIVISION_INTERNAL_ERROR, "Unknown texture format");
