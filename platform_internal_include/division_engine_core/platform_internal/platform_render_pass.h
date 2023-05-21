@@ -17,7 +17,7 @@ DIVISION_EXPORT bool division_engine_internal_platform_render_pass_realloc(Divis
 DIVISION_EXPORT bool division_engine_internal_platform_render_pass_impl_init_element(
     DivisionContext* ctx, uint32_t render_pass_id);
 
-DIVISION_EXPORT void division_engine_internal_platform_render_pass_free(DivisionContext* ctx, uint32_t pass_id);
+DIVISION_EXPORT void division_engine_internal_platform_render_pass_free(DivisionContext* ctx, uint32_t render_pass_id);
 
 #ifdef __cplusplus
 }

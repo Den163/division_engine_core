@@ -12,7 +12,54 @@ typedef struct DivisionIdWithBinding {
     uint32_t shader_location;
 } DivisionIdWithBinding;
 
+typedef enum DivisionColorMask
+{
+    DIVISION_COLOR_MASK_NONE = 0,
+    DIVISION_COLOR_MASK_R = 1 << 0,
+    DIVISION_COLOR_MASK_G = 1 << 1,
+    DIVISION_COLOR_MASK_B = 1 << 2,
+    DIVISION_COLOR_MASK_A = 1 << 3,
+    DIVISION_COLOR_MASK_RGB = DIVISION_COLOR_MASK_R | DIVISION_COLOR_MASK_G | DIVISION_COLOR_MASK_B,
+    DIVISION_COLOR_MASK_RGBA = DIVISION_COLOR_MASK_RGB | DIVISION_COLOR_MASK_A,
+} DivisionColorMask;
+
+typedef enum DivisionRenderPassCapabilityMask {
+    DIVISION_RENDER_PASS_CAPABILITY_NONE = 0,
+    DIVISION_RENDER_PASS_CAPABILITY_ALPHA_BLEND = 1,
+} DivisionRenderPassCapabilityMask;
+
+typedef enum DivisionAlphaBlend {
+    DIVISION_ALPHA_BLEND_ZERO = 0,
+    DIVISION_ALPHA_BLEND_ONE = 1,
+    DIVISION_ALPHA_BLEND_SRC_COLOR = 2,
+    DIVISION_ALPHA_BLEND_SRC_ALPHA = 3,
+    DIVISION_ALPHA_BLEND_SRC_ALPHA_SATURATE = 4,
+    DIVISION_ALPHA_BLEND_DST_COLOR = 5,
+    DIVISION_ALPHA_BLEND_DST_ALPHA = 6,
+    DIVISION_ALPHA_BLEND_ONE_MINUS_SRC_COLOR = 7,
+    DIVISION_ALPHA_BLEND_ONE_MINUS_SRC_ALPHA = 8,
+    DIVISION_ALPHA_BLEND_ONE_MINUS_DST_COLOR = 9,
+    DIVISION_ALPHA_BLEND_ONE_MINUS_DST_ALPHA = 10,
+} DivisionAlphaBlend;
+
+typedef enum DivisionAlphaBlendOperation {
+    DIVISION_ALPHA_BLEND_OP_ADD,
+    DIVISION_ALPHA_BLEND_OP_SUBTRACT,
+    DIVISION_ALPHA_BLEND_OP_REVERSE_SUBTRACT,
+    DIVISION_ALPHA_BLEND_OP_MIN,
+    DIVISION_ALPHA_BLEND_OP_MAX,
+} DivisionAlphaBlendOperation;
+
+typedef struct DivisionAlphaBlendingOptions {
+    DivisionAlphaBlend src;
+    DivisionAlphaBlend dst;
+    DivisionAlphaBlendOperation operation;
+    float color_factor[4];
+} DivisionAlphaBlendingOptions;
+
 typedef struct DivisionRenderPass {
+    DivisionAlphaBlendingOptions alpha_blending_options;
+
     size_t first_vertex;
     size_t vertex_count;
     size_t instance_count;
@@ -24,6 +71,7 @@ typedef struct DivisionRenderPass {
     int32_t fragment_texture_count;
     uint32_t vertex_buffer;
     uint32_t shader_program;
+    DivisionRenderPassCapabilityMask capabilities_mask;
 } DivisionRenderPass;
 
 typedef struct DivisionRenderPassSystemContext {

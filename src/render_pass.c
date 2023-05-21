@@ -59,10 +59,6 @@ bool division_engine_render_pass_alloc(
         return false;
     }
 
-    render_pass_copy.uniform_vertex_buffer_count = render_pass.uniform_vertex_buffer_count;
-    render_pass_copy.uniform_fragment_buffer_count = render_pass.uniform_fragment_buffer_count;
-    render_pass_copy.fragment_texture_count = render_pass.fragment_texture_count;
-
     memcpy(render_pass_copy.uniform_vertex_buffers, render_pass.uniform_vertex_buffers, uniform_vert_buffs_bytes);
     memcpy(render_pass_copy.uniform_fragment_buffers, render_pass.uniform_fragment_buffers, uniform_frag_buffs_bytes);
     memcpy(render_pass_copy.fragment_textures, render_pass.fragment_textures, fragment_textures_bytes);

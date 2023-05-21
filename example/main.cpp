@@ -126,11 +126,11 @@ void init_callback(DivisionContext* ctx)
     division_engine_shader_program_alloc(ctx, shader_settings, source_count, &shader_program);
 
     VertexData vd[] = {
-        {.position = {-0.5f, -0.5f, 0}, .color = {1, 1, 1, 1}, .uv = {0, 1}},
+        {.position = {-0.5f, -0.5f, 0}, .color = {1, 1, 1, 0}, .uv = {0, 1}},
         {.position = {0, 0, 0}, .color = {1, 1, 1, 1}, .uv = {1, 0}},
         {.position = {-0.5f, 0, 0}, .color = {1, 1, 1, 1}, .uv = {0, 0}},
         {.position = {0, 0, 0}, .color = {1, 1, 1, 1}, .uv = {1, 0}},
-        {.position = {-0.5f, -0.5f, 0}, .color = {1, 1, 1, 1}, .uv = {0, 1}},
+        {.position = {-0.5f, -0.5f, 0}, .color = {1, 1, 1, 0}, .uv = {0, 1}},
         {.position = {0, -0.5f, 0}, .color = {1, 1, 1, 1}, .uv = {1, 1}},
     };
     float local_to_word_mat[] = {
@@ -176,7 +176,7 @@ void init_callback(DivisionContext* ctx)
 
     division_engine_vertex_buffer_return_data_pointer(ctx, vertex_buffer, vert_buff_ptr);
 
-    float testVec[] = {0, 0.5f, 0, 1};
+    float testVec[] = {0, 0.5f, 0, 0};
 
     DivisionUniformBufferDescriptor buff = {.data_bytes = sizeof(testVec), .binding = 1,};
 
@@ -203,6 +203,13 @@ void init_callback(DivisionContext* ctx)
 
     uint32_t render_pass_id;
     division_engine_render_pass_alloc(ctx, (DivisionRenderPass) {
+        .alpha_blending_options = DivisionAlphaBlendingOptions {
+            .src = DIVISION_ALPHA_BLEND_SRC_ALPHA,
+            .dst = DIVISION_ALPHA_BLEND_ONE_MINUS_SRC_ALPHA,
+            .operation = DIVISION_ALPHA_BLEND_OP_ADD,
+            .color_factor = { 1, 1, 1, 1 },
+        },
+
         .first_vertex = 0,
         .vertex_count = static_cast<size_t>(vertex_count),
         .instance_count = static_cast<size_t>(instance_count),
@@ -213,6 +220,7 @@ void init_callback(DivisionContext* ctx)
         .fragment_texture_count = 1,
         .vertex_buffer = vertex_buffer,
         .shader_program = shader_program,
+        .capabilities_mask = DIVISION_RENDER_PASS_CAPABILITY_ALPHA_BLEND,
     }, &render_pass_id);
 }
 

@@ -9,6 +9,7 @@
 #include "division_engine_core/uniform_buffer.h"
 #include "division_engine_core/vertex_buffer.h"
 
+#include "glfw_render_pass.h"
 #include "glfw_shader.h"
 #include "glfw_texture.h"
 #include "glfw_uniform_buffer.h"
@@ -103,46 +104,64 @@ void renderer_draw(DivisionContext* ctx)
     DivisionTextureSystemContext* tex_ctx = ctx->texture_context;
 
     glClearBufferfv(GL_COLOR, 0, (const GLfloat*) &renderer_ctx->clear_color);
+
     for (int32_t i = 0; i < render_pass_ctx->id_table.orders_count; i++)
     {
-        DivisionRenderPass pass = render_pass_ctx->render_passes[render_pass_ctx->id_table.orders[i]];
-        DivisionVertexBufferInternalPlatform_ vb_internal = vert_buff_ctx->buffers_impl[pass.vertex_buffer];
-        DivisionShaderInternal_ shader_internal = shader_ctx->shaders_impl[pass.shader_program];
+        uint32_t pass_id = render_pass_ctx->id_table.orders[i];
+        const DivisionRenderPass* pass = &render_pass_ctx->render_passes[pass_id];
+        DivisionRenderPassInternalPlatform_* pass_impl = &render_pass_ctx->render_passes_impl[pass_id];
+        DivisionVertexBufferInternalPlatform_ vb_internal = vert_buff_ctx->buffers_impl[pass->vertex_buffer];
+        DivisionShaderInternal_ shader_internal = shader_ctx->shaders_impl[pass->shader_program];
+        const float* blend_color = pass->alpha_blending_options.color_factor;
 
         glBindVertexArray(vb_internal.gl_vao);
         glBindBuffer(GL_ARRAY_BUFFER, vb_internal.gl_vbo);
         glUseProgram(shader_internal.gl_shader_program);
 
-        for (int uniform_idx = 0; uniform_idx < pass.uniform_vertex_buffer_count; uniform_idx++)
+        for (int uniform_idx = 0; uniform_idx < pass->uniform_vertex_buffer_count; uniform_idx++)
         {
-            bind_uniform_buffer(uniform_buff_ctx, pass.uniform_vertex_buffers[uniform_idx]);
+            bind_uniform_buffer(uniform_buff_ctx, pass->uniform_vertex_buffers[uniform_idx]);
         }
 
-        for (int uniform_idx = 0; uniform_idx < pass.uniform_fragment_buffer_count; uniform_idx++)
+        for (int uniform_idx = 0; uniform_idx < pass->uniform_fragment_buffer_count; uniform_idx++)
         {
-            bind_uniform_buffer(uniform_buff_ctx, pass.uniform_fragment_buffers[uniform_idx]);
+            bind_uniform_buffer(uniform_buff_ctx, pass->uniform_fragment_buffers[uniform_idx]);
         }
 
-        for (int frag_tex_idx = 0; frag_tex_idx < pass.fragment_texture_count; frag_tex_idx++)
+        for (int frag_tex_idx = 0; frag_tex_idx < pass->fragment_texture_count; frag_tex_idx++)
         {
-            DivisionIdWithBinding tex_bind = pass.fragment_textures[frag_tex_idx];
+            DivisionIdWithBinding tex_bind = pass->fragment_textures[frag_tex_idx];
             DivisionTextureImpl_* tex_impl = &tex_ctx->textures_impl[tex_bind.id];
 
             glBindTextureUnit(tex_bind.shader_location, tex_impl->gl_texture);
         }
+        
+        for (int enable_idx = 0; enable_idx < pass_impl->gl_enable_count; enable_idx++)
+        {
+            glEnable(pass_impl->gl_enables[enable_idx]);
+        }
 
-        if (pass.instance_count > 0)
+        for (int disable_idx = 0; disable_idx < pass_impl->gl_disable_count; disable_idx++)
+        {
+            glDisable(pass_impl->gl_disables[disable_idx]);
+        }
+
+        glBlendFunc(pass_impl->gl_blend_src, pass_impl->gl_blend_dst);
+        glBlendColor(blend_color[0], blend_color[1], blend_color[2], blend_color[3]);
+        glBlendEquation(pass_impl->gl_blend_equation);
+
+        if (pass->instance_count > 0)
         {
             glDrawArraysInstanced(
                 vb_internal.gl_topology,
-                (GLint) pass.first_vertex,
-                (GLint) pass.vertex_count,
-                (GLint) pass.instance_count
+                (GLint) pass->first_vertex,
+                (GLint) pass->vertex_count,
+                (GLint) pass->instance_count
             );
         }
         else
         {
-            glDrawArrays(vb_internal.gl_topology, (GLint) pass.first_vertex, (GLint) pass.vertex_count);
+            glDrawArrays(vb_internal.gl_topology, (GLint) pass->first_vertex, (GLint) pass->vertex_count);
         }
     }
 }
