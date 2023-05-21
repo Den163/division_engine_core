@@ -83,44 +83,6 @@ static inline DivisionToMslAttrTraits_ get_vert_attr_msl_traits_(DivisionShaderV
     return descriptor;
 }
 
-- (id <MTLRenderPipelineState>)createRenderPipelineStateForShaderProgram:(const DivisionMetalShaderProgram*)program
-                                                        vertexDescriptor:(MTLVertexDescriptor*)desc {
-    MTLRenderPipelineDescriptor* pipeline_descriptor = [MTLRenderPipelineDescriptor new];
-    if (program->vertex_function != NULL)
-    {
-        [pipeline_descriptor setVertexFunction:program->vertex_function];
-        [pipeline_descriptor setVertexDescriptor:desc];
-    }
-
-    if (program->fragment_function != NULL)
-    {
-        [pipeline_descriptor setFragmentFunction:program->fragment_function];
-    }
-
-    [[[pipeline_descriptor colorAttachments] objectAtIndexedSubscript:0]
-                           setPixelFormat:MTLPixelFormatBGRA8Unorm_sRGB];
-
-    NSError* err = nil;
-    id <MTLRenderPipelineState> renderPipelineState = [device
-        newRenderPipelineStateWithDescriptor:pipeline_descriptor
-                                       error:&err
-    ];
-
-    if (err)
-    {
-        context->error_callback(DIVISION_INTERNAL_ERROR, [[err debugDescription] UTF8String]);
-        return nil;
-    }
-
-    if (!renderPipelineState)
-    {
-        context->error_callback(DIVISION_INTERNAL_ERROR, "Render pipeline state is null");
-        return nil;
-    }
-
-    return renderPipelineState;
-}
-
 - (bool)createShaderProgramWithSettings:(const DivisionShaderSettings*)shaderSettings
                             sourceCount:(int32_t)sourceCount
                              outProgram:(DivisionMetalShaderProgram*)out_program {
@@ -204,8 +166,8 @@ static inline DivisionToMslAttrTraits_ get_vert_attr_msl_traits_(DivisionShaderV
         for (int32_t i = 0; i < render_pass_ctx->id_table.orders_count; i++)
         {
             DivisionRenderPass* pass = &render_pass_ctx->render_passes[render_pass_ids[i]];
-            if (pass->vertex_count == 0) continue;
 
+            float* blend_color = pass->alpha_blending_options.constant_blend_color;
             DivisionRenderPassInternalPlatform_* pass_impl = &render_pass_ctx->render_passes_impl[i];
             DivisionVertexBufferInternalPlatform_ vert_buffer_impl = vert_buff_ctx->buffers_impl[pass->vertex_buffer];
 
@@ -236,8 +198,11 @@ static inline DivisionToMslAttrTraits_ get_vert_attr_msl_traits_(DivisionShaderV
                 const DivisionIdWithBinding* texture_binding = &pass->fragment_textures[texIdx];
                 const DivisionTextureImpl_* tex_impl = &tex_ctx->textures_impl[texture_binding->id];
 
-                [renderEnc setFragmentTexture:tex_impl->mtl_texture atIndex: texture_binding->shader_location];
+                [renderEnc setFragmentTexture:tex_impl->mtl_texture atIndex:texture_binding->shader_location];
             }
+
+            [renderEnc
+                setBlendColorRed: blend_color[0] green: blend_color[1] blue: blend_color[2] alpha: blend_color[3]];
 
             if (pass->instance_count > 0)
             {

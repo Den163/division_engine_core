@@ -5,6 +5,7 @@
 #include <Metal/Metal.h>
 
 #include "division_engine_core/context.h"
+#include "division_engine_core/render_pass.h"
 #include "division_engine_core/vertex_buffer.h"
 #include "osx_shader_context.h"
 
@@ -31,10 +32,6 @@
 - (id <MTLBuffer>)createBufferWithSize:(size_t)data_bytes;
 
 - (MTLVertexDescriptor*)createVertexDescriptorForBuffer:(const DivisionVertexBuffer*)vertexBuffer;
-
-
-- (id <MTLRenderPipelineState>)createRenderPipelineStateForShaderProgram:(const DivisionMetalShaderProgram*)program
-                                                        vertexDescriptor:(MTLVertexDescriptor*)desc;
 
 - (bool)createShaderProgramWithSettings:
     (const DivisionShaderSettings*)shaderSettings

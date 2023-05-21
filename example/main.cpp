@@ -207,7 +207,7 @@ void init_callback(DivisionContext* ctx)
             .src = DIVISION_ALPHA_BLEND_SRC_ALPHA,
             .dst = DIVISION_ALPHA_BLEND_ONE_MINUS_SRC_ALPHA,
             .operation = DIVISION_ALPHA_BLEND_OP_ADD,
-            .color_factor = { 1, 1, 1, 1 },
+            .constant_blend_color = { 0, 0, 0, 0 },
         },
 
         .first_vertex = 0,
@@ -221,7 +221,7 @@ void init_callback(DivisionContext* ctx)
         .vertex_buffer = vertex_buffer,
         .shader_program = shader_program,
         .capabilities_mask = DIVISION_RENDER_PASS_CAPABILITY_ALPHA_BLEND,
-        .color_mask = DIVISION_COLOR_MASK_R
+        .color_mask = DIVISION_COLOR_MASK_RGB
     }, &render_pass_id);
 }
 
