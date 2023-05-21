@@ -7,12 +7,17 @@ set(CMAKE_CXX_STANDARD 17)
 include(GenerateExportHeader)
 
 
-if(${CMAKE_CURRENT_SOURCE_DIR} STREQUAL ${CMAKE_SOURCE_DIR})
-add_subdirectory(example)
-add_subdirectory(tests)
+if(TARGET example)
+    add_subdirectory(example)
 endif()
 
-add_subdirectory(shader_compiler)
+if (TARGET tests)
+    add_subdirectory(tests)
+endif()
+
+if (TARGET shader_compiler)
+    add_subdirectory(shader_compiler)
+endif()
 
 set(SOURCES
     src/context.c
