@@ -13,8 +13,7 @@ static inline bool try_get_mtl_blend_arg(
 static inline bool try_get_mtl_blend_op(
     DivisionContext* ctx, DivisionAlphaBlendOperation blend_op, MTLBlendOperation* out_mtl_blend_op);
 
-static inline bool try_get_mtl_color_mask(
-    DivisionContext* ctx, DivisionColorMask color_mask, MTLColorWriteMask* out_color_mask);
+static inline MTLColorWriteMask division_to_mtl_color_mask(DivisionColorMask color_mask);
 
 bool division_engine_internal_platform_render_pass_context_alloc(DivisionContext* ctx, const DivisionSettings* settings)
 {
@@ -76,6 +75,7 @@ bool division_engine_internal_platform_render_pass_impl_init_element(DivisionCon
     ];
 
     [color_attach_desc setPixelFormat:MTLPixelFormatBGRA8Unorm_sRGB];
+    [color_attach_desc setWriteMask: division_to_mtl_color_mask(render_pass->color_mask)];
 
     if (division_utility_mask_has_flag(render_pass->capabilities_mask, DIVISION_RENDER_PASS_CAPABILITY_ALPHA_BLEND))
     {
@@ -85,8 +85,7 @@ bool division_engine_internal_platform_render_pass_impl_init_element(DivisionCon
         MTLColorWriteMask mtl_color_mask;
         if (!try_get_mtl_blend_arg(ctx, blend_options->src, &mtl_src) ||
             !try_get_mtl_blend_arg(ctx, blend_options->dst, &mtl_dst) ||
-            !try_get_mtl_blend_op(ctx, blend_options->operation, &mtl_blend_op) ||
-            !try_get_mtl_color_mask(ctx, render_pass->color_mask, &mtl_color_mask))
+            !try_get_mtl_blend_op(ctx, blend_options->operation, &mtl_blend_op))
         {
             return false;
         }
@@ -98,7 +97,6 @@ bool division_engine_internal_platform_render_pass_impl_init_element(DivisionCon
         [color_attach_desc setDestinationAlphaBlendFactor: mtl_dst];
         [color_attach_desc setRgbBlendOperation: mtl_blend_op];
         [color_attach_desc setAlphaBlendOperation: mtl_blend_op];
-        [color_attach_desc setWriteMask: mtl_color_mask];
     }
 
     NSError* err = nil;
@@ -205,7 +203,7 @@ bool try_get_mtl_blend_op(
     }
 }
 
-bool try_get_mtl_color_mask(DivisionContext* ctx, DivisionColorMask color_mask, MTLColorWriteMask* out_color_mask)
+MTLColorWriteMask division_to_mtl_color_mask(DivisionColorMask color_mask)
 {
     MTLColorWriteMask result_mask = MTLColorWriteMaskNone;
     result_mask |= (MTLColorWriteMaskRed * division_utility_mask_has_flag(color_mask, DIVISION_COLOR_MASK_R));
@@ -213,6 +211,5 @@ bool try_get_mtl_color_mask(DivisionContext* ctx, DivisionColorMask color_mask, 
     result_mask |= (MTLColorWriteMaskBlue * division_utility_mask_has_flag(color_mask, DIVISION_COLOR_MASK_B));
     result_mask |= (MTLColorWriteMaskAlpha * division_utility_mask_has_flag(color_mask, DIVISION_COLOR_MASK_A));
 
-    *out_color_mask = result_mask;
-    return true;
+    return result_mask;
 }

@@ -1,7 +1,6 @@
 #include "DivisionOSXViewDelegate.h"
 
 #include "division_engine_core/renderer.h"
-#include "division_engine_core/render_pass.h"
 #include "division_engine_core/texture.h"
 #include "division_engine_core/uniform_buffer.h"
 #include "division_engine_core/io_utility.h"
@@ -165,14 +164,14 @@ static inline DivisionToMslAttrTraits_ get_vert_attr_msl_traits_(DivisionShaderV
         uint32_t* render_pass_ids = render_pass_ctx->id_table.orders;
         for (int32_t i = 0; i < render_pass_ctx->id_table.orders_count; i++)
         {
-            DivisionRenderPass* pass = &render_pass_ctx->render_passes[render_pass_ids[i]];
-
-            float* blend_color = pass->alpha_blending_options.constant_blend_color;
-            DivisionRenderPassInternalPlatform_* pass_impl = &render_pass_ctx->render_passes_impl[i];
-            DivisionVertexBufferInternalPlatform_ vert_buffer_impl = vert_buff_ctx->buffers_impl[pass->vertex_buffer];
+            const DivisionRenderPass* pass = &render_pass_ctx->render_passes[render_pass_ids[i]];
+            const float* blend_color = pass->alpha_blending_options.constant_blend_color;
+            const DivisionRenderPassInternalPlatform_* pass_impl = &render_pass_ctx->render_passes_impl[i];
+            const DivisionVertexBufferInternalPlatform_* vert_buffer_impl =
+                &vert_buff_ctx->buffers_impl[pass->vertex_buffer];
 
             id <MTLRenderPipelineState> pipelineState = pass_impl->mtl_pipeline_state;
-            id <MTLBuffer> vertDataMtlBuffer = vert_buffer_impl.mtl_vertex_buffer;
+            id <MTLBuffer> vertDataMtlBuffer = vert_buffer_impl->mtl_vertex_buffer;
 
             [renderEnc setRenderPipelineState:pipelineState];
             [renderEnc setVertexBuffer:vertDataMtlBuffer offset:0 atIndex:MTL_VERTEX_DATA_BUFFER_INDEX];
@@ -210,7 +209,7 @@ static inline DivisionToMslAttrTraits_ get_vert_attr_msl_traits_(DivisionShaderV
                                     offset:0
                                    atIndex:MTL_VERTEX_DATA_INSTANCE_ARRAY_INDEX];
 
-                [renderEnc drawPrimitives:vert_buffer_impl.mtl_primitive_type
+                [renderEnc drawPrimitives:vert_buffer_impl->mtl_primitive_type
                               vertexStart:pass->first_vertex
                               vertexCount:pass->vertex_count
                             instanceCount:pass->instance_count
@@ -218,12 +217,11 @@ static inline DivisionToMslAttrTraits_ get_vert_attr_msl_traits_(DivisionShaderV
             }
             else
             {
-                [renderEnc drawPrimitives:vert_buffer_impl.mtl_primitive_type
+                [renderEnc drawPrimitives:vert_buffer_impl->mtl_primitive_type
                               vertexStart:pass->first_vertex
                               vertexCount:pass->vertex_count
                 ];
             }
-
         }
 
         [renderEnc endEncoding];
