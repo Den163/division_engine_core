@@ -47,14 +47,8 @@ bool division_engine_internal_platform_render_pass_impl_init_element(DivisionCon
     const DivisionRenderPass* pass = &pass_ctx->render_passes[render_pass_id];
     DivisionRenderPassInternalPlatform_* pass_impl = &pass_ctx->render_passes_impl[render_pass_id];
 
-    pass_impl->gl_enable_count = 0;
-    pass_impl->gl_disable_count = 0;
-    pass_impl->gl_enables = malloc(sizeof(GLenum[cap_capacity]));
-    pass_impl->gl_disables = malloc(sizeof(GLenum[cap_capacity]));
-
     if (division_utility_mask_has_flag(pass->capabilities_mask, DIVISION_RENDER_PASS_CAPABILITY_ALPHA_BLEND))
     {
-        pass_impl->gl_enables[pass_impl->gl_enable_count++] = GL_BLEND;
         const DivisionAlphaBlendingOptions* blend_options = &pass->alpha_blending_options;
 
         if (!try_get_gl_blend_arg(ctx, blend_options->src, &pass_impl->gl_blend_src) ||
@@ -64,29 +58,18 @@ bool division_engine_internal_platform_render_pass_impl_init_element(DivisionCon
             return false;
         }
     }
-    else
-    {
-        pass_impl->gl_disables[pass_impl->gl_disable_count++] = GL_BLEND;
-    }
 
     return true;
 }
 
 void division_engine_internal_platform_render_pass_free(DivisionContext* ctx, uint32_t render_pass_id)
 {
-    DivisionRenderPassInternalPlatform_* pass_impl = &ctx->render_pass_context->render_passes_impl[render_pass_id];
-    free(pass_impl->gl_enables);
-    free(pass_impl->gl_disables);
-    
-    pass_impl->gl_enables = NULL;
-    pass_impl->gl_disables = NULL;
 }
 
 bool try_get_gl_blend_arg(DivisionContext* ctx, DivisionAlphaBlend blend_arg, GLenum* out_gl_blend_arg)
 {
     switch (blend_arg)
     {
-
         case DIVISION_ALPHA_BLEND_ZERO:
             *out_gl_blend_arg = GL_ZERO;
             return true;
@@ -119,6 +102,18 @@ bool try_get_gl_blend_arg(DivisionContext* ctx, DivisionAlphaBlend blend_arg, GL
             return true;
         case DIVISION_ALPHA_BLEND_ONE_MINUS_DST_ALPHA:
             *out_gl_blend_arg = GL_ONE_MINUS_DST_ALPHA;
+            return true;
+        case DIVISION_ALPHA_BLEND_CONSTANT_COLOR:
+            *out_gl_blend_arg = GL_CONSTANT_COLOR;
+            return true;
+        case DIVISION_ALPHA_BLEND_CONSTANT_ALPHA:
+            *out_gl_blend_arg = GL_CONSTANT_ALPHA;
+            return true;
+        case DIVISION_ALPHA_BLEND_ONE_MINUS_CONSTANT_COLOR:
+            *out_gl_blend_arg = GL_ONE_MINUS_CONSTANT_COLOR;
+            return true;
+        case DIVISION_ALPHA_BLEND_ONE_MINUS_CONSTANT_ALPHA:
+            *out_gl_blend_arg = GL_ONE_MINUS_CONSTANT_ALPHA;
             return true;
         default:
             ctx->error_callback(DIVISION_INTERNAL_ERROR, "Unknown Blend arg to GL mapping");

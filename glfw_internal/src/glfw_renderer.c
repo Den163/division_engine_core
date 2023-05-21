@@ -112,7 +112,7 @@ void renderer_draw(DivisionContext* ctx)
         DivisionRenderPassInternalPlatform_* pass_impl = &render_pass_ctx->render_passes_impl[pass_id];
         DivisionVertexBufferInternalPlatform_ vb_internal = vert_buff_ctx->buffers_impl[pass->vertex_buffer];
         DivisionShaderInternal_ shader_internal = shader_ctx->shaders_impl[pass->shader_program];
-        const float* blend_color = pass->alpha_blending_options.color_factor;
+        const float* const_blend_color = pass->alpha_blending_options.constant_blend_color;
 
         glBindVertexArray(vb_internal.gl_vao);
         glBindBuffer(GL_ARRAY_BUFFER, vb_internal.gl_vbo);
@@ -135,20 +135,16 @@ void renderer_draw(DivisionContext* ctx)
 
             glBindTextureUnit(tex_bind.shader_location, tex_impl->gl_texture);
         }
-        
-        for (int enable_idx = 0; enable_idx < pass_impl->gl_enable_count; enable_idx++)
-        {
-            glEnable(pass_impl->gl_enables[enable_idx]);
-        }
 
-        for (int disable_idx = 0; disable_idx < pass_impl->gl_disable_count; disable_idx++)
-        {
-            glDisable(pass_impl->gl_disables[disable_idx]);
-        }
+        bool has_blend = division_utility_mask_has_flag(
+            pass->capabilities_mask, DIVISION_RENDER_PASS_CAPABILITY_ALPHA_BLEND);
+
+        glEnable(has_blend * GL_BLEND);
+        glDisable(!has_blend * GL_BLEND);
 
         glBlendFunc(pass_impl->gl_blend_src, pass_impl->gl_blend_dst);
-        glBlendColor(blend_color[0], blend_color[1], blend_color[2], blend_color[3]);
         glBlendEquation(pass_impl->gl_blend_equation);
+        glBlendColor(const_blend_color[0], const_blend_color[1], const_blend_color[2], const_blend_color[3]);
 
         glColorMask(
             division_utility_mask_has_flag(pass->color_mask, DIVISION_COLOR_MASK_R),
