@@ -1,9 +1,10 @@
 #include "division_engine_core/platform_internal/platform_render_pass.h"
+#include "division_engine_core/utility.h"
+
 #include "glfw_render_pass.h"
 
 #include <stdlib.h>
 
-static inline bool mask_has_flag(int mask, int flag);
 static inline bool try_get_gl_blend_arg(
     DivisionContext* ctx, DivisionAlphaBlend blend_arg, GLenum* out_gl_blend_arg);
 static inline bool try_get_gl_blend_eq(
@@ -51,7 +52,7 @@ bool division_engine_internal_platform_render_pass_impl_init_element(DivisionCon
     pass_impl->gl_enables = malloc(sizeof(GLenum[cap_capacity]));
     pass_impl->gl_disables = malloc(sizeof(GLenum[cap_capacity]));
 
-    if (mask_has_flag(pass->capabilities_mask, DIVISION_RENDER_PASS_CAPABILITY_ALPHA_BLEND))
+    if (division_utility_mask_has_flag(pass->capabilities_mask, DIVISION_RENDER_PASS_CAPABILITY_ALPHA_BLEND))
     {
         pass_impl->gl_enables[pass_impl->gl_enable_count++] = GL_BLEND;
         const DivisionAlphaBlendingOptions* blend_options = &pass->alpha_blending_options;
@@ -81,10 +82,6 @@ void division_engine_internal_platform_render_pass_free(DivisionContext* ctx, ui
     pass_impl->gl_disables = NULL;
 }
 
-bool mask_has_flag(int mask, int flag)
-{
-    return (mask & flag) == flag;
-}
 bool try_get_gl_blend_arg(DivisionContext* ctx, DivisionAlphaBlend blend_arg, GLenum* out_gl_blend_arg)
 {
     switch (blend_arg)

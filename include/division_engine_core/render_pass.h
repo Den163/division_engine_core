@@ -72,6 +72,7 @@ typedef struct DivisionRenderPass {
     uint32_t vertex_buffer;
     uint32_t shader_program;
     DivisionRenderPassCapabilityMask capabilities_mask;
+    DivisionColorMask color_mask;
 } DivisionRenderPass;
 
 typedef struct DivisionRenderPassSystemContext {

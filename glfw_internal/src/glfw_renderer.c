@@ -7,6 +7,7 @@
 #include "division_engine_core/renderer.h"
 #include "division_engine_core/texture.h"
 #include "division_engine_core/uniform_buffer.h"
+#include "division_engine_core/utility.h"
 #include "division_engine_core/vertex_buffer.h"
 
 #include "glfw_render_pass.h"
@@ -18,8 +19,7 @@
 #include "division_engine_core/platform_internal/platform_renderer.h"
 
 static inline void renderer_draw(DivisionContext* ctx);
-static inline void
-bind_uniform_buffer(DivisionUniformBufferSystemContext* ctx, uint32_t buffer_id);
+static inline void bind_uniform_buffer(DivisionUniformBufferSystemContext* ctx, uint32_t buffer_id);
 
 typedef struct DivisionWindowContextPlatformInternal_* DivisionWindowContextPlatformInternalPtr_;
 
@@ -149,6 +149,13 @@ void renderer_draw(DivisionContext* ctx)
         glBlendFunc(pass_impl->gl_blend_src, pass_impl->gl_blend_dst);
         glBlendColor(blend_color[0], blend_color[1], blend_color[2], blend_color[3]);
         glBlendEquation(pass_impl->gl_blend_equation);
+
+        glColorMask(
+            division_utility_mask_has_flag(pass->color_mask, DIVISION_COLOR_MASK_R),
+            division_utility_mask_has_flag(pass->color_mask, DIVISION_COLOR_MASK_G),
+            division_utility_mask_has_flag(pass->color_mask, DIVISION_COLOR_MASK_B),
+            division_utility_mask_has_flag(pass->color_mask, DIVISION_COLOR_MASK_A)
+        );
 
         if (pass->instance_count > 0)
         {

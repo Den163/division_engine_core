@@ -221,6 +221,7 @@ void init_callback(DivisionContext* ctx)
         .vertex_buffer = vertex_buffer,
         .shader_program = shader_program,
         .capabilities_mask = DIVISION_RENDER_PASS_CAPABILITY_ALPHA_BLEND,
+        .color_mask = DIVISION_COLOR_MASK_R
     }, &render_pass_id);
 }
 
