@@ -6,8 +6,8 @@
 #include <SPIRV/GlslangToSpv.h>
 #include <spirv_msl.hpp>
 
-static inline EShLanguage division_shader_type_to_glslang_type(DivisionShaderType shader_type);
-static inline spv::ExecutionModel division_shader_type_to_spv_cross_type(DivisionShaderType shader_type);
+static inline EShLanguage division_shader_type_to_glslang_type(DivisionCompilerShaderType shader_type);
+static inline spv::ExecutionModel division_shader_type_to_spv_cross_type(DivisionCompilerShaderType shader_type);
 
 bool division_shader_compiler_alloc()
 {
@@ -16,7 +16,7 @@ bool division_shader_compiler_alloc()
 
 bool division_shader_compiler_compile_glsl_to_spirv(
     const char* source, int32_t source_size,
-    DivisionShaderType shader_type,
+    DivisionCompilerShaderType shader_type,
     const char* spirv_entry_point_name,
     void** out_spirv,
     size_t* out_spirv_byte_count)
@@ -99,7 +99,7 @@ bool division_shader_compiler_compile_glsl_to_spirv(
 
 bool division_shader_compiler_compile_spirv_to_metal(
     const void* spirv_bytes, size_t spirv_byte_count,
-    DivisionShaderType shader_type, const char* entry_point,
+    DivisionCompilerShaderType shader_type, const char* entry_point,
     char** out_metal_source, size_t* out_metal_size)
 {
     try
@@ -139,28 +139,36 @@ bool division_shader_compiler_compile_spirv_to_metal(
     }
 }
 
+void division_shader_compiler_spirv_source_free(void* spirv_source) {
+    free(spirv_source);
+}
+
+void division_shader_compiler_metal_source_free(char* metal_source) {
+    free(metal_source);
+}
+
 void division_shader_compiler_free()
 {
     glslang::FinalizeProcess();
 }
 
-EShLanguage division_shader_type_to_glslang_type(DivisionShaderType shader_type)
+EShLanguage division_shader_type_to_glslang_type(DivisionCompilerShaderType shader_type)
 {
     switch (shader_type)
     {
-        case DIVISION_SHADER_VERTEX: return EShLanguage::EShLangVertex;
-        case DIVISION_SHADER_FRAGMENT: return EShLanguage::EShLangFragment;
+        case DIVISION_COMPILER_SHADER_TYPE_VERTEX: return EShLanguage::EShLangVertex;
+        case DIVISION_COMPILER_SHADER_TYPE_FRAGMENT: return EShLanguage::EShLangFragment;
         default:
             throw std::runtime_error("Unknown shader typ to EShLanguage mapping");
     }
 }
 
-spv::ExecutionModel division_shader_type_to_spv_cross_type(DivisionShaderType shader_type)
+spv::ExecutionModel division_shader_type_to_spv_cross_type(DivisionCompilerShaderType shader_type)
 {
     switch (shader_type)
     {
-        case DIVISION_SHADER_VERTEX: return spv::ExecutionModel::ExecutionModelVertex;
-        case DIVISION_SHADER_FRAGMENT: return spv::ExecutionModel::ExecutionModelFragment;
+        case DIVISION_COMPILER_SHADER_TYPE_VERTEX: return spv::ExecutionModel::ExecutionModelVertex;
+        case DIVISION_COMPILER_SHADER_TYPE_FRAGMENT: return spv::ExecutionModel::ExecutionModelFragment;
         default:
             throw std::runtime_error("Unknown shader type to spv::ExecutionModel mapping");
     }
