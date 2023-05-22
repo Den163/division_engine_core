@@ -1,4 +1,7 @@
+project(division_engine_shader_compiler LANGUAGES CXX)
 include(FetchContent)
+
+set(ENABLE_GLSLANG_INSTALL)
 
 FetchContent_Declare(
         glslang
@@ -19,3 +22,7 @@ add_library(division_engine_shader_compiler src/interface.cpp)
 target_include_directories(division_engine_shader_compiler PUBLIC ${PROJECT_SOURCE_DIR}/include ${PROJECT_BINARY_DIR})
 target_link_libraries(division_engine_shader_compiler
                       division_engine_core glslang SPIRV glslang-default-resource-limits spirv-cross-cpp spirv-cross-msl)
+
+target_link_directories(division_engine_shader_compiler PUBLIC ${PROJECT_BINARY_DIR})
+
+install(TARGETS division_engine_shader_compiler DESTINATION ${CMAKE_BINARY_DIR})

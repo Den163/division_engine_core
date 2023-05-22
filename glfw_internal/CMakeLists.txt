@@ -25,3 +25,4 @@ target_include_directories(glfw_internal PRIVATE
 
 target_link_libraries(glfw_internal PRIVATE glfw ${GLFW_STATIC_LIBRARIES})
 set(FILES_TO_COPY ${GLFW_BINARY_DIR}/src/libglfw3.a)
+install(TARGETS glfw_internal DESTINATION ${CMAKE_BINARY_DIR})

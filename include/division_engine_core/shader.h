@@ -9,18 +9,18 @@
 #include <division_engine_core/data_structures/unordered_id_table.h>
 
 typedef enum {
-    DIVISION_SHADER_VERTEX = 0,
-    DIVISION_SHADER_FRAGMENT = 1
+    DIVISION_SHADER_VERTEX = 1,
+    DIVISION_SHADER_FRAGMENT = 2
 } DivisionShaderType;
 
 typedef enum {
-    DIVISION_FLOAT = 0,
-    DIVISION_DOUBLE = 1,
-    DIVISION_INTEGER = 2,
-    DIVISION_FVEC2 = 3,
-    DIVISION_FVEC3 = 4,
-    DIVISION_FVEC4 = 5,
-    DIVISION_FMAT4X4 = 6
+    DIVISION_FLOAT = 1,
+    DIVISION_DOUBLE = 2,
+    DIVISION_INTEGER = 3,
+    DIVISION_FVEC2 = 4,
+    DIVISION_FVEC3 = 5,
+    DIVISION_FVEC4 = 6,
+    DIVISION_FMAT4X4 = 7
 } DivisionShaderVariableType;
 
 typedef struct DivisionShaderSettings {

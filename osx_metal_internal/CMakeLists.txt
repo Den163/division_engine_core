@@ -21,3 +21,5 @@ target_include_directories(osx_metal_internal PRIVATE
                            ${PROJECT_BINARY_DIR})
 target_link_libraries(osx_metal_internal
                       "-framework Foundation -framework AppKit -framework Metal -framework MetalKit")
+
+install(TARGETS osx_metal_internal DESTINATION ${CMAKE_BINARY_DIR})
