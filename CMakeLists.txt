@@ -1,22 +1,14 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.22.2)
 
-project(division_engine_core LANGUAGES C CXX OBJC)
+project(division_engine_core LANGUAGES C OBJC)
 set(CMAKE_C_STANDARD 11)
-set(CMAKE_CXX_STANDARD 17)
 
 include(GenerateExportHeader)
 
-
-if(TARGET example)
-    add_subdirectory(example)
-endif()
+add_subdirectory(example)
 
 if (TARGET tests)
     add_subdirectory(tests)
-endif()
-
-if (DEFINED ENV{DIVISION_ENGINE_USE_SHADER_COMPILER})
-    add_subdirectory(shader_compiler)
 endif()
 
 set(SOURCES

@@ -1,5 +1,4 @@
 #include <memory.h>
-#include <cstdio>
 
 #include <division_engine_core/render_pass.h>
 #include <division_engine_core/renderer.h>
@@ -8,12 +7,10 @@
 #include <division_engine_core/uniform_buffer.h>
 #include <division_engine_core/vertex_buffer.h>
 #include <division_engine_core/io_utility.h>
-#include <division_shader_compiler/interface.h>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
-static void compile_to_metal_shaders();
 static void error_callback(int error_code, const char* message);
 static void init_callback(DivisionContext* ctx);
 static void update_callback(DivisionContext* ctx);
@@ -27,10 +24,6 @@ typedef struct VertexData
 
 int main()
 {
-#ifdef __APPLE__
-    compile_to_metal_shaders();
-#endif
-
     DivisionSettings settings = {
         .window_width = 512,
         .window_height = 512,
@@ -40,55 +33,11 @@ int main()
         .update_callback = update_callback,
     };
 
-    DivisionContext* ctx = nullptr;
+    DivisionContext* ctx = NULL;
     division_engine_context_alloc(&settings, &ctx);
 
     division_engine_renderer_run_loop(ctx, &settings);
     division_engine_context_free(ctx);
-}
-
-void compile_to_metal_shaders()
-{
-    division_shader_compiler_alloc();
-
-    const size_t shader_count = 2;
-    DivisionShaderSettings shader_to_compile[shader_count] = {
-        {.type = DIVISION_SHADER_VERTEX, .file_path = "test.vert", .entry_point_name = "vert",},
-        {.type = DIVISION_SHADER_FRAGMENT, .file_path = "test.frag", .entry_point_name = "frag"}
-    };
-    const char* output_names[shader_count] = {"./test.vert.metal", "./test.frag.metal"};
-
-    for (int i = 0; i < shader_count; i++)
-    {
-        char* shader_data = nullptr;
-        void* spv_data = nullptr;
-        char* msl_data = nullptr;
-
-        size_t shader_size = 0;
-        size_t spv_size = 0;
-        size_t msl_size = 0;
-
-        DivisionShaderSettings shader_setting = shader_to_compile[i];
-        division_io_read_all_bytes_from_file(shader_setting.file_path, (void**) &shader_data, &shader_size);
-
-        division_shader_compiler_compile_glsl_to_spirv(
-            shader_data,
-            (int32_t) shader_size,
-            shader_setting.type,
-            shader_setting.entry_point_name,
-            &spv_data,
-            &spv_size);
-        division_shader_compiler_compile_spirv_to_metal(
-            spv_data, spv_size, shader_setting.type, shader_setting.entry_point_name, &msl_data, &msl_size);
-
-        division_io_write_all_bytes_to_file(output_names[i], msl_data, msl_size);
-
-        free(shader_data);
-        free(spv_data);
-        free(msl_data);
-    }
-
-    division_shader_compiler_free();
 }
 
 void init_callback(DivisionContext* ctx)
@@ -166,12 +115,11 @@ void init_callback(DivisionContext* ctx)
     uint32_t vertex_buffer;
     division_engine_vertex_buffer_alloc(ctx, &vertex_buffer_settings, &vertex_buffer);
 
-    auto* vert_buff_ptr = static_cast<int8_t*>(
-        division_engine_vertex_buffer_borrow_data_pointer(ctx, vertex_buffer));
+    void* vert_buff_ptr = division_engine_vertex_buffer_borrow_data_pointer(ctx, vertex_buffer);
 
     memcpy(vert_buff_ptr, vd, sizeof(vd));
 
-    auto* per_inst_ptr = vert_buff_ptr + sizeof(vd);
+    void* per_inst_ptr = vert_buff_ptr + sizeof(vd);
     memcpy(per_inst_ptr, local_to_word_mat, sizeof(local_to_word_mat));
 
     division_engine_vertex_buffer_return_data_pointer(ctx, vertex_buffer, vert_buff_ptr);
@@ -183,7 +131,7 @@ void init_callback(DivisionContext* ctx)
     uint32_t uniform_buffer;
     division_engine_uniform_buffer_alloc(ctx, buff, &uniform_buffer);
 
-    auto* uniform_ptr = static_cast<float*>(division_engine_uniform_buffer_borrow_data_pointer(ctx, uniform_buffer));
+    float* uniform_ptr = (float*) division_engine_uniform_buffer_borrow_data_pointer(ctx, uniform_buffer);
     memcpy(uniform_ptr, testVec, sizeof(testVec));
     division_engine_uniform_buffer_return_data_pointer(ctx, uniform_buffer, uniform_ptr);
 
@@ -199,20 +147,19 @@ void init_callback(DivisionContext* ctx)
     division_engine_texture_set_data(ctx, tex_id, tex_data);
     stbi_image_free(tex_data);
 
-    DivisionIdWithBinding frag_textures[] = { DivisionIdWithBinding { .id = tex_id, .shader_location = 0 } };
+    DivisionIdWithBinding frag_textures[] = { (DivisionIdWithBinding) { .id = tex_id, .shader_location = 0 } };
 
     uint32_t render_pass_id;
     division_engine_render_pass_alloc(ctx, (DivisionRenderPass) {
-        .alpha_blending_options = DivisionAlphaBlendingOptions {
+        .alpha_blending_options = (DivisionAlphaBlendingOptions) {
             .src = DIVISION_ALPHA_BLEND_SRC_ALPHA,
             .dst = DIVISION_ALPHA_BLEND_ONE_MINUS_SRC_ALPHA,
             .operation = DIVISION_ALPHA_BLEND_OP_ADD,
             .constant_blend_color = { 0, 0, 0, 0 },
         },
-
         .first_vertex = 0,
-        .vertex_count = static_cast<size_t>(vertex_count),
-        .instance_count = static_cast<size_t>(instance_count),
+        .vertex_count = (size_t) vertex_count,
+        .instance_count = (size_t) instance_count,
         .uniform_vertex_buffer_count = 0,
         .uniform_fragment_buffers = &uniform_buffer,
         .uniform_fragment_buffer_count = 1,
