@@ -8,10 +8,10 @@
 
 #include <division_engine_core_export.h>
 
-typedef enum {
-    DIVISION_TOPOLOGY_TRIANGLES = 0,
-    DIVISION_TOPOLOGY_POINTS = 1,
-    DIVISION_TOPOLOGY_LINES = 2
+typedef enum DivisionRenderTopology {
+    DIVISION_TOPOLOGY_TRIANGLES = 1,
+    DIVISION_TOPOLOGY_POINTS = 2,
+    DIVISION_TOPOLOGY_LINES = 3
 } DivisionRenderTopology;
 
 typedef struct DivisionVertexAttributeSettings {

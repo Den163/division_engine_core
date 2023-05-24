@@ -10,14 +10,12 @@
 
 struct DivisionUniformBufferInternal_;
 
-typedef struct DivisionUniformBufferDescriptor
-{
+typedef struct DivisionUniformBufferDescriptor {
     size_t data_bytes;
     int32_t binding;
 } DivisionUniformBufferDescriptor;
 
-typedef struct DivisionUniformBufferSystemContext
-{
+typedef struct DivisionUniformBufferSystemContext {
     DivisionUnorderedIdTable id_table;
     DivisionUniformBufferDescriptor* uniform_buffers;
     struct DivisionUniformBufferInternal_* uniform_buffers_impl;

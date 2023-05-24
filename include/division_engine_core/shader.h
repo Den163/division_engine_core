@@ -8,12 +8,12 @@
 #include <division_engine_core_export.h>
 #include <division_engine_core/data_structures/unordered_id_table.h>
 
-typedef enum {
+typedef enum DivisionShaderType {
     DIVISION_SHADER_VERTEX = 1,
     DIVISION_SHADER_FRAGMENT = 2
 } DivisionShaderType;
 
-typedef enum {
+typedef enum DivisionShaderVariableType {
     DIVISION_FLOAT = 1,
     DIVISION_DOUBLE = 2,
     DIVISION_INTEGER = 3,
