@@ -4,7 +4,7 @@
 
 #include "division_engine_core/context.h"
 #include "division_engine_core/settings.h"
-#import "division_engine_core/vertex_buffer.h"
+#include "division_engine_core/vertex_buffer.h"
 
 #include <division_engine_core_export.h>
 

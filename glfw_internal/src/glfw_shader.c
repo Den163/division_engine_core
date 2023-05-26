@@ -8,12 +8,10 @@
 #include "glfw_shader.h"
 
 static int create_shader_from_source(const char* source, size_t source_size, GLuint gl_shader_type);
-static bool alloc_shader_source_from_file(const char* path, char** shader_data, size_t* data_size);
 static bool check_program_status(GLuint programHandle);
 static void get_program_info_log(GLuint program_handle, char** error_ptr);
 static int shader_type_to_gl_type(DivisionShaderType shaderType);
 
-static inline bool attach_shader_to_program_from_file(const char* path, DivisionShaderType type, int32_t program_id);
 static inline bool attach_shader_to_program_from_source(
     const char* source, size_t source_size, DivisionShaderType type, int32_t program_id);
 
@@ -33,15 +31,15 @@ void division_engine_internal_platform_shader_system_context_free(DivisionContex
 
 bool division_engine_internal_platform_shader_program_alloc(
     DivisionContext* ctx,
-    const DivisionShaderSettings* settings,
+    const DivisionShaderSourceDescriptor* settings,
     int32_t source_count,
     uint32_t* out_shader_program_id)
 {
     int32_t gl_program = glCreateProgram();
     for (int i = 0; i < source_count; i++)
     {
-        const DivisionShaderSettings* s = &settings[i];
-        attach_shader_to_program_from_file(s->file_path, s->type, gl_program);
+        const DivisionShaderSourceDescriptor* s = &settings[i];
+        attach_shader_to_program_from_source(s->source, s->source_size, s->type, gl_program);
     }
     glLinkProgram(gl_program);
 
@@ -83,22 +81,6 @@ void division_engine_internal_platform_shader_program_free(DivisionContext* ctx,
     division_unordered_id_table_remove(&ctx->shader_context->id_table, shader_program_id);
 }
 
-bool attach_shader_to_program_from_file(const char* path, DivisionShaderType type, int32_t program_id)
-{
-    char* shader_src;
-    size_t shader_src_size;
-
-    if (!alloc_shader_source_from_file(path, &shader_src, &shader_src_size))
-    {
-        return false;
-    }
-
-    bool ok = attach_shader_to_program_from_source(shader_src, shader_src_size, type, program_id);
-    free(shader_src);
-
-    return ok;
-}
-
 bool attach_shader_to_program_from_source(
     const char* source, size_t source_size, DivisionShaderType type, int32_t program_id)
 {
@@ -128,7 +110,8 @@ int create_shader_from_source(const char* source, size_t source_size, GLuint gl_
         return -1;
     }
 
-    glShaderSource(shader_handle, 1, (const GLchar* const*) &source, (GLint*) &source_size);
+    GLint int_src_size = (GLint) source_size;
+    glShaderSource(shader_handle, 1, (const GLchar* const*) &source, &int_src_size);
     glCompileShader(shader_handle);
 
     GLint compile_result = 0;
@@ -146,35 +129,6 @@ int create_shader_from_source(const char* source, size_t source_size, GLuint gl_
     fprintf(stderr, "Failed to compile shader source. Info log: \n%s\n", error_log_data);
     free(error_log_data);
     return -1;
-}
-
-bool alloc_shader_source_from_file(const char* path, char** shader_data, size_t* data_size)
-{
-    FILE* shader_file_ptr = fopen(path, "rt");
-    if (shader_file_ptr == NULL)
-    {
-        fprintf(stderr, "Failed to open file by path %s", path);
-        return false;
-    }
-
-    fseek(shader_file_ptr, 0, SEEK_END);
-    size_t file_size = (int) ftell(shader_file_ptr);
-    rewind(shader_file_ptr);
-
-    *shader_data = (char*) malloc(file_size);
-    *data_size = file_size;
-
-    fread(*shader_data, 1, file_size, shader_file_ptr);
-    if (ferror(shader_file_ptr))
-    {
-        fprintf(stderr, "Failed to read file by path: %s", path);
-        fclose(shader_file_ptr);
-        free(*shader_data);
-        return false;
-    }
-
-    fclose(shader_file_ptr);
-    return true;
 }
 
 bool check_program_status(GLuint programHandle)

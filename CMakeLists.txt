@@ -1,6 +1,6 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.22.2)
 
-project(division_engine_core LANGUAGES C OBJC)
+project(division_engine_core)
 set(CMAKE_C_STANDARD 11)
 
 include(GenerateExportHeader)
