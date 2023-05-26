@@ -1,5 +1,9 @@
 include(FetchContent)
 
+set(GLFW_BUILD_EXAMPLES OFF)
+set(GLFW_BUILD_TESTS OFF)
+set(GLFW_VULKAN_STATIC OFF)
+
 FetchContent_Declare(
         glfw
         GIT_REPOSITORY https://github.com/glfw/glfw
@@ -23,6 +27,13 @@ target_include_directories(glfw_internal PRIVATE
                            ${CMAKE_CURRENT_SOURCE_DIR}/include
                            ${PROJECT_BINARY_DIR})
 
-target_link_libraries(glfw_internal PRIVATE glfw ${GLFW_STATIC_LIBRARIES})
+target_link_libraries(glfw_internal PRIVATE glfw)
 set(FILES_TO_COPY ${GLFW_BINARY_DIR}/src/libglfw3.a)
-install(TARGETS glfw_internal DESTINATION ${CMAKE_BINARY_DIR})
+
+if(UNIX)
+    include(GNUInstallDirs)
+    install(TARGETS glfw_internal DESTINATION ${CMAKE_INSTALL_LIBDIR})
+else()
+    install(TARGETS glfw_internal DESTINATION ${CMAKE_INSTALL_PREFIX})
+endif()
+
