@@ -5,7 +5,18 @@
 #include "osx_window_context.h"
 #include "osx_vertex_buffer.h"
 
+typedef struct {
+    MTLVertexFormat vertex_format;
+    int32_t divide_by_components;
+} DivisionToMslAttrTraits_;
+
 static inline MTLPrimitiveType division_topology_to_mtl_type(DivisionRenderTopology topology);
+static inline MTLVertexDescriptor* create_vertex_descriptor(const DivisionVertexBuffer* vertex_buffer);
+static inline void define_msl_vertex_attributes(
+    const DivisionVertexAttribute* attributes, int32_t attribute_count,
+    MTLVertexAttributeDescriptorArray* attr_desc_arr, size_t attributes_offset, int32_t buffer_index);
+
+static inline DivisionToMslAttrTraits_ get_vert_attr_msl_traits_(DivisionShaderVariableType attrType);
 
 bool division_engine_internal_platform_vertex_buffer_context_alloc(
     DivisionContext* ctx, const DivisionSettings* settings)
@@ -60,15 +71,17 @@ bool division_engine_internal_platform_vertex_buffer_realloc(DivisionContext* ct
 bool division_engine_internal_platform_vertex_buffer_impl_init_element(DivisionContext* ctx, uint32_t buffer_id)
 {
     DivisionOSXWindowContext* window_context = ctx->renderer_context->window_data;
+    id<MTLDevice> device = window_context->app_delegate->viewDelegate->device;
     DivisionVertexBufferSystemContext* vert_buffer_ctx = ctx->vertex_buffer_context;
     const DivisionVertexBuffer* vertex_buffer = &vert_buffer_ctx->buffers[buffer_id];
     DivisionVertexBufferInternalPlatform_* impl_buffer = &vert_buffer_ctx->buffers_impl[buffer_id];
 
     DivisionOSXViewDelegate* view_delegate = window_context->app_delegate->viewDelegate;
-    id <MTLBuffer> vert_buffer = [view_delegate
-        createBufferWithSize:vertex_buffer->per_vertex_data_size * vertex_buffer->vertex_count +
-                             vertex_buffer->per_instance_data_size * vertex_buffer->instance_count
-    ];
+
+    size_t buffer_size = vertex_buffer->per_vertex_data_size * vertex_buffer->vertex_count +
+                         vertex_buffer->per_instance_data_size * vertex_buffer->instance_count;
+
+    id <MTLBuffer> vert_buffer = [device newBufferWithLength: buffer_size options: MTLResourceStorageModeManaged];
 
     if (vert_buffer == nil)
     {
@@ -76,7 +89,7 @@ bool division_engine_internal_platform_vertex_buffer_impl_init_element(DivisionC
         return false;
     }
 
-    MTLVertexDescriptor* vertex_descriptor = [view_delegate createVertexDescriptorForBuffer:vertex_buffer];
+    MTLVertexDescriptor* vertex_descriptor = create_vertex_descriptor(vertex_buffer);
 
     if (vertex_descriptor == nil)
     {
@@ -104,5 +117,89 @@ MTLPrimitiveType division_topology_to_mtl_type(DivisionRenderTopology topology)
         default:
             fprintf(stderr, "Unknown topology");
             return 0;
+    }
+}
+
+MTLVertexDescriptor* create_vertex_descriptor(const DivisionVertexBuffer* vertex_buffer)
+{
+    MTLVertexDescriptor* descriptor = [MTLVertexDescriptor new];
+    MTLVertexAttributeDescriptorArray* attrDescArray = [descriptor attributes];
+
+    define_msl_vertex_attributes(
+        vertex_buffer->per_vertex_attributes,
+        vertex_buffer->per_vertex_attribute_count,
+        attrDescArray,
+        0,
+        DIVISION_MTL_VERTEX_DATA_BUFFER_INDEX
+    );
+
+    MTLVertexBufferLayoutDescriptor* perVertexLayoutDesc =
+        [[descriptor layouts] objectAtIndexedSubscript:DIVISION_MTL_VERTEX_DATA_BUFFER_INDEX];
+
+    [perVertexLayoutDesc setStride:vertex_buffer->per_vertex_data_size];
+    [perVertexLayoutDesc setStepFunction:MTLVertexStepFunctionPerVertex];
+
+    if (vertex_buffer->per_instance_attribute_count > 0)
+    {
+        define_msl_vertex_attributes(
+            vertex_buffer->per_instance_attributes,
+            vertex_buffer->per_instance_attribute_count,
+            attrDescArray,
+            vertex_buffer->per_vertex_data_size * vertex_buffer->vertex_count,
+            DIVISION_MTL_VERTEX_DATA_INSTANCE_ARRAY_INDEX
+        );
+
+        MTLVertexBufferLayoutDescriptor* perInstanceLayoutDesc =
+            [[descriptor layouts] objectAtIndexedSubscript:DIVISION_MTL_VERTEX_DATA_INSTANCE_ARRAY_INDEX];
+
+        [perInstanceLayoutDesc setStride:vertex_buffer->per_instance_data_size];
+        [perInstanceLayoutDesc setStepFunction:MTLVertexStepFunctionPerInstance];
+    }
+
+    return descriptor;
+}
+
+void define_msl_vertex_attributes(
+    const DivisionVertexAttribute* attributes, int32_t attribute_count,
+    MTLVertexAttributeDescriptorArray* attr_desc_arr, size_t attributes_offset, int32_t buffer_index)
+{
+    for (int i = 0; i < attribute_count; i++)
+    {
+        const DivisionVertexAttribute* attr = &attributes[i];
+        DivisionToMslAttrTraits_ traits = get_vert_attr_msl_traits_(attr->type);
+        size_t gl_attr_comp_count = (attr->component_count / traits.divide_by_components);
+        size_t comp_size = attr->base_size * gl_attr_comp_count;
+        size_t offset = attributes_offset + attr->offset;
+
+        for (int comp_idx = 0; comp_idx < gl_attr_comp_count; comp_idx++)
+        {
+            MTLVertexAttributeDescriptor* attrDesc = [attr_desc_arr objectAtIndexedSubscript:attr->location + comp_idx];
+            [attrDesc setOffset:offset + comp_idx * comp_size];
+            [attrDesc setBufferIndex:buffer_index];
+            [attrDesc setFormat:traits.vertex_format];
+        }
+    }
+}
+
+DivisionToMslAttrTraits_ get_vert_attr_msl_traits_(DivisionShaderVariableType attrType)
+{
+    switch (attrType)
+    {
+        case DIVISION_FLOAT:
+            return (DivisionToMslAttrTraits_) {MTLVertexFormatFloat, 1};
+        case DIVISION_INTEGER:
+            return (DivisionToMslAttrTraits_) {MTLVertexFormatInt, 1};
+        case DIVISION_FVEC2:
+            return (DivisionToMslAttrTraits_) {MTLVertexFormatFloat2, 1};
+        case DIVISION_FVEC3:
+            return (DivisionToMslAttrTraits_) {MTLVertexFormatFloat3, 1};
+        case DIVISION_FVEC4:
+            return (DivisionToMslAttrTraits_) {MTLVertexFormatFloat4, 1};
+        case DIVISION_FMAT4X4:
+            return (DivisionToMslAttrTraits_) {MTLVertexFormatFloat4, 4};
+        case DIVISION_DOUBLE:
+        default:
+            fprintf(stderr, "Unsupported attribute format");
+            exit(1);
     }
 }

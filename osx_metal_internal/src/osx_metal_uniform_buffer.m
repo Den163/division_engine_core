@@ -34,7 +34,7 @@ void division_engine_internal_platform_uniform_buffer_return_data_pointer(
     DivisionContext* ctx, uint32_t buffer_id, void* data_pointer)
 {
     DivisionUniformBufferSystemContext* uniform_buffer_ctx = ctx->uniform_buffer_context;
-    id<MTLBuffer> mtl_buffer = uniform_buffer_ctx->uniform_buffers_impl[buffer_id].mtl_buffer;
+    id <MTLBuffer> mtl_buffer = uniform_buffer_ctx->uniform_buffers_impl[buffer_id].mtl_buffer;
     [mtl_buffer didModifyRange:NSMakeRange(0, [mtl_buffer length])];
 }
 
@@ -55,11 +55,15 @@ bool division_engine_internal_platform_uniform_buffer_impl_init_element(
     DivisionContext* ctx, uint32_t buffer_id)
 {
     DivisionOSXWindowContext* window_ctx = ctx->renderer_context->window_data;
+    id <MTLDevice> device = window_ctx->app_delegate->viewDelegate->device;
     DivisionUniformBufferSystemContext* uniform_buffer_ctx = ctx->uniform_buffer_context;
 
     DivisionUniformBufferDescriptor* uniform_buffer = &uniform_buffer_ctx->uniform_buffers[buffer_id];
     DivisionUniformBufferInternal_* internal_buffer = &uniform_buffer_ctx->uniform_buffers_impl[buffer_id];
-    id<MTLBuffer> mtl_buffer = [window_ctx->app_delegate->viewDelegate createBufferWithSize:uniform_buffer->data_bytes];
+
+    id <MTLBuffer> mtl_buffer = [device newBufferWithLength:uniform_buffer->data_bytes
+                                                    options:MTLResourceStorageModeManaged];
+
     if (mtl_buffer == nil)
     {
         ctx->error_callback(DIVISION_INTERNAL_ERROR, "Failed to create MTLBuffer");

@@ -9,6 +9,9 @@
 #include "division_engine_core/vertex_buffer.h"
 #include "osx_shader_context.h"
 
+#define DIVISION_MTL_VERTEX_DATA_BUFFER_INDEX 29
+#define DIVISION_MTL_VERTEX_DATA_INSTANCE_ARRAY_INDEX 30
+
 @interface DivisionOSXViewDelegate : NSObject <MTKViewDelegate>
 {
 @public
@@ -28,14 +31,5 @@
 - (instancetype)initWithContext:(DivisionContext*)aContext
                        settings:(const DivisionSettings*)aSettings
                          device:(id)aDevice;
-
-- (id <MTLBuffer>)createBufferWithSize:(size_t)data_bytes;
-
-- (MTLVertexDescriptor*)createVertexDescriptorForBuffer:(const DivisionVertexBuffer*)vertexBuffer;
-
-- (bool)createShaderProgramWithSettings:
-    (const DivisionShaderSettings*)shaderSettings
-                            sourceCount:(int32_t)sourceCount
-                             outProgram:(DivisionMetalShaderProgram*)out_program;
 
 @end

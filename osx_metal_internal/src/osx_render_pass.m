@@ -59,13 +59,13 @@ bool division_engine_internal_platform_render_pass_impl_init_element(DivisionCon
     DivisionAlphaBlendingOptions* blend_options = &render_pass->alpha_blending_options;
 
     MTLRenderPipelineDescriptor* pipeline_descriptor = [MTLRenderPipelineDescriptor new];
-    if (shader_program->vertex_function != NULL)
+    if (shader_program->vertex_function != nil)
     {
         [pipeline_descriptor setVertexFunction:shader_program->vertex_function];
         [pipeline_descriptor setVertexDescriptor:vert_buff->mtl_vertex_descriptor];
     }
 
-    if (shader_program->fragment_function != NULL)
+    if (shader_program->fragment_function != nil)
     {
         [pipeline_descriptor setFragmentFunction:shader_program->fragment_function];
     }

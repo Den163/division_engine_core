@@ -42,37 +42,46 @@ int main()
 
 void init_callback(DivisionContext* ctx)
 {
+    const char* vert_shader_entry_point;
+    const char* frag_shader_entry_point;
+    char* vert_shader_src;
+    char* frag_shader_src;
+    size_t vert_shader_size;
+    size_t frag_shader_size;
+
 #if __APPLE__
-    DivisionShaderSettings shader_settings[] = {
-        (DivisionShaderSettings) {
-            .type = DIVISION_SHADER_VERTEX,
-            .file_path = "test.vert.metal",
-            .entry_point_name = "vert",
-        },
-        (DivisionShaderSettings) {
-            .type = DIVISION_SHADER_FRAGMENT,
-            .file_path = "test.frag.metal",
-            .entry_point_name = "frag",
-        }
-    };
+    vert_shader_entry_point = "vert";
+    frag_shader_entry_point = "frag";
+
+    division_io_read_all_bytes_from_file("test.vert.metal", (void**) &vert_shader_src, &vert_shader_size);
+    division_io_read_all_bytes_from_file("test.frag.metal", (void**) &frag_shader_src, &frag_shader_size);
 #else
-    DivisionShaderSettings shader_settings[] = {
-        (DivisionShaderSettings) {
+    vert_shader_entry_point = "main";
+    frag_shader_entry_point = "main";
+
+    division_io_read_all_bytes_from_file("test.vert", (void**) &vert_shader_src, &vert_shader_size);
+    division_io_read_all_bytes_from_file("test.vert", (void**) &frag_shader_src, &frag_shader_size);
+#endif
+
+    DivisionShaderSourceDescriptor shader_settings[] = {
+        (DivisionShaderSourceDescriptor) {
             .type = DIVISION_SHADER_VERTEX,
-            .file_path = "test.vert",
-            .entry_point_name = "main",
+            .entry_point_name = vert_shader_entry_point,
+            .source = vert_shader_src,
+            .source_size = vert_shader_size
         },
-        (DivisionShaderSettings) {
+        (DivisionShaderSourceDescriptor) {
             .type = DIVISION_SHADER_FRAGMENT,
-            .file_path = "test.frag",
-            .entry_point_name = "main",
+            .entry_point_name = frag_shader_entry_point,
+            .source = frag_shader_src,
+            .source_size = frag_shader_size
         }
     };
-#endif
-    int32_t source_count = sizeof(shader_settings) / sizeof(DivisionShaderSettings);
+
+    int32_t source_count = sizeof(shader_settings) / sizeof(DivisionShaderSourceDescriptor);
 
     uint32_t shader_program;
-    division_engine_shader_program_alloc(ctx, shader_settings, source_count, &shader_program);
+    assert(division_engine_shader_program_alloc(ctx, shader_settings, source_count, &shader_program));
 
     VertexData vd[] = {
         {.position = {-0.5f, -0.5f, 0}, .color = {1, 1, 1, 0}, .uv = {0, 1}},

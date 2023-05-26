@@ -16,8 +16,8 @@ DIVISION_EXPORT void division_engine_internal_platform_shader_system_context_fre
 
 DIVISION_EXPORT bool division_engine_internal_platform_shader_program_alloc(
     DivisionContext* ctx,
-    const DivisionShaderSettings* settings,
-    int32_t source_count,
+    const DivisionShaderSourceDescriptor* shader_descriptors,
+    int32_t shader_descriptor_count,
     uint32_t* out_shader_program_id
 );
 

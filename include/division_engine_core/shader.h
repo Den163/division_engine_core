@@ -23,11 +23,12 @@ typedef enum DivisionShaderVariableType {
     DIVISION_FMAT4X4 = 7
 } DivisionShaderVariableType;
 
-typedef struct DivisionShaderSettings {
+typedef struct DivisionShaderSourceDescriptor {
     DivisionShaderType type;
-    const char* file_path;
     const char* entry_point_name;
-} DivisionShaderSettings;
+    const char* source;
+    uint32_t source_size;
+} DivisionShaderSourceDescriptor;
 
 typedef struct DivisionShaderSystemContext {
     DivisionUnorderedIdTable id_table;
@@ -44,8 +45,8 @@ extern "C" {
 
 DIVISION_EXPORT bool division_engine_shader_program_alloc(
     DivisionContext* ctx,
-    const DivisionShaderSettings* settings,
-    int32_t source_count,
+    const DivisionShaderSourceDescriptor* descriptors,
+    int32_t descriptor_count,
     uint32_t* out_shader_program_id
 );
 
