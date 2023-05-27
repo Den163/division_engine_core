@@ -79,7 +79,7 @@ DIVISION_EXPORT bool division_engine_vertex_buffer_alloc(
 DIVISION_EXPORT void division_engine_vertex_buffer_free(DivisionContext* ctx, uint32_t vertex_buffer_id);
 
 DIVISION_EXPORT void* division_engine_vertex_buffer_borrow_data_pointer(
-    DivisionContext* ctx, uint32_t vertex_buffer);
+    DivisionContext* ctx, uint32_t vertex_buffer, uint32_t* vertex_data_offset, uint32_t* instance_data_offset);
 DIVISION_EXPORT void division_engine_vertex_buffer_return_data_pointer(
     DivisionContext* ctx, uint32_t vertex_buffer, void* data_pointer);
 

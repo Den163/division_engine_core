@@ -51,7 +51,9 @@ bool division_engine_internal_platform_uniform_buffer_impl_init_element(
 
 void division_engine_internal_platform_uniform_buffer_free(DivisionContext* ctx, uint32_t buffer_id)
 {
-    glDeleteBuffers(1, &ctx->uniform_buffer_context->uniform_buffers_impl[buffer_id].gl_buffer);
+    DivisionUniformBufferInternal_* buff = &ctx->uniform_buffer_context->uniform_buffers_impl[buffer_id];
+    glDeleteBuffers(1, &buff->gl_buffer);
+    buff->gl_buffer = 0;
 }
 
 void* division_engine_internal_platform_uniform_buffer_borrow_data_pointer(

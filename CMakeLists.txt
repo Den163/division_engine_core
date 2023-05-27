@@ -5,7 +5,9 @@ set(CMAKE_C_STANDARD 11)
 
 include(GenerateExportHeader)
 
-add_subdirectory(example)
+if(DEFINED ENV{DIVISION_BUILD_EXAMPLE})
+    add_subdirectory(example)
+endif()
 
 if (TARGET tests)
     add_subdirectory(tests)

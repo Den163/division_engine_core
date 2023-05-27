@@ -173,6 +173,9 @@ void free_buffer_data_and_handle_error(DivisionContext* ctx, DivisionVertexBuffe
     division_unordered_id_table_remove(&ctx->vertex_buffer_context->id_table, buffer_id);
     free(buffer->per_vertex_attributes);
     free(buffer->per_instance_attributes);
+    buffer->per_vertex_attributes = NULL;
+    buffer->per_instance_attributes = NULL;
+
     ctx->error_callback(DIVISION_INTERNAL_ERROR, "Division error: Failed to alloc a Vertex Buffer");
 }
 
@@ -185,13 +188,20 @@ void division_engine_vertex_buffer_free(DivisionContext* ctx, uint32_t vertex_bu
         free(vertex_buffer->per_vertex_attributes);
         free(vertex_buffer->per_instance_attributes);
         vertex_buffer->per_vertex_attributes = NULL;
+        vertex_buffer->per_instance_attributes = NULL;
     }
 
     division_unordered_id_table_remove(&ctx->vertex_buffer_context->id_table, vertex_buffer_id);
 }
 
-void* division_engine_vertex_buffer_borrow_data_pointer(DivisionContext* ctx, uint32_t vertex_buffer)
+void* division_engine_vertex_buffer_borrow_data_pointer(
+    DivisionContext* ctx, uint32_t vertex_buffer, uint32_t* vertex_data_offset, uint32_t* instance_data_offset)
 {
+    const DivisionVertexBuffer* buff = &ctx->vertex_buffer_context->buffers[vertex_buffer];
+
+    *vertex_data_offset = 0;
+    *instance_data_offset = buff->per_vertex_data_size * buff->vertex_count;
+
     return division_engine_internal_platform_vertex_buffer_borrow_data_pointer(ctx, vertex_buffer);
 }
 

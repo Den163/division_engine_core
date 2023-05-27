@@ -73,7 +73,9 @@ void division_engine_internal_platform_texture_set_data(DivisionContext* ctx, ui
 }
 void division_engine_internal_platform_texture_free(DivisionContext* ctx, uint32_t texture_id)
 {
-    glDeleteTextures(1, &ctx->texture_context->textures_impl[texture_id].gl_texture);
+    DivisionTextureImpl_* texture = &ctx->texture_context->textures_impl[texture_id];
+    glDeleteTextures(1, &texture->gl_texture);
+    texture->gl_texture = 0;
 }
 
 bool get_texture_traits(DivisionContext* ctx, DivisionTextureFormat texture_format, GlTextureTraits_* out_traits)

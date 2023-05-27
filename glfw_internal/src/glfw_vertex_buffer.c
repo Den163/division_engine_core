@@ -139,6 +139,9 @@ void division_engine_internal_platform_vertex_buffer_free(DivisionContext* ctx, 
     DivisionVertexBufferInternalPlatform_ buffer_impl = ctx->vertex_buffer_context->buffers_impl[buffer_id];
     glDeleteBuffers(1, &buffer_impl.gl_vbo);
     glDeleteVertexArrays(1, &buffer_impl.gl_vao);
+
+    buffer_impl.gl_vbo = 0;
+    buffer_impl.gl_vao = 0;
 }
 
 void* division_engine_internal_platform_vertex_buffer_borrow_data_pointer(

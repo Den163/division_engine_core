@@ -77,7 +77,11 @@ bool division_engine_internal_platform_shader_program_alloc(
 
 void division_engine_internal_platform_shader_program_free(DivisionContext* ctx, uint32_t shader_program_id)
 {
-    glDeleteProgram(ctx->shader_context->shaders_impl[shader_program_id].gl_shader_program);
+    DivisionShaderInternal_* prog = &ctx->shader_context->shaders_impl[shader_program_id];
+
+    glDeleteProgram(prog->gl_shader_program);
+    prog->gl_shader_program = 0;
+
     division_unordered_id_table_remove(&ctx->shader_context->id_table, shader_program_id);
 }
 
