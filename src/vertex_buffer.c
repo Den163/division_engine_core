@@ -195,12 +195,14 @@ void division_engine_vertex_buffer_free(DivisionContext* ctx, uint32_t vertex_bu
 }
 
 void* division_engine_vertex_buffer_borrow_data_pointer(
-    DivisionContext* ctx, uint32_t vertex_buffer, uint32_t* vertex_data_offset, uint32_t* instance_data_offset)
+    DivisionContext* ctx, uint32_t vertex_buffer, DivisionVertexBufferDataBorrowInfo* out_borrow_info)
 {
     const DivisionVertexBuffer* buff = &ctx->vertex_buffer_context->buffers[vertex_buffer];
 
-    *vertex_data_offset = 0;
-    *instance_data_offset = buff->per_vertex_data_size * buff->vertex_count;
+    out_borrow_info->vertex_data_offset = 0;
+    out_borrow_info->instance_data_offset = buff->per_vertex_data_size * buff->vertex_count;;
+    out_borrow_info->vertex_count = buff->vertex_count;
+    out_borrow_info->instance_count = buff->instance_count;
 
     return division_engine_internal_platform_vertex_buffer_borrow_data_pointer(ctx, vertex_buffer);
 }

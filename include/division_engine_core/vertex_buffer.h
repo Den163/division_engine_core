@@ -59,6 +59,12 @@ typedef struct DivisionVertexBufferSettings {
     DivisionRenderTopology topology;
 } DivisionVertexBufferSettings;
 
+typedef struct DivisionVertexBufferDataBorrowInfo {
+    uint32_t vertex_data_offset;
+    uint32_t instance_data_offset;
+    uint32_t vertex_count;
+    uint32_t instance_count;
+} DivisionVertexBufferDataBorrowInfo;
 
 bool division_engine_internal_vertex_buffer_context_alloc(DivisionContext* ctx, const DivisionSettings* settings);
 void division_engine_internal_vertex_buffer_context_free(DivisionContext* ctx);
@@ -79,7 +85,7 @@ DIVISION_EXPORT bool division_engine_vertex_buffer_alloc(
 DIVISION_EXPORT void division_engine_vertex_buffer_free(DivisionContext* ctx, uint32_t vertex_buffer_id);
 
 DIVISION_EXPORT void* division_engine_vertex_buffer_borrow_data_pointer(
-    DivisionContext* ctx, uint32_t vertex_buffer, uint32_t* vertex_data_offset, uint32_t* instance_data_offset);
+    DivisionContext* ctx, uint32_t vertex_buffer, DivisionVertexBufferDataBorrowInfo* out_borrow_info);
 DIVISION_EXPORT void division_engine_vertex_buffer_return_data_pointer(
     DivisionContext* ctx, uint32_t vertex_buffer, void* data_pointer);
 
