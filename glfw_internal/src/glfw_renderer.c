@@ -19,7 +19,8 @@
 #include "division_engine_core/platform_internal/platform_renderer.h"
 
 static inline void renderer_draw(DivisionContext* ctx);
-static inline void bind_uniform_buffer(DivisionUniformBufferSystemContext* ctx, uint32_t buffer_id);
+static inline void bind_uniform_buffer(
+    DivisionUniformBufferSystemContext* ctx, const DivisionIdWithBinding* buffer_binding);
 
 typedef struct DivisionWindowContextPlatformInternal_* DivisionWindowContextPlatformInternalPtr_;
 
@@ -120,12 +121,12 @@ void renderer_draw(DivisionContext* ctx)
 
         for (int uniform_idx = 0; uniform_idx < pass->uniform_vertex_buffer_count; uniform_idx++)
         {
-            bind_uniform_buffer(uniform_buff_ctx, pass->uniform_vertex_buffers[uniform_idx]);
+            bind_uniform_buffer(uniform_buff_ctx, &pass->uniform_vertex_buffers[uniform_idx]);
         }
 
         for (int uniform_idx = 0; uniform_idx < pass->uniform_fragment_buffer_count; uniform_idx++)
         {
-            bind_uniform_buffer(uniform_buff_ctx, pass->uniform_fragment_buffers[uniform_idx]);
+            bind_uniform_buffer(uniform_buff_ctx, &pass->uniform_fragment_buffers[uniform_idx]);
         }
 
         for (int frag_tex_idx = 0; frag_tex_idx < pass->fragment_texture_count; frag_tex_idx++)
@@ -169,10 +170,10 @@ void renderer_draw(DivisionContext* ctx)
     }
 }
 
-void bind_uniform_buffer(DivisionUniformBufferSystemContext* ctx, uint32_t buffer_id)
+void bind_uniform_buffer(DivisionUniformBufferSystemContext* ctx, const DivisionIdWithBinding* buffer_binding)
 {
+    uint32_t buffer_id = buffer_binding->id;
     GLuint gl_uniform_buff = ctx->uniform_buffers_impl[buffer_id].gl_buffer;
-    DivisionUniformBufferDescriptor* uniform_buffer = &ctx->uniform_buffers[buffer_id];
 
-    glBindBufferBase(GL_UNIFORM_BUFFER, uniform_buffer->binding, gl_uniform_buff);
+    glBindBufferBase(GL_UNIFORM_BUFFER, buffer_binding->shader_location, gl_uniform_buff);
 }

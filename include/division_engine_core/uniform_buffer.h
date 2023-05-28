@@ -12,7 +12,6 @@ struct DivisionUniformBufferInternal_;
 
 typedef struct DivisionUniformBufferDescriptor {
     size_t data_bytes;
-    int32_t binding;
 } DivisionUniformBufferDescriptor;
 
 typedef struct DivisionUniformBufferSystemContext {
