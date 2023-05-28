@@ -1,5 +1,6 @@
 #include "DivisionOSXViewDelegate.h"
 
+#include "division_engine_core/render_pass.h"
 #include "division_engine_core/renderer.h"
 #include "division_engine_core/texture.h"
 #include "division_engine_core/uniform_buffer.h"
@@ -47,6 +48,14 @@
         DivisionUniformBufferSystemContext* uniform_buff_ctx = context->uniform_buffer_context;
         DivisionTextureSystemContext* tex_ctx = context->texture_context;
 
+        CGSize drawable_size = [view drawableSize];
+        [renderEnc setViewport:(MTLViewport) {
+            .originX=0, .originY=0,
+            .width=drawable_size.width, .height=drawable_size.height,
+            .znear=0.0f, .zfar=1.0f
+        }];
+        [renderEnc setFrontFacingWinding:MTLWindingCounterClockwise];
+
         uint32_t* render_pass_ids = render_pass_ctx->id_table.orders;
         for (int32_t i = 0; i < render_pass_ctx->id_table.orders_count; i++)
         {
@@ -64,18 +73,16 @@
 
             for (int ubIdx = 0; ubIdx < pass->uniform_vertex_buffer_count; ubIdx++)
             {
-                uint32_t buff_id = pass->uniform_vertex_buffers[ubIdx];
-                id <MTLBuffer> uniformBuff = uniform_buff_ctx->uniform_buffers_impl[buff_id].mtl_buffer;
-                DivisionUniformBufferDescriptor buffDesc = uniform_buff_ctx->uniform_buffers[buff_id];
-                [renderEnc setVertexBuffer:uniformBuff offset:0 atIndex:buffDesc.binding];
+                const DivisionIdWithBinding* buff_binding = &pass->uniform_vertex_buffers[ubIdx];
+                id <MTLBuffer> uniformBuff = uniform_buff_ctx->uniform_buffers_impl[buff_binding->id].mtl_buffer;
+                [renderEnc setVertexBuffer:uniformBuff offset:0 atIndex:buff_binding->shader_location];
             }
 
             for (int ubIdx = 0; ubIdx < pass->uniform_fragment_buffer_count; ubIdx++)
             {
-                uint32_t buff_id = pass->uniform_fragment_buffers[ubIdx];
-                id <MTLBuffer> uniformBuff = uniform_buff_ctx->uniform_buffers_impl[buff_id].mtl_buffer;
-                DivisionUniformBufferDescriptor buffDesc = uniform_buff_ctx->uniform_buffers[buff_id];
-                [renderEnc setFragmentBuffer:uniformBuff offset:0 atIndex:buffDesc.binding];
+                const DivisionIdWithBinding* buff_binding = &pass->uniform_fragment_buffers[ubIdx];
+                id <MTLBuffer> uniformBuff = uniform_buff_ctx->uniform_buffers_impl[buff_binding->id].mtl_buffer;
+                [renderEnc setFragmentBuffer:uniformBuff offset:0 atIndex:buff_binding->shader_location];
             }
 
             for (int texIdx = 0; texIdx < pass->fragment_texture_count; texIdx++)
@@ -84,10 +91,11 @@
                 const DivisionTextureImpl_* tex_impl = &tex_ctx->textures_impl[texture_binding->id];
 
                 [renderEnc setFragmentTexture:tex_impl->mtl_texture atIndex:texture_binding->shader_location];
+                [renderEnc setFragmentSamplerState:tex_impl->mtl_sampler atIndex:texture_binding->shader_location];
             }
 
             [renderEnc
-                setBlendColorRed: blend_color[0] green: blend_color[1] blue: blend_color[2] alpha: blend_color[3]];
+                setBlendColorRed:blend_color[0] green:blend_color[1] blue:blend_color[2] alpha:blend_color[3]];
 
             if (pass->instance_count > 0)
             {

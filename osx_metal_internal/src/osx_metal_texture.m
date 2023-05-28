@@ -56,11 +56,13 @@ bool division_engine_internal_platform_texture_impl_init_new_element(DivisionCon
 
     @autoreleasepool
     {
-        MTLTextureDescriptor* descriptor = [MTLTextureDescriptor new];
-        descriptor.width = tex->width;
-        descriptor.height = tex->height;
+        MTLSamplerDescriptor* sample_desc = [MTLSamplerDescriptor new];
+        MTLTextureDescriptor* tex_desc = [MTLTextureDescriptor new];
+        tex_desc.width = tex->width;
+        tex_desc.height = tex->height;
 
-        tex_impl->mtl_texture = [device newTextureWithDescriptor:descriptor];
+        tex_impl->mtl_texture = [device newTextureWithDescriptor:tex_desc];
+        tex_impl->mtl_sampler = [device newSamplerStateWithDescriptor:sample_desc];
     }
     tex_impl->bytes_per_pixel = traits.mtl_bytes_per_pixel;
     tex_impl->src_data_bytes_per_pixel = traits.src_data_bytes_per_pixel;

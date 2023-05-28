@@ -76,8 +76,6 @@ bool division_engine_internal_platform_vertex_buffer_impl_init_element(DivisionC
     const DivisionVertexBuffer* vertex_buffer = &vert_buffer_ctx->buffers[buffer_id];
     DivisionVertexBufferInternalPlatform_* impl_buffer = &vert_buffer_ctx->buffers_impl[buffer_id];
 
-    DivisionOSXViewDelegate* view_delegate = window_context->app_delegate->viewDelegate;
-
     size_t buffer_size = vertex_buffer->per_vertex_data_size * vertex_buffer->vertex_count +
                          vertex_buffer->per_instance_data_size * vertex_buffer->instance_count;
 
