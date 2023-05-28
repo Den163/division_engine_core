@@ -117,6 +117,7 @@ void renderer_draw(DivisionContext* ctx)
 
         glBindVertexArray(vb_internal.gl_vao);
         glBindBuffer(GL_ARRAY_BUFFER, vb_internal.gl_vbo);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vb_internal.gl_index_buffer);
         glUseProgram(shader_internal.gl_shader_program);
 
         for (int uniform_idx = 0; uniform_idx < pass->uniform_vertex_buffer_count; uniform_idx++)
@@ -154,18 +155,15 @@ void renderer_draw(DivisionContext* ctx)
             division_utility_mask_has_flag(pass->color_mask, DIVISION_COLOR_MASK_A)
         );
 
-        if (pass->instance_count > 0)
+        if (division_utility_mask_has_flag(pass->capabilities_mask, DIVISION_RENDER_PASS_CAPABILITY_INSTANCED_RENDERING))
         {
-            glDrawArraysInstanced(
-                vb_internal.gl_topology,
-                (GLint) pass->first_vertex,
-                (GLint) pass->vertex_count,
-                (GLint) pass->instance_count
-            );
+            glDrawElementsInstanced(
+                vb_internal.gl_topology, pass->index_count, GL_UNSIGNED_INT, NULL, pass->instance_count);
         }
         else
         {
-            glDrawArrays(vb_internal.gl_topology, (GLint) pass->first_vertex, (GLint) pass->vertex_count);
+            glDrawElements(
+                vb_internal.gl_topology, pass->index_count, GL_UNSIGNED_INT, NULL);
         }
     }
 }

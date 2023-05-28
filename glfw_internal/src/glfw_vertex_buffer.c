@@ -25,6 +25,8 @@ static inline void enable_gl_attributes(
 bool division_engine_internal_platform_vertex_buffer_context_alloc(
     DivisionContext* ctx, const DivisionSettings* settings)
 {
+    ctx->vertex_buffer_context->buffers_impl = NULL;
+
     return true;
 }
 
@@ -93,8 +95,20 @@ bool division_engine_internal_platform_vertex_buffer_impl_init_element(DivisionC
         .gl_topology = topology_to_gl_type(vertex_buffer->topology)
     };
 
+
     glGenVertexArrays(1, &vertex_buffer_impl.gl_vao);
     glBindVertexArray(vertex_buffer_impl.gl_vao);
+
+    glGenBuffers(1, &vertex_buffer_impl.gl_index_buffer);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vertex_buffer_impl.gl_index_buffer);
+
+    glBufferData(
+        GL_ELEMENT_ARRAY_BUFFER,
+        (GLsizei) sizeof(uint32_t[vertex_buffer->index_count]),
+        NULL,
+        GL_DYNAMIC_DRAW
+    );
+
     glGenBuffers(1, &vertex_buffer_impl.gl_vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_impl.gl_vbo);
 
@@ -129,6 +143,9 @@ bool division_engine_internal_platform_vertex_buffer_impl_init_element(DivisionC
         GL_DYNAMIC_DRAW
     );
 
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
     vertex_ctx->buffers_impl[buffer_id] = vertex_buffer_impl;
 
     return true;
@@ -138,26 +155,46 @@ void division_engine_internal_platform_vertex_buffer_free(DivisionContext* ctx, 
 {
     DivisionVertexBufferInternalPlatform_ buffer_impl = ctx->vertex_buffer_context->buffers_impl[buffer_id];
     glDeleteBuffers(1, &buffer_impl.gl_vbo);
+    glDeleteBuffers(1, &buffer_impl.gl_index_buffer);
     glDeleteVertexArrays(1, &buffer_impl.gl_vao);
 
     buffer_impl.gl_vbo = 0;
     buffer_impl.gl_vao = 0;
+    buffer_impl.gl_index_buffer = 0;
 }
 
-void* division_engine_internal_platform_vertex_buffer_borrow_data_pointer(
-    DivisionContext* ctx, uint32_t buffer_id)
+bool division_engine_internal_platform_vertex_buffer_borrow_data_pointer(
+    DivisionContext* ctx, uint32_t buffer_id, DivisionVertexBufferBorrowedData* out_borrow_data)
 {
-    DivisionVertexBufferInternalPlatform_* vb = &ctx->vertex_buffer_context->buffers_impl[buffer_id];
+    DivisionVertexBufferSystemContext* vertex_buffer_ctx = ctx->vertex_buffer_context;
+    DivisionVertexBufferInternalPlatform_* vb = &vertex_buffer_ctx->buffers_impl[buffer_id];
+    const DivisionVertexBuffer* vertex_buffer = &vertex_buffer_ctx->buffers[buffer_id];
+
     glBindBuffer(GL_ARRAY_BUFFER, vb->gl_vbo);
-    return glMapBuffer(GL_ARRAY_BUFFER, GL_READ_WRITE);
+    void* vbo_ptr = glMapBuffer(GL_ARRAY_BUFFER, GL_READ_WRITE);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vb->gl_index_buffer);
+    void* idx_ptr = glMapBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_READ_WRITE);
+
+    out_borrow_data->vertex_data_ptr = vbo_ptr;
+    out_borrow_data->instance_data_ptr = vbo_ptr + vertex_buffer->vertex_count * vertex_buffer->per_vertex_data_size;
+    out_borrow_data->index_data_ptr = idx_ptr;
+
+    return true;
 }
 
 void division_engine_internal_platform_vertex_buffer_return_data_pointer(
-    DivisionContext* ctx, uint32_t buffer_id, void* data_pointer)
+    DivisionContext* ctx, uint32_t buffer_id, DivisionVertexBufferBorrowedData* out_borrow_data)
 {
     DivisionVertexBufferInternalPlatform_* vb = &ctx->vertex_buffer_context->buffers_impl[buffer_id];
     glBindBuffer(GL_ARRAY_BUFFER, vb->gl_vbo);
     glUnmapBuffer(GL_ARRAY_BUFFER);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vb->gl_index_buffer);
+    glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
 void enable_gl_attributes(

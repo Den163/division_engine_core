@@ -16,9 +16,10 @@ bool division_engine_internal_texture_context_alloc(DivisionContext* ctx, const 
 void division_engine_internal_texture_context_free(DivisionContext* ctx)
 {
     division_engine_internal_platform_texture_context_free(ctx);
+    division_unordered_id_table_free(&ctx->texture_context->id_table);
 
     free(ctx->texture_context->textures);
-    division_unordered_id_table_free(&ctx->texture_context->id_table);
+    free(ctx->texture_context);
 }
 
 bool division_engine_texture_alloc(DivisionContext* ctx, const DivisionTexture* texture, uint32_t* out_texture_id)

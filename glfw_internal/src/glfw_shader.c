@@ -58,7 +58,7 @@ bool division_engine_internal_platform_shader_program_alloc(
     {
         shader_ctx->shaders_impl = realloc(
             shader_ctx->shaders_impl,
-            sizeof(DivisionShaderInternal_[shader_ctx->shader_count])
+            sizeof(DivisionShaderInternal_[program_id + 1])
         );
 
         if (shader_ctx->shaders_impl == NULL)
@@ -67,6 +67,8 @@ bool division_engine_internal_platform_shader_program_alloc(
             ctx->error_callback(DIVISION_INTERNAL_ERROR, "Failed to realloc Shader Implementation array");
             return false;
         }
+
+        shader_ctx->shader_count++;
     }
 
     shader_ctx->shaders_impl[program_id] = (DivisionShaderInternal_) {.gl_shader_program = gl_program};

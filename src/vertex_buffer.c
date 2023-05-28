@@ -43,7 +43,9 @@ void division_engine_internal_vertex_buffer_context_free(DivisionContext* ctx)
 
     for (int i = 0; i < vertex_buffer_ctx->buffers_count; i++)
     {
-        free(vertex_buffer_ctx->buffers[i].per_vertex_attributes);
+        DivisionVertexBuffer* buff = &vertex_buffer_ctx->buffers[i];
+        free(buff->per_vertex_attributes);
+        free(buff->per_instance_attributes);
     }
 
     free(vertex_buffer_ctx->buffers);

@@ -58,6 +58,12 @@ bool division_engine_internal_platform_render_pass_impl_init_element(DivisionCon
             return false;
         }
     }
+    else 
+    {
+        pass_impl->gl_blend_src = 0;
+        pass_impl->gl_blend_dst = 0;
+        pass_impl->gl_blend_equation = 0;
+    }
 
     return true;
 }
