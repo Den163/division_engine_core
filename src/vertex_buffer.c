@@ -63,6 +63,7 @@ bool division_engine_vertex_buffer_alloc(
         .per_instance_attributes = NULL,
         .per_instance_attribute_count = vertex_buffer_settings->per_instance_attribute_count,
         .vertex_count = vertex_buffer_settings->vertex_count,
+        .index_count = vertex_buffer_settings->index_count,
         .instance_count = vertex_buffer_settings->instance_count,
         .topology = vertex_buffer_settings->topology
     };
@@ -194,20 +195,20 @@ void division_engine_vertex_buffer_free(DivisionContext* ctx, uint32_t vertex_bu
     division_unordered_id_table_remove(&ctx->vertex_buffer_context->id_table, vertex_buffer_id);
 }
 
-void* division_engine_vertex_buffer_borrow_data_pointer(
-    DivisionContext* ctx, uint32_t vertex_buffer, DivisionVertexBufferDataBorrowInfo* out_borrow_info)
+bool division_engine_vertex_buffer_borrow_data(
+    DivisionContext* ctx, uint32_t vertex_buffer, DivisionVertexBufferBorrowedData* out_borrow_data)
 {
     const DivisionVertexBuffer* buff = &ctx->vertex_buffer_context->buffers[vertex_buffer];
 
-    out_borrow_info->vertex_data_offset = 0;
-    out_borrow_info->instance_data_offset = buff->per_vertex_data_size * buff->vertex_count;;
-    out_borrow_info->vertex_count = buff->vertex_count;
-    out_borrow_info->instance_count = buff->instance_count;
+    out_borrow_data->vertex_count = buff->vertex_count;
+    out_borrow_data->index_count = buff->index_count;
+    out_borrow_data->instance_count = buff->instance_count;
 
-    return division_engine_internal_platform_vertex_buffer_borrow_data_pointer(ctx, vertex_buffer);
+    return division_engine_internal_platform_vertex_buffer_borrow_data_pointer(ctx, vertex_buffer, out_borrow_data);
 }
 
-void division_engine_vertex_buffer_return_data_pointer(DivisionContext* ctx, uint32_t vertex_buffer, void* data_pointer)
+void division_engine_vertex_buffer_return_data(
+    DivisionContext* ctx, uint32_t vertex_buffer, DivisionVertexBufferBorrowedData* borrow_data)
 {
-    division_engine_internal_platform_vertex_buffer_return_data_pointer(ctx, vertex_buffer, data_pointer);
+    division_engine_internal_platform_vertex_buffer_return_data_pointer(ctx, vertex_buffer, borrow_data);
 }

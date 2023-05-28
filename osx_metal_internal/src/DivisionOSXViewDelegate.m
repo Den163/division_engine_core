@@ -1,6 +1,5 @@
 #include "DivisionOSXViewDelegate.h"
 
-#include "division_engine_core/render_pass.h"
 #include "division_engine_core/renderer.h"
 #include "division_engine_core/texture.h"
 #include "division_engine_core/uniform_buffer.h"
@@ -98,23 +97,26 @@
             }
 
             if (division_utility_mask_has_flag(
-                    pass->capabilities_mask, DIVISION_RENDER_PASS_CAPABILITY_INSTANCED_RENDERING))
+                pass->capabilities_mask, DIVISION_RENDER_PASS_CAPABILITY_INSTANCED_RENDERING))
             {
                 [renderEnc setVertexBuffer:vertDataMtlBuffer
                                     offset:0
                                    atIndex:DIVISION_MTL_VERTEX_DATA_INSTANCE_ARRAY_INDEX];
-
-                [renderEnc drawPrimitives:vert_buffer_impl->mtl_primitive_type
-                              vertexStart:pass->first_vertex
-                              vertexCount:pass->vertex_count
-                            instanceCount:pass->instance_count
+                [renderEnc drawIndexedPrimitives:vert_buffer_impl->mtl_primitive_type
+                                      indexCount:pass->index_count
+                                       indexType:MTLIndexTypeUInt32
+                                     indexBuffer:vert_buffer_impl->mtl_index_buffer
+                               indexBufferOffset:0
+                                   instanceCount:pass->instance_count
                 ];
             }
             else
             {
-                [renderEnc drawPrimitives:vert_buffer_impl->mtl_primitive_type
-                              vertexStart:pass->first_vertex
-                              vertexCount:pass->vertex_count
+                [renderEnc drawIndexedPrimitives:vert_buffer_impl->mtl_primitive_type
+                                      indexCount:pass->index_count
+                                       indexType:MTLIndexTypeUInt32
+                                     indexBuffer:vert_buffer_impl->mtl_index_buffer
+                               indexBufferOffset:0
                 ];
             }
         }

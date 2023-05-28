@@ -67,6 +67,7 @@ typedef struct DivisionRenderPass {
 
     size_t first_vertex;
     size_t vertex_count;
+    size_t index_count;
     size_t instance_count;
     DivisionIdWithBinding* uniform_vertex_buffers;
     int32_t uniform_vertex_buffer_count;

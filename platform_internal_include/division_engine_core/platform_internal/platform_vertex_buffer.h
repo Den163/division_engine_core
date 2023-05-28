@@ -23,11 +23,11 @@ DIVISION_EXPORT bool division_engine_internal_platform_vertex_buffer_realloc(Div
 DIVISION_EXPORT bool division_engine_internal_platform_vertex_buffer_impl_init_element(
     DivisionContext* ctx, uint32_t buffer_id);
 
-DIVISION_EXPORT void* division_engine_internal_platform_vertex_buffer_borrow_data_pointer(
-    DivisionContext* ctx, uint32_t buffer_id);
+DIVISION_EXPORT bool division_engine_internal_platform_vertex_buffer_borrow_data_pointer(
+    DivisionContext* ctx, uint32_t buffer_id, DivisionVertexBufferBorrowedData* out_borrow_data);
 
 DIVISION_EXPORT void division_engine_internal_platform_vertex_buffer_return_data_pointer(
-    DivisionContext* ctx, uint32_t buffer_id, void* data_pointer);
+    DivisionContext* ctx, uint32_t buffer_id, DivisionVertexBufferBorrowedData* out_borrow_data);
 
 #ifdef __cplusplus
 }

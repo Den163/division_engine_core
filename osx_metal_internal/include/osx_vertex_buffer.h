@@ -5,7 +5,7 @@
 typedef struct DivisionVertexBufferInternalPlatform_
 {
     __strong id<MTLBuffer> mtl_vertex_buffer;
+    __strong id<MTLBuffer> mtl_index_buffer;
     __strong MTLVertexDescriptor* mtl_vertex_descriptor;
     MTLPrimitiveType mtl_primitive_type;
-
 } DivisionVertexBufferInternalPlatform_;

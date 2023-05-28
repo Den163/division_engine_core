@@ -37,6 +37,7 @@ typedef struct DivisionVertexBuffer {
     size_t per_instance_data_size;
 
     int32_t vertex_count;
+    int32_t index_count;
     int32_t instance_count;
 
     DivisionRenderTopology topology;
@@ -55,16 +56,20 @@ typedef struct DivisionVertexBufferSettings {
     int32_t per_vertex_attribute_count;
     int32_t per_instance_attribute_count;
     int32_t vertex_count;
+    int32_t index_count;
     int32_t instance_count;
     DivisionRenderTopology topology;
 } DivisionVertexBufferSettings;
 
-typedef struct DivisionVertexBufferDataBorrowInfo {
-    uint32_t vertex_data_offset;
-    uint32_t instance_data_offset;
+typedef struct DivisionVertexBufferBorrowedData {
+    void* vertex_data_ptr;
+    void* index_data_ptr;
+    void* instance_data_ptr;
+
     uint32_t vertex_count;
+    uint32_t index_count;
     uint32_t instance_count;
-} DivisionVertexBufferDataBorrowInfo;
+} DivisionVertexBufferBorrowedData;
 
 bool division_engine_internal_vertex_buffer_context_alloc(DivisionContext* ctx, const DivisionSettings* settings);
 void division_engine_internal_vertex_buffer_context_free(DivisionContext* ctx);
@@ -84,10 +89,10 @@ DIVISION_EXPORT bool division_engine_vertex_buffer_alloc(
 
 DIVISION_EXPORT void division_engine_vertex_buffer_free(DivisionContext* ctx, uint32_t vertex_buffer_id);
 
-DIVISION_EXPORT void* division_engine_vertex_buffer_borrow_data_pointer(
-    DivisionContext* ctx, uint32_t vertex_buffer, DivisionVertexBufferDataBorrowInfo* out_borrow_info);
-DIVISION_EXPORT void division_engine_vertex_buffer_return_data_pointer(
-    DivisionContext* ctx, uint32_t vertex_buffer, void* data_pointer);
+DIVISION_EXPORT bool division_engine_vertex_buffer_borrow_data(
+    DivisionContext* ctx, uint32_t vertex_buffer, DivisionVertexBufferBorrowedData* out_borrow_data);
+DIVISION_EXPORT void division_engine_vertex_buffer_return_data(
+    DivisionContext* ctx, uint32_t vertex_buffer, DivisionVertexBufferBorrowedData* borrow_data);
 
 #ifdef __cplusplus
 }
