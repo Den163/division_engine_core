@@ -25,7 +25,8 @@ typedef enum DivisionColorMask
 
 typedef enum DivisionRenderPassCapabilityMask {
     DIVISION_RENDER_PASS_CAPABILITY_NONE = 0,
-    DIVISION_RENDER_PASS_CAPABILITY_ALPHA_BLEND = 1,
+    DIVISION_RENDER_PASS_CAPABILITY_ALPHA_BLEND = 1 << 0,
+    DIVISION_RENDER_PASS_CAPABILITY_INSTANCED_RENDERING = 1 << 1
 } DivisionRenderPassCapabilityMask;
 
 typedef enum DivisionAlphaBlend {

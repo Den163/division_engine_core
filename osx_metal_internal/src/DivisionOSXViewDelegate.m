@@ -4,6 +4,7 @@
 #include "division_engine_core/renderer.h"
 #include "division_engine_core/texture.h"
 #include "division_engine_core/uniform_buffer.h"
+#include "division_engine_core/utility.h"
 #include "osx_render_pass.h"
 #include "osx_texture.h"
 #include "osx_vertex_buffer.h"
@@ -70,6 +71,8 @@
 
             [renderEnc setRenderPipelineState:pipelineState];
             [renderEnc setVertexBuffer:vertDataMtlBuffer offset:0 atIndex:DIVISION_MTL_VERTEX_DATA_BUFFER_INDEX];
+            [renderEnc
+                setBlendColorRed:blend_color[0] green:blend_color[1] blue:blend_color[2] alpha:blend_color[3]];
 
             for (int ubIdx = 0; ubIdx < pass->uniform_vertex_buffer_count; ubIdx++)
             {
@@ -94,10 +97,8 @@
                 [renderEnc setFragmentSamplerState:tex_impl->mtl_sampler atIndex:texture_binding->shader_location];
             }
 
-            [renderEnc
-                setBlendColorRed:blend_color[0] green:blend_color[1] blue:blend_color[2] alpha:blend_color[3]];
-
-            if (pass->instance_count > 0)
+            if (division_utility_mask_has_flag(
+                    pass->capabilities_mask, DIVISION_RENDER_PASS_CAPABILITY_INSTANCED_RENDERING))
             {
                 [renderEnc setVertexBuffer:vertDataMtlBuffer
                                     offset:0
