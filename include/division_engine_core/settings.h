@@ -11,7 +11,7 @@ struct DivisionContext;
 typedef void (*DivisionErrorFunc) (int, const char*);
 typedef void (*DivisionLifecycleFunc)(struct DivisionContext* ctx);
 
-typedef struct {
+typedef struct DivisionSettings {
     uint32_t window_width;
     uint32_t window_height;
     const char* window_title;
