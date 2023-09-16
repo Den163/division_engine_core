@@ -1,5 +1,4 @@
 #pragma clang diagnostic push
-#pragma ide diagnostic ignored "misc-no-recursion"
 
 #include "division_engine_core/data_structures/hash_table.h"
 
@@ -157,4 +156,3 @@ void division_hash_table_increase_capacity(DivisionHashTable* table, size_t new_
     free(old_buckets);
     assert(bucket_counter == old_buckets_size);
 }
-#pragma clang diagnostic pop
