@@ -1,25 +1,28 @@
 #pragma once
 
-#include <stdlib.h>
 #include <stdbool.h>
+#include <stdlib.h>
 
 #include "context.h"
 #include "shader.h"
 
 #include <division_engine_core_export.h>
 
-typedef enum DivisionRenderTopology {
+typedef enum DivisionRenderTopology
+{
     DIVISION_TOPOLOGY_TRIANGLES = 1,
     DIVISION_TOPOLOGY_POINTS = 2,
     DIVISION_TOPOLOGY_LINES = 3
 } DivisionRenderTopology;
 
-typedef struct DivisionVertexAttributeSettings {
+typedef struct DivisionVertexAttributeSettings
+{
     DivisionShaderVariableType type;
     int32_t location;
 } DivisionVertexAttributeSettings;
 
-typedef struct DivisionVertexAttribute {
+typedef struct DivisionVertexAttribute
+{
     int32_t location;
     int32_t offset;
     int32_t base_size;
@@ -27,7 +30,8 @@ typedef struct DivisionVertexAttribute {
     DivisionShaderVariableType type;
 } DivisionVertexAttribute;
 
-typedef struct DivisionVertexBuffer {
+typedef struct DivisionVertexBuffer
+{
     DivisionVertexAttribute* per_vertex_attributes;
     int32_t per_vertex_attribute_count;
     size_t per_vertex_data_size;
@@ -43,14 +47,16 @@ typedef struct DivisionVertexBuffer {
     DivisionRenderTopology topology;
 } DivisionVertexBuffer;
 
-typedef struct DivisionVertexBufferSystemContext {
+typedef struct DivisionVertexBufferSystemContext
+{
     DivisionUnorderedIdTable id_table;
     DivisionVertexBuffer* buffers;
     struct DivisionVertexBufferInternalPlatform_* buffers_impl;
     size_t buffers_count;
 } DivisionVertexBufferSystemContext;
 
-typedef struct DivisionVertexBufferSettings {
+typedef struct DivisionVertexBufferSettings
+{
     const DivisionVertexAttributeSettings* per_vertex_attributes;
     const DivisionVertexAttributeSettings* per_instance_attributes;
     int32_t per_vertex_attribute_count;
@@ -61,7 +67,8 @@ typedef struct DivisionVertexBufferSettings {
     DivisionRenderTopology topology;
 } DivisionVertexBufferSettings;
 
-typedef struct DivisionVertexBufferBorrowedData {
+typedef struct DivisionVertexBufferBorrowedData
+{
     void* vertex_data_ptr;
     void* index_data_ptr;
     void* instance_data_ptr;
@@ -71,28 +78,43 @@ typedef struct DivisionVertexBufferBorrowedData {
     uint32_t instance_count;
 } DivisionVertexBufferBorrowedData;
 
-bool division_engine_internal_vertex_buffer_context_alloc(DivisionContext* ctx, const DivisionSettings* settings);
+bool division_engine_internal_vertex_buffer_context_alloc(
+    DivisionContext* ctx, const DivisionSettings* settings
+);
 void division_engine_internal_vertex_buffer_context_free(DivisionContext* ctx);
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
-/*
- *  Vertex specification:
- *  1. Non-instanced rendering buffer. Attributes are interleaved, consecutive in the order they are received
- *  2. Instanced rendering buffer. First goes vertex data,
- *  after - interleaved instance data attributes in the order they are received
- */
-DIVISION_EXPORT bool division_engine_vertex_buffer_alloc(
-    DivisionContext* ctx, const DivisionVertexBufferSettings* vertex_buffer_settings, uint32_t* out_vertex_buffer_id);
+    /*
+     *  Vertex specification:
+     *  1. Non-instanced rendering buffer. Attributes are interleaved, consecutive in the
+     * order they are received
+     *  2. Instanced rendering buffer. First goes vertex data,
+     *  after - interleaved instance data attributes in the order they are received
+     */
+    DIVISION_EXPORT bool division_engine_vertex_buffer_alloc(
+        DivisionContext* ctx,
+        const DivisionVertexBufferSettings* vertex_buffer_settings,
+        uint32_t* out_vertex_buffer_id
+    );
 
-DIVISION_EXPORT void division_engine_vertex_buffer_free(DivisionContext* ctx, uint32_t vertex_buffer_id);
+    DIVISION_EXPORT void division_engine_vertex_buffer_free(
+        DivisionContext* ctx, uint32_t vertex_buffer_id
+    );
 
-DIVISION_EXPORT bool division_engine_vertex_buffer_borrow_data(
-    DivisionContext* ctx, uint32_t vertex_buffer, DivisionVertexBufferBorrowedData* out_borrow_data);
-DIVISION_EXPORT void division_engine_vertex_buffer_return_data(
-    DivisionContext* ctx, uint32_t vertex_buffer, DivisionVertexBufferBorrowedData* borrow_data);
+    DIVISION_EXPORT bool division_engine_vertex_buffer_borrow_data(
+        DivisionContext* ctx,
+        uint32_t vertex_buffer,
+        DivisionVertexBufferBorrowedData* out_borrow_data
+    );
+    DIVISION_EXPORT void division_engine_vertex_buffer_return_data(
+        DivisionContext* ctx,
+        uint32_t vertex_buffer,
+        DivisionVertexBufferBorrowedData* borrow_data
+    );
 
 #ifdef __cplusplus
 }

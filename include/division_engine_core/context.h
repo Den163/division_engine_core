@@ -17,7 +17,8 @@ struct DivisionUniformBufferSystemContext;
 struct DivisionRenderPassSystemContext;
 struct DivisionTextureSystemContext;
 
-typedef struct DivisionContext {
+typedef struct DivisionContext
+{
     DivisionState state;
 
     DivisionErrorFunc error_callback;
@@ -32,11 +33,14 @@ typedef struct DivisionContext {
 } DivisionContext;
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
-DIVISION_EXPORT bool division_engine_context_alloc(const DivisionSettings* settings, DivisionContext** output_context);
-DIVISION_EXPORT void division_engine_context_free(DivisionContext* ctx);
+    DIVISION_EXPORT bool division_engine_context_alloc(
+        const DivisionSettings* settings, DivisionContext** output_context
+    );
+    DIVISION_EXPORT void division_engine_context_free(DivisionContext* ctx);
 
 #ifdef __cplusplus
 }

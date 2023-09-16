@@ -4,7 +4,9 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
-bool division_engine_internal_shader_system_context_alloc(DivisionContext* ctx, const DivisionSettings* settings)
+bool division_engine_internal_shader_system_context_alloc(
+    DivisionContext* ctx, const DivisionSettings* settings
+)
 {
     ctx->shader_context = malloc(sizeof(DivisionShaderSystemContext));
     ctx->shader_context->shader_count = 0;
@@ -27,9 +29,12 @@ bool division_engine_shader_program_alloc(
     DivisionContext* ctx,
     const DivisionShaderSourceDescriptor* descriptors,
     int32_t descriptor_count,
-    uint32_t* out_shader_program_id)
+    uint32_t* out_shader_program_id
+)
 {
-    return division_engine_internal_platform_shader_program_alloc(ctx, descriptors, descriptor_count, out_shader_program_id);
+    return division_engine_internal_platform_shader_program_alloc(
+        ctx, descriptors, descriptor_count, out_shader_program_id
+    );
 }
 
 void division_engine_shader_program_free(DivisionContext* ctx, uint32_t shader_program_id)

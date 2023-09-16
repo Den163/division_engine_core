@@ -21,7 +21,8 @@ void division_ordered_id_table_free(DivisionOrderedIdTable* id_table)
 
     id_table->orders = NULL;
     id_table->id_to_order = NULL;
-    id_table->orders_count = id_table->orders_capacity = id_table->id_to_order_capacity = 0;
+    id_table->orders_count = id_table->orders_capacity = id_table->id_to_order_capacity =
+        0;
 }
 
 uint32_t division_ordered_id_table_insert(DivisionOrderedIdTable* id_table)
@@ -61,7 +62,9 @@ void division_ordered_id_table_remove(DivisionOrderedIdTable* id_table, uint32_t
     id_table->orders_count--;
 }
 
-bool division_ordered_id_table_contains(const DivisionOrderedIdTable* id_table, uint32_t id)
+bool division_ordered_id_table_contains(
+    const DivisionOrderedIdTable* id_table, uint32_t id
+)
 {
     return division_unordered_id_table_contains(&id_table->unordered_id_table, id);
 }

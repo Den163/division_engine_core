@@ -1,13 +1,14 @@
 #pragma once
 
-#include <stdint.h>
 #include <stddef.h>
+#include <stdint.h>
 
-#include "division_engine_core_export.h"
 #include "context.h"
 #include "division_engine_core/data_structures/ordered_id_table.h"
+#include "division_engine_core_export.h"
 
-typedef struct DivisionIdWithBinding {
+typedef struct DivisionIdWithBinding
+{
     uint32_t id;
     uint32_t shader_location;
 } DivisionIdWithBinding;
@@ -19,17 +20,20 @@ typedef enum DivisionColorMask
     DIVISION_COLOR_MASK_G = 1 << 1,
     DIVISION_COLOR_MASK_B = 1 << 2,
     DIVISION_COLOR_MASK_A = 1 << 3,
-    DIVISION_COLOR_MASK_RGB = DIVISION_COLOR_MASK_R | DIVISION_COLOR_MASK_G | DIVISION_COLOR_MASK_B,
+    DIVISION_COLOR_MASK_RGB =
+        DIVISION_COLOR_MASK_R | DIVISION_COLOR_MASK_G | DIVISION_COLOR_MASK_B,
     DIVISION_COLOR_MASK_RGBA = DIVISION_COLOR_MASK_RGB | DIVISION_COLOR_MASK_A,
 } DivisionColorMask;
 
-typedef enum DivisionRenderPassCapabilityMask {
+typedef enum DivisionRenderPassCapabilityMask
+{
     DIVISION_RENDER_PASS_CAPABILITY_NONE = 0,
     DIVISION_RENDER_PASS_CAPABILITY_ALPHA_BLEND = 1 << 0,
     DIVISION_RENDER_PASS_CAPABILITY_INSTANCED_RENDERING = 1 << 1
 } DivisionRenderPassCapabilityMask;
 
-typedef enum DivisionAlphaBlend {
+typedef enum DivisionAlphaBlend
+{
     DIVISION_ALPHA_BLEND_ZERO = 0,
     DIVISION_ALPHA_BLEND_ONE = 1,
     DIVISION_ALPHA_BLEND_SRC_COLOR = 2,
@@ -47,7 +51,8 @@ typedef enum DivisionAlphaBlend {
     DIVISION_ALPHA_BLEND_ONE_MINUS_CONSTANT_ALPHA = 14,
 } DivisionAlphaBlend;
 
-typedef enum DivisionAlphaBlendOperation {
+typedef enum DivisionAlphaBlendOperation
+{
     DIVISION_ALPHA_BLEND_OP_ADD = 1,
     DIVISION_ALPHA_BLEND_OP_SUBTRACT = 2,
     DIVISION_ALPHA_BLEND_OP_REVERSE_SUBTRACT = 3,
@@ -55,14 +60,16 @@ typedef enum DivisionAlphaBlendOperation {
     DIVISION_ALPHA_BLEND_OP_MAX = 5,
 } DivisionAlphaBlendOperation;
 
-typedef struct DivisionAlphaBlendingOptions {
+typedef struct DivisionAlphaBlendingOptions
+{
     DivisionAlphaBlend src;
     DivisionAlphaBlend dst;
     DivisionAlphaBlendOperation operation;
     float constant_blend_color[4];
 } DivisionAlphaBlendingOptions;
 
-typedef struct DivisionRenderPass {
+typedef struct DivisionRenderPass
+{
     DivisionAlphaBlendingOptions alpha_blending_options;
 
     size_t first_vertex;
@@ -81,7 +88,8 @@ typedef struct DivisionRenderPass {
     DivisionColorMask color_mask;
 } DivisionRenderPass;
 
-typedef struct DivisionRenderPassSystemContext {
+typedef struct DivisionRenderPassSystemContext
+{
     DivisionOrderedIdTable id_table;
     DivisionRenderPass* render_passes;
     struct DivisionRenderPassInternalPlatform_* render_passes_impl;
@@ -89,18 +97,23 @@ typedef struct DivisionRenderPassSystemContext {
 } DivisionRenderPassSystemContext;
 
 bool division_engine_internal_render_pass_context_alloc(
-    DivisionContext* ctx, const DivisionSettings* settings);
+    DivisionContext* ctx, const DivisionSettings* settings
+);
 
 void division_engine_internal_render_pass_context_free(DivisionContext* ctx);
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
-DIVISION_EXPORT bool division_engine_render_pass_alloc(
-    DivisionContext* ctx, DivisionRenderPass render_pass, uint32_t* out_render_pass_id);
+    DIVISION_EXPORT bool division_engine_render_pass_alloc(
+        DivisionContext* ctx, DivisionRenderPass render_pass, uint32_t* out_render_pass_id
+    );
 
-DIVISION_EXPORT void division_engine_render_pass_free(DivisionContext* ctx, uint32_t render_pass_id);
+    DIVISION_EXPORT void division_engine_render_pass_free(
+        DivisionContext* ctx, uint32_t render_pass_id
+    );
 
 #ifdef __cplusplus
 }

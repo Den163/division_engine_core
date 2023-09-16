@@ -1,27 +1,32 @@
 #pragma once
 
-#include <stdint.h>
-#include <stdbool.h>
 #include "settings.h"
+#include <stdbool.h>
+#include <stdint.h>
 
+#include "color.h"
 #include "context.h"
 #include "state.h"
-#include "color.h"
 
-typedef struct DivisionRendererSystemContext {
+typedef struct DivisionRendererSystemContext
+{
     DivisionColor clear_color;
     struct DivisionWindowContextPlatformInternal_* window_data;
 } DivisionRendererSystemContext;
 
 bool division_engine_internal_renderer_context_alloc(
-    DivisionContext* ctx, const DivisionSettings* settings);
+    DivisionContext* ctx, const DivisionSettings* settings
+);
 void division_engine_internal_renderer_context_free(DivisionContext* ctx);
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
-DIVISION_EXPORT void division_engine_renderer_run_loop(DivisionContext* ctx, const DivisionSettings* settings);
+    DIVISION_EXPORT void division_engine_renderer_run_loop(
+        DivisionContext* ctx, const DivisionSettings* settings
+    );
 
 #ifdef __cplusplus
 }

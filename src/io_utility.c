@@ -4,7 +4,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-bool division_io_read_all_bytes_from_file(const char* path, void** out_data, size_t* out_data_byte_count)
+bool division_io_read_all_bytes_from_file(
+    const char* path, void** out_data, size_t* out_data_byte_count
+)
 {
     FILE* srcFile = fopen(path, "rb");
     if (!srcFile)
@@ -32,7 +34,9 @@ bool division_io_read_all_bytes_from_file(const char* path, void** out_data, siz
     return true;
 }
 
-bool division_io_write_all_bytes_to_file(const char* path, void* data, size_t data_byte_count)
+bool division_io_write_all_bytes_to_file(
+    const char* path, void* data, size_t data_byte_count
+)
 {
     FILE* file = fopen(path, "wt");
     if (file == NULL)

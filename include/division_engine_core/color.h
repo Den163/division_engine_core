@@ -1,12 +1,14 @@
 #pragma once
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
-typedef struct DivisionColor {
-    float r, g, b, a;
-} DivisionColor;
+    typedef struct DivisionColor
+    {
+        float r, g, b, a;
+    } DivisionColor;
 
 #ifdef __cplusplus
 }

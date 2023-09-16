@@ -1,10 +1,10 @@
 #include "division_engine_core/data_structures/unordered_id_table.h"
 
 #include <assert.h>
-#include <stdlib.h>
 #include <memory.h>
+#include <stdlib.h>
 
-void division_unordered_id_table_alloc(DivisionUnorderedIdTable* table, size_t capacity)
+void division_unordered_id_table_alloc(DivisionUnorderedIdTable *table, size_t capacity)
 {
     assert(capacity > 0);
 
@@ -19,7 +19,7 @@ void division_unordered_id_table_alloc(DivisionUnorderedIdTable* table, size_t c
     }
 }
 
-void division_unordered_id_table_free(DivisionUnorderedIdTable* table)
+void division_unordered_id_table_free(DivisionUnorderedIdTable *table)
 {
     free(table->free_ids);
 
@@ -27,21 +27,23 @@ void division_unordered_id_table_free(DivisionUnorderedIdTable* table)
     table->free_ids_count = table->free_ids_capacity = table->max_id = 0;
 }
 
-uint32_t division_unordered_id_table_insert(DivisionUnorderedIdTable* table)
+uint32_t division_unordered_id_table_insert(DivisionUnorderedIdTable *table)
 {
     if (table->free_ids_count > 0)
     {
         table->free_ids_count--;
 
         uint32_t id = table->free_ids[0];
-        memmove(table->free_ids, table->free_ids + 1, sizeof(uint32_t[table->free_ids_count]));
+        memmove(
+            table->free_ids, table->free_ids + 1, sizeof(uint32_t[table->free_ids_count])
+        );
         return id;
     }
 
     return ++table->max_id;
 }
 
-void division_unordered_id_table_remove(DivisionUnorderedIdTable* table, uint32_t id)
+void division_unordered_id_table_remove(DivisionUnorderedIdTable *table, uint32_t id)
 {
     assert(id <= table->max_id && division_unordered_id_table_contains(table, id));
 
@@ -54,16 +56,20 @@ void division_unordered_id_table_remove(DivisionUnorderedIdTable* table, uint32_
         if (table->free_ids_count == table->free_ids_capacity)
         {
             table->free_ids_capacity *= 2;
-            table->free_ids = realloc(table->free_ids, sizeof(uint32_t[table->free_ids_capacity]));
+            table->free_ids =
+                realloc(table->free_ids, sizeof(uint32_t[table->free_ids_capacity]));
         }
 
         table->free_ids[table->free_ids_count++] = id;
     }
 }
 
-bool division_unordered_id_table_contains(const DivisionUnorderedIdTable* table, uint32_t id)
+bool division_unordered_id_table_contains(
+    const DivisionUnorderedIdTable *table, uint32_t id
+)
 {
-    if (id > table->max_id) return false;
+    if (id > table->max_id)
+        return false;
 
     for (size_t i = 0; i < table->free_ids_count; i++)
     {
