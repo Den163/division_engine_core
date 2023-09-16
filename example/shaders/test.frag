@@ -12,7 +12,6 @@ layout (std140, binding = 1) uniform Uniforms {
 layout (binding = 0) uniform sampler2D _tex;
 
 void main() {
-    vec4 tex = vec4(texture(_tex, inUV));
-    FragColor = VertexColor * tex;
-    FragColor.rgb += TestColor.rgb;
+   vec4 tex = vec4(texture(_tex, inUV));
+   FragColor = tex * VertexColor * TestColor;
 }
