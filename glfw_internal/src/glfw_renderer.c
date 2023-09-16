@@ -182,22 +182,27 @@ void renderer_draw(DivisionContext* ctx)
         );
 
         if (division_utility_mask_has_flag(
-                pass->capabilities_mask,
+                pass->capabilities_mask, 
                 DIVISION_RENDER_PASS_CAPABILITY_INSTANCED_RENDERING
             ))
         {
-            glDrawElementsInstanced(
+            glDrawElementsInstancedBaseVertex(
                 vb_internal.gl_topology,
                 pass->index_count,
                 GL_UNSIGNED_INT,
                 NULL,
-                pass->instance_count
+                pass->instance_count,
+                pass->first_vertex
             );
         }
         else
         {
-            glDrawElements(
-                vb_internal.gl_topology, pass->index_count, GL_UNSIGNED_INT, NULL
+            glDrawElementsBaseVertex(
+                vb_internal.gl_topology,
+                pass->index_count,
+                GL_UNSIGNED_INT,
+                NULL,
+                pass->first_vertex
             );
         }
     }
