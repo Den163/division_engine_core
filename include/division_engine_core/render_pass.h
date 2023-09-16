@@ -96,6 +96,9 @@ typedef struct DivisionRenderPassSystemContext
     int32_t render_pass_count;
 } DivisionRenderPassSystemContext;
 
+#define DIVISION_GET_RENDER_PASS(ctx, render_pass_id)                                    \
+    (&ctx->render_pass_context->render_passes[render_pass_id])
+
 bool division_engine_internal_render_pass_context_alloc(
     DivisionContext* ctx, const DivisionSettings* settings
 );
@@ -109,6 +112,14 @@ extern "C"
 
     DIVISION_EXPORT bool division_engine_render_pass_alloc(
         DivisionContext* ctx, DivisionRenderPass render_pass, uint32_t* out_render_pass_id
+    );
+
+    DIVISION_EXPORT DivisionRenderPass* division_engine_render_pass_borrow(
+        DivisionContext* ctx, uint32_t render_pass_id
+    );
+
+    DIVISION_EXPORT void division_engine_render_pass_return(
+        DivisionContext* ctx, uint32_t render_pass_id, DivisionRenderPass* render_pass_ptr
     );
 
     DIVISION_EXPORT void division_engine_render_pass_free(

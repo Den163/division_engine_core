@@ -110,12 +110,13 @@ extern "C"
         uint32_t vertex_buffer,
         DivisionVertexBufferBorrowedData* out_borrow_data
     );
+
     DIVISION_EXPORT void division_engine_vertex_buffer_return_data(
         DivisionContext* ctx,
         uint32_t vertex_buffer,
         DivisionVertexBufferBorrowedData* borrow_data
     );
-
+    
 #ifdef __cplusplus
 }
 #endif

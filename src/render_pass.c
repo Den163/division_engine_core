@@ -1,8 +1,10 @@
 #include "division_engine_core/render_pass.h"
 
 #include <memory.h>
+#include <stdint.h>
 #include <stdlib.h>
 
+#include "division_engine_core/context.h"
 #include "division_engine_core/platform_internal/platform_render_pass.h"
 
 static inline void handle_render_pass_alloc_error(
@@ -145,6 +147,19 @@ void handle_render_pass_alloc_error(
     free(render_pass_copy->fragment_textures);
 
     ctx->error_callback(DIVISION_INTERNAL_ERROR, "Failed to realloc Render pass array");
+}
+
+
+DivisionRenderPass* division_engine_render_pass_borrow(
+    DivisionContext* ctx, uint32_t render_pass_id
+) {
+    return DIVISION_GET_RENDER_PASS(ctx, render_pass_id);
+}
+
+void division_engine_render_pass_return(
+    DivisionContext* ctx, uint32_t render_pass_id, DivisionRenderPass* render_pass_ptr
+) {
+    
 }
 
 void division_engine_render_pass_free(DivisionContext* ctx, uint32_t render_pass_id)
