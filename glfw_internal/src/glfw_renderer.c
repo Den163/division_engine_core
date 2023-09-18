@@ -23,6 +23,11 @@ static inline void bind_uniform_buffer(
     DivisionUniformBufferSystemContext* ctx, const DivisionIdWithBinding* buffer_binding
 );
 
+static void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+{
+    glViewport(0, 0, width, height);
+}
+
 typedef struct DivisionWindowContextPlatformInternal_*
     DivisionWindowContextPlatformInternalPtr_;
 
@@ -60,6 +65,9 @@ bool division_engine_internal_platform_renderer_alloc(
         settings->error_callback(0, "Failed to load GLAD");
         return false;
     }
+
+    glEnable(GL_DEBUG_OUTPUT);
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
     ctx->renderer_context->window_data =
         (DivisionWindowContextPlatformInternalPtr_)window;
