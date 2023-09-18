@@ -1,3 +1,4 @@
+#include "division_engine_core/context.h"
 #include <memory.h>
 
 #include <division_engine_core/io_utility.h>
@@ -16,6 +17,24 @@
 static void error_callback(int error_code, const char* message);
 static void init_callback(DivisionContext* ctx);
 static void update_callback(DivisionContext* ctx);
+
+static void example_create_shader_program(DivisionContext* ctx, uint32_t* out_shader_id);
+
+static void example_create_vertex_buffer(
+    DivisionContext* ctx,
+    uint32_t* out_vertex_buffer_id,
+    size_t* out_vertex_count,
+    size_t* out_index_count,
+    size_t* out_instance_count
+);
+
+static void example_create_uniform_buffer(
+    DivisionContext* ctx, DivisionIdWithBinding* out_uniform_buffer
+);
+
+static void example_create_textures(
+    DivisionContext* ctx, DivisionIdWithBinding* out_texture
+);
 
 typedef struct VertexData
 {
@@ -43,6 +62,59 @@ int main()
 }
 
 void init_callback(DivisionContext* ctx)
+{
+    DivisionIdWithBinding uniform_buffer, texture;
+    uint32_t vertex_buffer, shader_program;
+    size_t vertex_count, index_count, instance_count;
+
+    example_create_shader_program(ctx, &shader_program);
+    example_create_uniform_buffer(ctx, &uniform_buffer);
+    example_create_vertex_buffer(
+        ctx, &vertex_buffer, &vertex_count, &index_count, &instance_count
+    );
+
+    example_create_textures(ctx, &texture);
+
+    uint32_t render_pass_id;
+    division_engine_render_pass_alloc(
+        ctx,
+        (DivisionRenderPass){
+            .alpha_blending_options =
+                (DivisionAlphaBlendingOptions){
+                    .src = DIVISION_ALPHA_BLEND_SRC_ALPHA,
+                    .dst = DIVISION_ALPHA_BLEND_ONE_MINUS_SRC_ALPHA,
+                    .operation = DIVISION_ALPHA_BLEND_OP_ADD,
+                    .constant_blend_color = {0, 0, 0, 0},
+                },
+            .first_vertex = 0,
+            .vertex_count = (size_t)vertex_count,
+            .instance_count = (size_t)instance_count,
+            .index_count = (size_t)index_count,
+            .uniform_vertex_buffer_count = 0,
+            .uniform_fragment_buffers = &uniform_buffer,
+            .uniform_fragment_buffer_count = 1,
+            .fragment_textures = &texture,
+            .fragment_texture_count = 1,
+            .vertex_buffer = vertex_buffer,
+            .shader_program = shader_program,
+            .capabilities_mask = DIVISION_RENDER_PASS_CAPABILITY_ALPHA_BLEND | 
+                                 DIVISION_RENDER_PASS_CAPABILITY_INSTANCED_RENDERING,
+            .color_mask = DIVISION_COLOR_MASK_RGBA,
+        },
+        &render_pass_id
+    );
+}
+
+void update_callback(DivisionContext* ctx)
+{
+}
+
+void error_callback(int error_code, const char* message)
+{
+    fprintf(stderr, "Error code: %d, error message: %s\n", error_code, message);
+}
+
+static void example_create_shader_program(DivisionContext* ctx, uint32_t* out_shader_id)
 {
     const char* vert_shader_entry_point;
     const char* frag_shader_entry_point;
@@ -74,16 +146,18 @@ void init_callback(DivisionContext* ctx)
 #endif
 
     DivisionShaderSourceDescriptor shader_settings[] = {
-        (DivisionShaderSourceDescriptor
-        ){.type = DIVISION_SHADER_VERTEX,
-          .entry_point_name = vert_shader_entry_point,
-          .source = vert_shader_src,
-          .source_size = vert_shader_size},
-        (DivisionShaderSourceDescriptor
-        ){.type = DIVISION_SHADER_FRAGMENT,
-          .entry_point_name = frag_shader_entry_point,
-          .source = frag_shader_src,
-          .source_size = frag_shader_size}};
+        (DivisionShaderSourceDescriptor){
+            .type = DIVISION_SHADER_VERTEX,
+            .entry_point_name = vert_shader_entry_point,
+            .source = vert_shader_src,
+            .source_size = vert_shader_size,
+        },
+        (DivisionShaderSourceDescriptor){
+            .type = DIVISION_SHADER_FRAGMENT,
+            .entry_point_name = frag_shader_entry_point,
+            .source = frag_shader_src,
+            .source_size = frag_shader_size,
+        }};
 
     int32_t source_count =
         sizeof(shader_settings) / sizeof(DivisionShaderSourceDescriptor);
@@ -93,21 +167,40 @@ void init_callback(DivisionContext* ctx)
         ctx, shader_settings, source_count, &shader_program
     ));
 
+    *out_shader_id = shader_program;
+}
+
+void example_create_vertex_buffer(
+    DivisionContext* ctx,
+    uint32_t* out_vertex_buffer_id,
+    size_t* out_vertex_count,
+    size_t* out_index_count,
+    size_t* out_instance_count
+)
+{
     VertexData vd[] = {
-        {.position = {-0.5f, 0, 0}, .color = {1, 1, 1, 1}, .uv = {0, 0}},
-        {.position = {-0.5f, -0.5f, 0}, .color = {1, 1, 1, 1}, .uv = {0, 1}},
-        {.position = {0, -0.5f, 0}, .color = {1, 1, 1, 1}, .uv = {1, 1}},
-        {.position = {0, 0, 0}, .color = {1, 1, 1, 1}, .uv = {1, 0}},
+        {.position = {-0.5f, 0, 0.5}, .color = {1, 1, 1, 1}, .uv = {0, 0}},
+        {.position = {-0.5f, -0.5f, 0.5}, .color = {1, 1, 1, 1}, .uv = {0, 1}},
+        {.position = {0, -0.5f, 0.5}, .color = {1, 1, 1, 1}, .uv = {1, 1}},
+        {.position = {0, 0, 0.5}, .color = {1, 1, 1, 1}, .uv = {1, 0}},
     };
-    float local_to_word_mat[] = {
-        1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, // 1
-        1, 0, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1  // 2
-    };
+
     uint32_t indices[] = {0, 1, 2, 2, 3, 0};
 
-    int32_t vertex_count = sizeof(vd) / sizeof(VertexData);
-    int32_t instance_count = sizeof(local_to_word_mat) / (sizeof(float) * 16);
-    int32_t index_count = sizeof(indices) / sizeof(int32_t);
+    float local_to_word_mat[] = {
+        1, 0, 0, 0, 
+        0, 1, 0, 0, 
+        0, 0, 1, 0, 
+        0, 0, 0, 1, // 1
+        1, 0, 0, 1, 
+        0, 1, 0, 1, 
+        0, 0, 1, 0, 
+        0, 0, 0, 1  // 2
+    };
+
+    size_t vertex_count = sizeof(vd) / sizeof(VertexData);
+    size_t index_count = sizeof(indices) / sizeof(int32_t);
+    size_t instance_count = sizeof(local_to_word_mat) / (sizeof(float) * 16);
 
     DivisionVertexAttributeSettings vertex_attrs[] = {
         {.type = DIVISION_FVEC3, .location = 0},
@@ -140,6 +233,16 @@ void init_callback(DivisionContext* ctx)
 
     division_engine_vertex_buffer_return_data(ctx, vertex_buffer, &vb_borrowed);
 
+    *out_vertex_buffer_id = vertex_buffer;
+    *out_vertex_count = vertex_count;
+    *out_index_count = index_count;
+    *out_instance_count = instance_count;
+}
+
+void example_create_uniform_buffer(
+    DivisionContext* ctx, DivisionIdWithBinding* out_uniform_buffer
+)
+{
     float testVec[] = {0.5, 0.5, 0.5, 1};
 
     DivisionUniformBufferDescriptor buff = {.data_bytes = sizeof(testVec)};
@@ -152,8 +255,16 @@ void init_callback(DivisionContext* ctx)
     memcpy(uniform_ptr, testVec, sizeof(testVec));
     division_engine_uniform_buffer_return_data_pointer(ctx, uniform_buffer, uniform_ptr);
 
-    DivisionIdWithBinding uniform_binding = {.id = uniform_buffer, .shader_location = 1};
+    *out_uniform_buffer = (DivisionIdWithBinding){
+        .id = uniform_buffer,
+        .shader_location = 1,
+    };
+}
 
+static void example_create_textures(
+    DivisionContext* ctx, DivisionIdWithBinding* out_texture
+)
+{
     int image_width, image_height, channels_in_file;
     void* tex_data =
         stbi_load("nevsky.jpg", &image_width, &image_height, &channels_in_file, 3);
@@ -168,45 +279,8 @@ void init_callback(DivisionContext* ctx)
     division_engine_texture_set_data(ctx, tex_id, tex_data);
     stbi_image_free(tex_data);
 
-    DivisionIdWithBinding frag_textures[] = {(DivisionIdWithBinding){
+    *out_texture = (DivisionIdWithBinding){
         .id = tex_id,
         .shader_location = 0,
-    }};
-
-    uint32_t render_pass_id;
-    division_engine_render_pass_alloc(
-        ctx,
-        (DivisionRenderPass){
-            .alpha_blending_options =
-                (DivisionAlphaBlendingOptions){
-                    .src = DIVISION_ALPHA_BLEND_SRC_ALPHA,
-                    .dst = DIVISION_ALPHA_BLEND_ONE_MINUS_SRC_ALPHA,
-                    .operation = DIVISION_ALPHA_BLEND_OP_ADD,
-                    .constant_blend_color = {0, 0, 0, 0},
-                },
-            .first_vertex = 0,
-            .vertex_count = (size_t)vertex_count,
-            .instance_count = (size_t)instance_count,
-            .index_count = (size_t)index_count,
-            .uniform_vertex_buffer_count = 0,
-            .uniform_fragment_buffers = &uniform_binding,
-            .uniform_fragment_buffer_count = 1,
-            .fragment_textures = frag_textures,
-            .fragment_texture_count = 1,
-            .vertex_buffer = vertex_buffer,
-            .shader_program = shader_program,
-            .capabilities_mask = DIVISION_RENDER_PASS_CAPABILITY_ALPHA_BLEND,
-            .color_mask = DIVISION_COLOR_MASK_RGBA,
-        },
-        &render_pass_id
-    );
-}
-
-void update_callback(DivisionContext* ctx)
-{
-}
-
-void error_callback(int error_code, const char* message)
-{
-    fprintf(stderr, "Error code: %d, error message: %s\n", error_code, message);
+    };
 }
