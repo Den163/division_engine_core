@@ -1,5 +1,6 @@
 #pragma once
 
+#include <CoreFoundation/CoreFoundation.h>
 #include <Foundation/Foundation.h>
 #include <AppKit/AppKit.h>
 #include <Metal/MTLDevice.h>
@@ -11,7 +12,8 @@
 @interface DivisionOSXAppDelegate: NSObject<NSApplicationDelegate>
 {
     @public DivisionContext* context;
-    @public const DivisionSettings* settings;
+    @public CGRect windowFrame;
+    @public NSString* windowTitle;
 
     @public NSWindow* window;
     @public MTKView* view;

@@ -13,11 +13,9 @@ bool division_engine_internal_renderer_context_alloc(
     return division_engine_internal_platform_renderer_alloc(ctx, settings);
 }
 
-void division_engine_renderer_run_loop(
-    DivisionContext* ctx, const DivisionSettings* settings
-)
+void division_engine_renderer_run_loop(DivisionContext* ctx)
 {
-    division_engine_internal_platform_renderer_run_loop(ctx, settings);
+    division_engine_internal_platform_renderer_run_loop(ctx);
 }
 
 void division_engine_internal_renderer_context_free(DivisionContext* ctx)

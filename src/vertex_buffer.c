@@ -1,4 +1,5 @@
 #include "division_engine_core/vertex_buffer.h"
+#include "division_engine_core/context.h"
 #include "division_engine_core/platform_internal/platform_vertex_buffer.h"
 
 #include <stdio.h>
@@ -11,21 +12,23 @@ typedef struct AttrTraits_
 } AttrTraits_;
 
 static inline AttrTraits_ division_attribute_get_traits(
+    DivisionContext* ctx,
     DivisionShaderVariableType attributeType
 );
 static inline void free_buffer_data_and_handle_error(
-    DivisionContext *ctx, DivisionVertexBuffer *buffer, uint32_t buffer_id
+    DivisionContext* ctx, DivisionVertexBuffer* buffer, uint32_t buffer_id
 );
 
 static inline bool alloc_vert_attrs_(
-    const DivisionVertexAttributeSettings *input_attributes,
+    DivisionContext* ctx,
+    const DivisionVertexAttributeSettings* input_attributes,
     int32_t attr_count,
-    DivisionVertexAttribute **output_attributes,
-    size_t *output_all_attributes_data_size
+    DivisionVertexAttribute** output_attributes,
+    size_t* output_all_attributes_data_size
 );
 
 bool division_engine_internal_vertex_buffer_context_alloc(
-    DivisionContext *ctx, const DivisionSettings *settings
+    DivisionContext* ctx, const DivisionSettings* settings
 )
 {
     ctx->vertex_buffer_context = malloc(sizeof(DivisionVertexBufferSystemContext));
@@ -37,16 +40,16 @@ bool division_engine_internal_vertex_buffer_context_alloc(
     return division_engine_internal_platform_vertex_buffer_context_alloc(ctx, settings);
 }
 
-void division_engine_internal_vertex_buffer_context_free(DivisionContext *ctx)
+void division_engine_internal_vertex_buffer_context_free(DivisionContext* ctx)
 {
     division_engine_internal_platform_vertex_buffer_context_free(ctx);
 
-    DivisionVertexBufferSystemContext *vertex_buffer_ctx = ctx->vertex_buffer_context;
+    DivisionVertexBufferSystemContext* vertex_buffer_ctx = ctx->vertex_buffer_context;
     division_unordered_id_table_free(&vertex_buffer_ctx->id_table);
 
     for (int i = 0; i < vertex_buffer_ctx->buffers_count; i++)
     {
-        DivisionVertexBuffer *buff = &vertex_buffer_ctx->buffers[i];
+        DivisionVertexBuffer* buff = &vertex_buffer_ctx->buffers[i];
         free(buff->per_vertex_attributes);
         free(buff->per_instance_attributes);
     }
@@ -56,12 +59,12 @@ void division_engine_internal_vertex_buffer_context_free(DivisionContext *ctx)
 }
 
 bool division_engine_vertex_buffer_alloc(
-    DivisionContext *ctx,
-    const DivisionVertexBufferSettings *vertex_buffer_settings,
-    uint32_t *out_vertex_buffer_id
+    DivisionContext* ctx,
+    const DivisionVertexBufferSettings* vertex_buffer_settings,
+    uint32_t* out_vertex_buffer_id
 )
 {
-    DivisionVertexBufferSystemContext *vertex_ctx = ctx->vertex_buffer_context;
+    DivisionVertexBufferSystemContext* vertex_ctx = ctx->vertex_buffer_context;
 
     uint32_t vertex_buffer_id = division_unordered_id_table_insert(&vertex_ctx->id_table);
 
@@ -77,6 +80,7 @@ bool division_engine_vertex_buffer_alloc(
         .topology = vertex_buffer_settings->topology};
 
     if (!alloc_vert_attrs_(
+            ctx,
             vertex_buffer_settings->per_vertex_attributes,
             vertex_buffer_settings->per_vertex_attribute_count,
             &vertex_buffer.per_vertex_attributes,
@@ -88,6 +92,7 @@ bool division_engine_vertex_buffer_alloc(
     }
 
     if (!alloc_vert_attrs_(
+            ctx,
             vertex_buffer_settings->per_instance_attributes,
             vertex_buffer_settings->per_instance_attribute_count,
             &vertex_buffer.per_instance_attributes,
@@ -123,10 +128,11 @@ bool division_engine_vertex_buffer_alloc(
 }
 
 bool alloc_vert_attrs_(
-    const DivisionVertexAttributeSettings *input_attributes,
+    DivisionContext* ctx,
+    const DivisionVertexAttributeSettings* input_attributes,
     int32_t attr_count,
-    DivisionVertexAttribute **output_attributes,
-    size_t *output_all_attributes_data_size
+    DivisionVertexAttribute** output_attributes,
+    size_t* output_all_attributes_data_size
 )
 {
     *output_attributes = NULL;
@@ -137,14 +143,14 @@ bool alloc_vert_attrs_(
 
     size_t all_attr_data_size = 0;
 
-    DivisionVertexAttribute *attrs = malloc(sizeof(DivisionVertexAttribute[attr_count]));
+    DivisionVertexAttribute* attrs = malloc(sizeof(DivisionVertexAttribute[attr_count]));
     if (attrs == NULL)
         return false;
 
     for (int32_t i = 0; i < attr_count; i++)
     {
         DivisionVertexAttributeSettings at = input_attributes[i];
-        AttrTraits_ attr_traits = division_attribute_get_traits(at.type);
+        AttrTraits_ attr_traits = division_attribute_get_traits(ctx, at.type);
 
         int32_t attr_size = attr_traits.base_size * attr_traits.component_count;
         int32_t offset = (int32_t)all_attr_data_size;
@@ -164,7 +170,9 @@ bool alloc_vert_attrs_(
     return true;
 }
 
-AttrTraits_ division_attribute_get_traits(DivisionShaderVariableType attributeType)
+AttrTraits_ division_attribute_get_traits(
+    DivisionContext* ctx,
+    DivisionShaderVariableType attributeType)
 {
     switch (attributeType)
     {
@@ -183,13 +191,13 @@ AttrTraits_ division_attribute_get_traits(DivisionShaderVariableType attributeTy
     case DIVISION_FMAT4X4:
         return (AttrTraits_){4, 16};
     default: {
-        fprintf(stderr, "Unknown attribute type");
+        DIVISION_THROW_INTERNAL_ERROR(ctx, "Unknown attribute type");
     }
     }
 }
 
 void free_buffer_data_and_handle_error(
-    DivisionContext *ctx, DivisionVertexBuffer *buffer, uint32_t buffer_id
+    DivisionContext* ctx, DivisionVertexBuffer* buffer, uint32_t buffer_id
 )
 {
     division_unordered_id_table_remove(&ctx->vertex_buffer_context->id_table, buffer_id);
@@ -198,15 +206,15 @@ void free_buffer_data_and_handle_error(
     buffer->per_vertex_attributes = NULL;
     buffer->per_instance_attributes = NULL;
 
-    ctx->error_callback(
-        DIVISION_INTERNAL_ERROR, "Division error: Failed to alloc a Vertex Buffer"
+    ctx->lifecycle.error_callback(
+        ctx, DIVISION_INTERNAL_ERROR, "Division error: Failed to alloc a Vertex Buffer"
     );
 }
 
-void division_engine_vertex_buffer_free(DivisionContext *ctx, uint32_t vertex_buffer_id)
+void division_engine_vertex_buffer_free(DivisionContext* ctx, uint32_t vertex_buffer_id)
 {
     division_engine_internal_platform_vertex_buffer_free(ctx, vertex_buffer_id);
-    DivisionVertexBuffer *vertex_buffer =
+    DivisionVertexBuffer* vertex_buffer =
         &ctx->vertex_buffer_context->buffers[vertex_buffer_id];
     for (int i = 0; i < vertex_buffer->per_vertex_attribute_count; i++)
     {
@@ -222,12 +230,12 @@ void division_engine_vertex_buffer_free(DivisionContext *ctx, uint32_t vertex_bu
 }
 
 bool division_engine_vertex_buffer_borrow_data(
-    DivisionContext *ctx,
+    DivisionContext* ctx,
     uint32_t vertex_buffer,
-    DivisionVertexBufferBorrowedData *out_borrow_data
+    DivisionVertexBufferBorrowedData* out_borrow_data
 )
 {
-    const DivisionVertexBuffer *buff =
+    const DivisionVertexBuffer* buff =
         &ctx->vertex_buffer_context->buffers[vertex_buffer];
 
     out_borrow_data->vertex_count = buff->vertex_count;
@@ -240,9 +248,9 @@ bool division_engine_vertex_buffer_borrow_data(
 }
 
 void division_engine_vertex_buffer_return_data(
-    DivisionContext *ctx,
+    DivisionContext* ctx,
     uint32_t vertex_buffer,
-    DivisionVertexBufferBorrowedData *borrow_data
+    DivisionVertexBufferBorrowedData* borrow_data
 )
 {
     division_engine_internal_platform_vertex_buffer_return_data_pointer(

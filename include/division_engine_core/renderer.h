@@ -1,6 +1,5 @@
 #pragma once
 
-#include "settings.h"
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -24,9 +23,7 @@ extern "C"
 {
 #endif
 
-    DIVISION_EXPORT void division_engine_renderer_run_loop(
-        DivisionContext* ctx, const DivisionSettings* settings
-    );
+    DIVISION_EXPORT void division_engine_renderer_run_loop(DivisionContext* ctx);
 
 #ifdef __cplusplus
 }

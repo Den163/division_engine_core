@@ -1,5 +1,6 @@
 #include "division_engine_core/context.h"
 
+#include "division_engine_core/division_lifecycle.h"
 #include "division_engine_core/render_pass.h"
 #include "division_engine_core/renderer.h"
 #include "division_engine_core/shader.h"
@@ -9,12 +10,13 @@
 #include <stdlib.h>
 
 bool division_engine_context_alloc(
-    const DivisionSettings* settings, DivisionContext** output_context
+    const DivisionSettings* settings, 
+    DivisionContext** output_context
 )
 {
     DivisionContext* ctx = (DivisionContext*)malloc(sizeof(DivisionContext));
-    ctx->error_callback = settings->error_callback;
     ctx->state.delta_time = 0;
+
     *output_context = ctx;
 
     if (!division_engine_internal_renderer_context_alloc(ctx, settings))
@@ -31,6 +33,13 @@ bool division_engine_context_alloc(
         return false;
 
     return true;
+}
+
+DIVISION_EXPORT void division_engine_context_register_lifecycle(
+    DivisionContext* context, const DivisionLifecycle* lifecycle
+)
+{
+    context->lifecycle = *lifecycle;
 }
 
 void division_engine_context_free(DivisionContext* ctx)

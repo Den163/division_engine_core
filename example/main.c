@@ -1,4 +1,5 @@
 #include "division_engine_core/context.h"
+#include "division_engine_core/division_lifecycle.h"
 #include <memory.h>
 
 #include <division_engine_core/io_utility.h>
@@ -14,7 +15,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
-static void error_callback(int error_code, const char* message);
+static void error_callback(DivisionContext* ctx, int error_code, const char* message);
 static void init_callback(DivisionContext* ctx);
 static void update_callback(DivisionContext* ctx);
 
@@ -49,15 +50,19 @@ int main()
         .window_width = 512,
         .window_height = 512,
         .window_title = "New window",
-        .error_callback = error_callback,
+    };
+
+    DivisionLifecycle lifecycle = {
         .init_callback = init_callback,
         .update_callback = update_callback,
+        .error_callback = error_callback,
     };
 
     DivisionContext* ctx = NULL;
     division_engine_context_alloc(&settings, &ctx);
+    division_engine_context_register_lifecycle(ctx, &lifecycle);
 
-    division_engine_renderer_run_loop(ctx, &settings);
+    division_engine_renderer_run_loop(ctx);
     division_engine_context_free(ctx);
 }
 
@@ -109,7 +114,7 @@ void update_callback(DivisionContext* ctx)
 {
 }
 
-void error_callback(int error_code, const char* message)
+void error_callback(DivisionContext* ctx, int error_code, const char* message)
 {
     fprintf(stderr, "Error code: %d, error message: %s\n", error_code, message);
 }

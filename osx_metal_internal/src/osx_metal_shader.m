@@ -1,20 +1,21 @@
+#include "division_engine_core/division_lifecycle.h"
 #include "division_engine_core/platform_internal/platfrom_shader.h"
 
-#include <stdbool.h>
-#include <MetalKit/MetalKit.h>
 #include "division_engine_core/renderer.h"
 #include "osx_window_context.h"
+#include <MetalKit/MetalKit.h>
+#include <stdbool.h>
 
 static inline bool create_shader_program(
     DivisionContext* ctx,
     const DivisionShaderSourceDescriptor* descriptors,
     int32_t descriptor_count,
-    DivisionMetalShaderProgram*
-    out_shader_program
+    DivisionMetalShaderProgram* out_shader_program
 );
 
 bool division_engine_internal_platform_shader_system_context_alloc(
-    DivisionContext* ctx, const DivisionSettings* settings)
+    DivisionContext* ctx, const DivisionSettings* settings
+)
 {
     ctx->shader_context->shaders_impl = NULL;
 
@@ -38,7 +39,8 @@ bool division_engine_internal_platform_shader_program_alloc(
     DivisionContext* ctx,
     const DivisionShaderSourceDescriptor* shader_descriptors,
     int32_t shader_descriptor_count,
-    uint32_t* out_shader_program_id)
+    uint32_t* out_shader_program_id
+)
 {
     DivisionOSXWindowContext* window_ctx = ctx->renderer_context->window_data;
     DivisionShaderSystemContext* shader_ctx = ctx->shader_context;
@@ -49,7 +51,10 @@ bool division_engine_internal_platform_shader_program_alloc(
         .fragment_function = nil,
     };
 
-    if (!create_shader_program(ctx, shader_descriptors, shader_descriptor_count, &shader_program)) {
+    if (!create_shader_program(
+            ctx, shader_descriptors, shader_descriptor_count, &shader_program
+        ))
+    {
         return false;
     }
 
@@ -58,14 +63,17 @@ bool division_engine_internal_platform_shader_program_alloc(
     if (program_id >= shader_program_count)
     {
         shader_ctx->shaders_impl = realloc(
-            shader_ctx->shaders_impl,
-            sizeof(DivisionMetalShaderProgram[program_id + 1])
+            shader_ctx->shaders_impl, sizeof(DivisionMetalShaderProgram[program_id + 1])
         );
 
         if (shader_ctx->shaders_impl == NULL)
         {
             division_unordered_id_table_remove(&shader_ctx->id_table, program_id);
-            ctx->error_callback(DIVISION_INTERNAL_ERROR, "Failed to reallocate Shader Implementation array");
+            ctx->lifecycle.error_callback(
+                ctx,
+                DIVISION_INTERNAL_ERROR,
+                "Failed to reallocate Shader Implementation array"
+            );
 
             return false;
         }
@@ -82,52 +90,64 @@ bool create_shader_program(
     const DivisionShaderSourceDescriptor* descriptors,
     int32_t descriptor_count,
     DivisionMetalShaderProgram* out_shader_program
-) {
+)
+{
     @autoreleasepool
     {
-        id<MTLDevice> device = ctx->renderer_context->window_data->app_delegate->viewDelegate->device;
+        id<MTLDevice> device =
+            ctx->renderer_context->window_data->app_delegate->viewDelegate->device;
         NSError* err = nil;
 
         for (int32_t i = 0; i < descriptor_count; i++)
         {
             const DivisionShaderSourceDescriptor* desc = &descriptors[i];
 
-            id <MTLLibrary> library = [device
-                newLibraryWithSource:[NSString stringWithUTF8String:desc->source] options:nil error:&err];
+            id<MTLLibrary> library =
+                [device newLibraryWithSource:[NSString stringWithUTF8String:desc->source]
+                                     options:nil
+                                       error:&err];
 
             if (err)
             {
-                ctx->error_callback(DIVISION_INTERNAL_ERROR, [[err debugDescription] UTF8String]);
+                ctx->lifecycle.error_callback(
+                    ctx, DIVISION_INTERNAL_ERROR, [[err debugDescription] UTF8String]
+                );
                 return false;
             }
 
             if (!library)
             {
-                ctx->error_callback(DIVISION_INTERNAL_ERROR, "Created shader library is null\n");
+                ctx->lifecycle.error_callback(
+                    ctx, DIVISION_INTERNAL_ERROR, "Created shader library is null\n"
+                );
                 return false;
             }
 
             MTLFunctionDescriptor* mtl_func_desc = [MTLFunctionDescriptor new];
-            [mtl_func_desc setName: [NSString stringWithUTF8String:desc->entry_point_name]];
+            [mtl_func_desc
+                setName:[NSString stringWithUTF8String:desc->entry_point_name]];
 
-            id <MTLFunction> func = [library newFunctionWithDescriptor:mtl_func_desc error:&err];
+            id<MTLFunction> func = [library newFunctionWithDescriptor:mtl_func_desc
+                                                                error:&err];
             if (err)
             {
-                ctx->error_callback(DIVISION_INTERNAL_ERROR, [[err debugDescription] UTF8String]);
+                ctx->lifecycle.error_callback(
+                    ctx, DIVISION_INTERNAL_ERROR, [[err debugDescription] UTF8String]
+                );
                 return false;
             }
 
             switch (desc->type)
             {
-                case DIVISION_SHADER_VERTEX:
-                    out_shader_program->vertex_function = func;
-                    break;
-                case DIVISION_SHADER_FRAGMENT:
-                    out_shader_program->fragment_function = func;
-                    break;
-                default:
-                    fprintf(stderr, "Unknown shader function type `%d`\n", desc->type);
-                    return false;
+            case DIVISION_SHADER_VERTEX:
+                out_shader_program->vertex_function = func;
+                break;
+            case DIVISION_SHADER_FRAGMENT:
+                out_shader_program->fragment_function = func;
+                break;
+            default:
+                fprintf(stderr, "Unknown shader function type `%d`\n", desc->type);
+                return false;
             }
         }
 
@@ -135,9 +155,12 @@ bool create_shader_program(
     }
 }
 
-void division_engine_internal_platform_shader_program_free(DivisionContext* ctx, uint32_t shader_program_id)
+void division_engine_internal_platform_shader_program_free(
+    DivisionContext* ctx, uint32_t shader_program_id
+)
 {
-    DivisionMetalShaderProgram* shader = &ctx->shader_context->shaders_impl[shader_program_id];
+    DivisionMetalShaderProgram* shader =
+        &ctx->shader_context->shaders_impl[shader_program_id];
     shader->fragment_function = nil;
     shader->vertex_function = nil;
 

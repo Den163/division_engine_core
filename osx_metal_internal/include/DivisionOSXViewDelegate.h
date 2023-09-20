@@ -25,11 +25,9 @@
 };
 
 + (instancetype)withContext:(DivisionContext*)aContext
-                   settings:(const DivisionSettings*)aSettings
                      device:(id)aDevice;
 
 - (instancetype)initWithContext:(DivisionContext*)aContext
-                       settings:(const DivisionSettings*)aSettings
                          device:(id)aDevice;
 
 @end

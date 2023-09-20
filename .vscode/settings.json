@@ -1,5 +1,10 @@
 {
     "cmake.configureEnvironment": {
         "DIVISION_BUILD_EXAMPLE": "1"
-    }
+    },
+    "cSpell.words": [
+        "FMAT",
+        "FVEC",
+        "stbi"
+    ]
 }

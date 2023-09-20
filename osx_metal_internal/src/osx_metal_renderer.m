@@ -1,17 +1,21 @@
 #include "division_engine_core/platform_internal/platform_renderer.h"
 #include "division_engine_core/renderer.h"
 
-#include <Foundation/Foundation.h>
-#include <AppKit/AppKit.h>
 #include "DivisionOSXAppDelegate.h"
 #include "osx_window_context.h"
+#include <AppKit/AppKit.h>
+#include <Foundation/Foundation.h>
 
 // TODO: rename to context
-bool division_engine_internal_platform_renderer_alloc(DivisionContext* ctx, const DivisionSettings* settings)
+bool division_engine_internal_platform_renderer_alloc(
+    DivisionContext* ctx, const DivisionSettings* settings
+)
 {
-    @autoreleasepool {
+    @autoreleasepool
+    {
         NSApplication* app = [NSApplication sharedApplication];
-        DivisionOSXAppDelegate* app_delegate = [DivisionOSXAppDelegate withContext:ctx settings:settings];
+        DivisionOSXAppDelegate* app_delegate =
+            [DivisionOSXAppDelegate withContext:ctx settings:settings];
         DivisionOSXWindowContext* window_data = malloc(sizeof(DivisionOSXWindowContext));
 
         [app setDelegate:app_delegate];
@@ -30,15 +34,16 @@ void division_engine_internal_platform_renderer_free(DivisionContext* ctx)
 {
     DivisionOSXWindowContext* window_data = ctx->renderer_context->window_data;
     window_data->app_delegate = nil;
-    window_data->app_delegate = nil;
+    window_data->app = nil;
 
     free(window_data);
 }
 
-void division_engine_internal_platform_renderer_run_loop(DivisionContext* ctx, const DivisionSettings* settings)
+void division_engine_internal_platform_renderer_run_loop(DivisionContext* ctx)
 {
-    @autoreleasepool {
-        DivisionOSXWindowContext * window_data = ctx->renderer_context->window_data;
+    @autoreleasepool
+    {
+        DivisionOSXWindowContext* window_data = ctx->renderer_context->window_data;
         [window_data->app run];
     }
 }
