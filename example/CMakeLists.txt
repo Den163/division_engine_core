@@ -1,4 +1,4 @@
-add_executable(division_example main.c lib/stb_image.h)
+add_executable(division_example main.c)
 
 target_link_libraries(division_example PRIVATE division_engine_core)
 target_include_directories(division_example PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/lib)

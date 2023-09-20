@@ -1,3 +1,10 @@
+#if __ARM_NEON__
+    #define STBI_NEON
+#endif
+
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
+
 #include "division_engine_core/context.h"
 
 #include "division_engine_core/division_lifecycle.h"

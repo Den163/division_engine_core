@@ -1,6 +1,5 @@
 #include "division_engine_core/context.h"
 #include "division_engine_core/division_lifecycle.h"
-#include <memory.h>
 
 #include <division_engine_core/io_utility.h>
 #include <division_engine_core/render_pass.h>
@@ -9,10 +8,13 @@
 #include <division_engine_core/texture.h>
 #include <division_engine_core/uniform_buffer.h>
 #include <division_engine_core/vertex_buffer.h>
+
+#include <assert.h>
+#include <memory.h>
 #include <stdint.h>
 #include <string.h>
+#include <stdio.h>
 
-#define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
 static void error_callback(DivisionContext* ctx, int error_code, const char* message);
