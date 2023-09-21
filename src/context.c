@@ -16,15 +16,12 @@
 #include "division_engine_core/vertex_buffer.h"
 #include <stdlib.h>
 
-bool division_engine_context_alloc(
+bool division_engine_context_initialize(
     const DivisionSettings* settings, 
-    DivisionContext** output_context
+    DivisionContext* ctx
 )
 {
-    DivisionContext* ctx = (DivisionContext*)malloc(sizeof(DivisionContext));
     ctx->state.delta_time = 0;
-
-    *output_context = ctx;
 
     if (!division_engine_internal_renderer_context_alloc(ctx, settings))
         return false;
@@ -49,7 +46,7 @@ DIVISION_EXPORT void division_engine_context_register_lifecycle(
     context->lifecycle = *lifecycle;
 }
 
-void division_engine_context_free(DivisionContext* ctx)
+void division_engine_context_finalize(DivisionContext* ctx)
 {
     division_engine_internal_render_pass_context_free(ctx);
     division_engine_internal_texture_context_free(ctx);
@@ -57,5 +54,4 @@ void division_engine_context_free(DivisionContext* ctx)
     division_engine_internal_vertex_buffer_context_free(ctx);
     division_engine_internal_shader_system_context_free(ctx);
     division_engine_internal_renderer_context_free(ctx);
-    free(ctx);
 }

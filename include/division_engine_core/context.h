@@ -40,16 +40,16 @@ extern "C"
 {
 #endif
 
-    DIVISION_EXPORT bool division_engine_context_alloc(
+    DIVISION_EXPORT bool division_engine_context_initialize(
         const DivisionSettings* settings,
-        DivisionContext** output_context
+        DivisionContext* output_context
     );
 
     DIVISION_EXPORT void division_engine_context_register_lifecycle(
         DivisionContext* context, const DivisionLifecycle* lifecycle
     );
 
-    DIVISION_EXPORT void division_engine_context_free(DivisionContext* ctx);
+    DIVISION_EXPORT void division_engine_context_finalize(DivisionContext* ctx);
 
 #ifdef __cplusplus
 }

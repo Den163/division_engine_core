@@ -60,12 +60,13 @@ int main()
         .error_callback = error_callback,
     };
 
-    DivisionContext* ctx = NULL;
-    division_engine_context_alloc(&settings, &ctx);
-    division_engine_context_register_lifecycle(ctx, &lifecycle);
+    DivisionContext ctx;
+    division_engine_context_initialize(&settings, &ctx);
+    division_engine_context_register_lifecycle(&ctx, &lifecycle);
 
-    division_engine_renderer_run_loop(ctx);
-    division_engine_context_free(ctx);
+    division_engine_renderer_run_loop(&ctx);
+    
+    division_engine_context_finalize(&ctx);
 }
 
 void init_callback(DivisionContext* ctx)
