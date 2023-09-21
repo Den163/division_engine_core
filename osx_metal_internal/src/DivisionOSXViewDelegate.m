@@ -151,5 +151,9 @@
 
 - (void)mtkView:(nonnull MTKView*)view drawableSizeWillChange:(CGSize)size
 {
+    DivisionRendererSystemContext* renderer = context->renderer_context;
+    
+    renderer->frame_buffer_width = size.width;
+    renderer->frame_buffer_height = size.height;
 }
 @end
