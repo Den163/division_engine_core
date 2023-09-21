@@ -1,4 +1,5 @@
 #include "glfw_vertex_buffer.h"
+#include "division_engine_core/context.h"
 #include "division_engine_core/platform_internal/platform_vertex_buffer.h"
 #include "division_engine_core/render_pass.h"
 #include "division_engine_core/vertex_buffer.h"
@@ -13,9 +14,12 @@ typedef struct GlAttrTraits_
     int32_t divide_by_components;
 } GlAttrTraits_;
 
-static inline GlAttrTraits_ get_gl_attr_traits(DivisionShaderVariableType attributeType);
-static inline GLenum topology_to_gl_type(DivisionRenderTopology t);
+static inline GlAttrTraits_ get_gl_attr_traits(
+    DivisionContext* ctx, DivisionShaderVariableType attributeType
+);
+static inline GLenum topology_to_gl_type(DivisionContext* ctx, DivisionRenderTopology t);
 static inline void enable_gl_attributes(
+    DivisionContext* ctx,
     const DivisionVertexAttribute* attributes,
     int32_t attribute_count,
     size_t attributes_offset,
@@ -39,7 +43,9 @@ void division_engine_internal_platform_vertex_buffer_context_free(DivisionContex
     free(vertex_buffer_ctx->buffers_impl);
 }
 
-GlAttrTraits_ get_gl_attr_traits(DivisionShaderVariableType attributeType)
+GlAttrTraits_ get_gl_attr_traits(
+    DivisionContext* ctx, DivisionShaderVariableType attributeType
+)
 {
     switch (attributeType)
     {
@@ -55,12 +61,13 @@ GlAttrTraits_ get_gl_attr_traits(DivisionShaderVariableType attributeType)
     case DIVISION_FMAT4X4:
         return (GlAttrTraits_){GL_FLOAT, 4};
     default: {
-        fprintf(stderr, "Unknown attribute type");
+        DIVISION_THROW_INTERNAL_ERROR(ctx, "Unknown attribute type");
+        return (GlAttrTraits_){0, 0};
     }
     }
 }
 
-GLenum topology_to_gl_type(DivisionRenderTopology t)
+GLenum topology_to_gl_type(DivisionContext* ctx, DivisionRenderTopology t)
 {
     switch (t)
     {
@@ -70,10 +77,9 @@ GLenum topology_to_gl_type(DivisionRenderTopology t)
         return GL_LINES;
     case DIVISION_TOPOLOGY_POINTS:
         return GL_POINTS;
-    default: {
-        fprintf(stderr, "Unknown type of topology");
+    default:
+        DIVISION_THROW_INTERNAL_ERROR(ctx, "Unknown type of topology");
         exit(EXIT_FAILURE);
-    }
     }
 }
 
@@ -97,7 +103,8 @@ bool division_engine_internal_platform_vertex_buffer_impl_init_element(
     DivisionVertexBuffer* vertex_buffer = &vertex_ctx->buffers[buffer_id];
 
     DivisionVertexBufferInternalPlatform_ vertex_buffer_impl = {
-        .gl_topology = topology_to_gl_type(vertex_buffer->topology)};
+        .gl_topology = topology_to_gl_type(ctx, vertex_buffer->topology),
+    };
 
     glGenVertexArrays(1, &vertex_buffer_impl.gl_vao);
     glBindVertexArray(vertex_buffer_impl.gl_vao);
@@ -121,6 +128,7 @@ bool division_engine_internal_platform_vertex_buffer_impl_init_element(
     size_t instance_count = vertex_buffer->instance_count;
 
     enable_gl_attributes(
+        ctx,
         vertex_buffer->per_vertex_attributes,
         vertex_buffer->per_vertex_attribute_count,
         0,
@@ -131,6 +139,7 @@ bool division_engine_internal_platform_vertex_buffer_impl_init_element(
     if (vertex_buffer->per_instance_attribute_count > 0)
     {
         enable_gl_attributes(
+            ctx,
             vertex_buffer->per_instance_attributes,
             vertex_buffer->per_instance_attribute_count,
             vertex_buffer->per_vertex_data_size * vertex_count,
@@ -214,6 +223,7 @@ void division_engine_internal_platform_vertex_buffer_return_data_pointer(
 }
 
 void enable_gl_attributes(
+    DivisionContext* ctx,
     const DivisionVertexAttribute* attributes,
     int32_t attribute_count,
     size_t attributes_offset,
@@ -224,7 +234,7 @@ void enable_gl_attributes(
     for (int32_t i = 0; i < attribute_count; i++)
     {
         const DivisionVertexAttribute* at = &attributes[i];
-        GlAttrTraits_ gl_attr_traits = get_gl_attr_traits(at->type);
+        GlAttrTraits_ gl_attr_traits = get_gl_attr_traits(ctx, at->type);
         int gl_comp_count = at->component_count / gl_attr_traits.divide_by_components;
         size_t gl_comp_size = gl_comp_count * at->base_size;
         size_t attr_base_offset = attributes_offset + at->offset;

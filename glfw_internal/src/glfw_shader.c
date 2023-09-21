@@ -1,3 +1,4 @@
+#include "division_engine_core/context.h"
 #include "division_engine_core/platform_internal/platfrom_shader.h"
 
 #include "glad/gl.h"
@@ -8,14 +9,17 @@
 #include "glfw_shader.h"
 
 static int create_shader_from_source(
-    const char* source, size_t source_size, GLuint gl_shader_type
+    DivisionContext* ctx, const char* source, size_t source_size, GLenum gl_shader_type
 );
-static bool check_program_status(GLuint programHandle);
+static bool check_program_status(DivisionContext* ctx, GLuint programHandle);
 static void get_program_info_log(GLuint program_handle, char** error_ptr);
-static int shader_type_to_gl_type(DivisionShaderType shaderType);
-
+static GLenum shader_type_to_gl_type(DivisionContext* ctx, DivisionShaderType shaderType);
 static inline bool attach_shader_to_program_from_source(
-    const char* source, size_t source_size, DivisionShaderType type, int32_t program_id
+    DivisionContext* ctx,
+    const char* source,
+    size_t source_size,
+    DivisionShaderType type,
+    int32_t program_id
 );
 
 bool division_engine_internal_platform_shader_system_context_alloc(
@@ -44,15 +48,14 @@ bool division_engine_internal_platform_shader_program_alloc(
     {
         const DivisionShaderSourceDescriptor* s = &settings[i];
         attach_shader_to_program_from_source(
-            s->source, s->source_size, s->type, gl_program
+            ctx, s->source, s->source_size, s->type, gl_program
         );
     }
     glLinkProgram(gl_program);
 
-    if (!check_program_status(gl_program))
+    if (!check_program_status(ctx, gl_program))
     {
-
-        ctx->error_callback(DIVISION_INTERNAL_ERROR, "Failed to link shader program");
+        DIVISION_THROW_INTERNAL_ERROR(ctx, "Failed to link shader program");
         glDeleteProgram(gl_program);
         return false;
     }
@@ -70,8 +73,8 @@ bool division_engine_internal_platform_shader_program_alloc(
         if (shader_ctx->shaders_impl == NULL)
         {
             division_unordered_id_table_remove(&shader_ctx->id_table, program_id);
-            ctx->error_callback(
-                DIVISION_INTERNAL_ERROR, "Failed to realloc Shader Implementation array"
+            DIVISION_THROW_INTERNAL_ERROR(
+                ctx, "Failed to realloc Shader Implementation array"
             );
             return false;
         }
@@ -99,16 +102,21 @@ void division_engine_internal_platform_shader_program_free(
 }
 
 bool attach_shader_to_program_from_source(
-    const char* source, size_t source_size, DivisionShaderType type, int32_t program_id
+    DivisionContext* ctx,
+    const char* source,
+    size_t source_size,
+    DivisionShaderType type,
+    int32_t program_id
 )
 {
-    int gl_shader_type = shader_type_to_gl_type(type);
+    GLenum gl_shader_type = shader_type_to_gl_type(ctx, type);
     if (gl_shader_type < 0)
     {
         return false;
     }
 
-    int shader_handle = create_shader_from_source(source, source_size, gl_shader_type);
+    int shader_handle =
+        create_shader_from_source(ctx, source, source_size, gl_shader_type);
     if (shader_handle < 0)
     {
         return false;
@@ -120,13 +128,13 @@ bool attach_shader_to_program_from_source(
 }
 
 int create_shader_from_source(
-    const char* source, size_t source_size, GLuint gl_shader_type
+    DivisionContext* ctx, const char* source, size_t source_size, GLenum gl_shader_type
 )
 {
     GLuint shader_handle = glCreateShader(gl_shader_type);
     if (!shader_handle)
     {
-        fprintf(stderr, "Failed to create a shader");
+        DIVISION_THROW_INTERNAL_ERROR(ctx, "Failed to create a shader");
         return -1;
     }
 
@@ -145,13 +153,12 @@ int create_shader_from_source(
     glGetShaderiv(shader_handle, GL_INFO_LOG_LENGTH, &error_length);
     char* error_log_data = malloc(error_length);
     glGetShaderInfoLog(shader_handle, error_length, &error_length, error_log_data);
-
-    fprintf(stderr, "Failed to compile shader source. Info log: \n%s\n", error_log_data);
+    DIVISION_THROW_INTERNAL_ERROR(ctx, error_log_data);
     free(error_log_data);
     return -1;
 }
 
-bool check_program_status(GLuint programHandle)
+bool check_program_status(DivisionContext* ctx, GLuint programHandle)
 {
     GLint linkStatus;
     glGetProgramiv(programHandle, GL_LINK_STATUS, &linkStatus);
@@ -159,7 +166,7 @@ bool check_program_status(GLuint programHandle)
     {
         char* error;
         get_program_info_log(programHandle, &error);
-        fprintf(stderr, "Failed to link a shader program. Info log: \n%s\n", error);
+        DIVISION_THROW_INTERNAL_ERROR(ctx, error);
         free(error);
         return false;
     }
@@ -171,7 +178,7 @@ bool check_program_status(GLuint programHandle)
     {
         char* error;
         get_program_info_log(programHandle, &error);
-        fprintf(stderr, "Failed to validate a shader program. Info log: \n%s\n", error);
+        DIVISION_THROW_INTERNAL_ERROR(ctx, error);
         free(error);
         return false;
     }
@@ -189,7 +196,7 @@ void get_program_info_log(GLuint program_handle, char** error_ptr)
     *error_ptr = error;
 }
 
-int shader_type_to_gl_type(DivisionShaderType shaderType)
+GLenum shader_type_to_gl_type(DivisionContext* ctx, DivisionShaderType shaderType)
 {
     switch (shaderType)
     {
@@ -198,7 +205,7 @@ int shader_type_to_gl_type(DivisionShaderType shaderType)
     case DIVISION_SHADER_FRAGMENT:
         return GL_FRAGMENT_SHADER;
     default:
-        fprintf(stderr, "Unknown type of shader");
+        DIVISION_THROW_INTERNAL_ERROR(ctx, "Unknown type of shader");
         return -1;
     }
 }

@@ -1,3 +1,4 @@
+#include "division_engine_core/context.h"
 #include "division_engine_core/platform_internal/platform_render_pass.h"
 #include "division_engine_core/utility.h"
 
@@ -138,7 +139,7 @@ bool try_get_gl_blend_arg(
         *out_gl_blend_arg = GL_ONE_MINUS_CONSTANT_ALPHA;
         return true;
     default:
-        ctx->error_callback(DIVISION_INTERNAL_ERROR, "Unknown Blend arg to GL mapping");
+        DIVISION_THROW_INTERNAL_ERROR(ctx, "Unknown Blend arg to GL mapping");
         return false;
     }
 }
@@ -164,9 +165,7 @@ bool try_get_gl_blend_eq(
         *out_gl_eq = GL_MAX;
         return true;
     default:
-        ctx->error_callback(
-            DIVISION_INTERNAL_ERROR, "Unknown BlendOperation to GL mapping"
-        );
+        DIVISION_THROW_INTERNAL_ERROR(ctx, "Unknown BlendOperation to GL mapping");
         return false;
     }
 }

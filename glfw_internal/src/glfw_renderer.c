@@ -1,3 +1,4 @@
+#include "division_engine_core/context.h"
 #define GLFW_INCLUDE_NONE
 #define GLAD_GL_IMPLEMENTATION
 #include "GLFW/glfw3.h"
@@ -23,23 +24,34 @@ static inline void bind_uniform_buffer(
     DivisionUniformBufferSystemContext* ctx, const DivisionIdWithBinding* buffer_binding
 );
 
-static void framebuffer_size_callback(GLFWwindow* window, int width, int height)
-{
-    glViewport(0, 0, width, height);
-}
-
 typedef struct DivisionWindowContextPlatformInternal_*
     DivisionWindowContextPlatformInternalPtr_;
+
+static void gl_debug_message_callback(
+    GLenum source,
+    GLenum type,
+    GLuint id,
+    GLenum severity,
+    GLsizei length,
+    const GLchar* message,
+    const void* user_data
+)
+{
+    if ((source != GL_DEBUG_SOURCE_SHADER_COMPILER) & 
+        (type == GL_DEBUG_TYPE_ERROR))
+    {
+        DivisionContext* ctx = (DivisionContext*)user_data;
+        ctx->lifecycle.error_callback(ctx, id, message);
+    }
+}
 
 bool division_engine_internal_platform_renderer_alloc(
     DivisionContext* ctx, const DivisionSettings* settings
 )
 {
-    glfwSetErrorCallback(settings->error_callback);
-
     if (!glfwInit())
     {
-        settings->error_callback(0, "Failed to init GLFW");
+        DIVISION_THROW_INTERNAL_ERROR(ctx, "Failed to init glfw");
         return false;
     }
 
@@ -53,7 +65,7 @@ bool division_engine_internal_platform_renderer_alloc(
 
     if (!window)
     {
-        settings->error_callback(0, "Can't create a new GLFW window");
+        DIVISION_THROW_INTERNAL_ERROR(ctx, "Can't create a new GLFW window");
         return false;
     }
 
@@ -62,24 +74,30 @@ bool division_engine_internal_platform_renderer_alloc(
     int version = gladLoadGL(glfwGetProcAddress);
     if (version == 0)
     {
-        settings->error_callback(0, "Failed to load GLAD");
+        DIVISION_THROW_INTERNAL_ERROR(ctx, "Failed to load GLAD");
         return false;
     }
 
-    glEnable(GL_DEBUG_OUTPUT);
-    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    DivisionRendererSystemContext* renderer_context = ctx->renderer_context;
+    glfwGetFramebufferSize(
+        window,
+        &renderer_context->frame_buffer_width,
+        &renderer_context->frame_buffer_height
+    );
 
-    ctx->renderer_context->window_data =
-        (DivisionWindowContextPlatformInternalPtr_)window;
+    renderer_context->window_data = (DivisionWindowContextPlatformInternalPtr_)window;
 
     return true;
 }
 
-void division_engine_internal_platform_renderer_run_loop(
-    DivisionContext* ctx, const DivisionSettings* settings
-)
+void division_engine_internal_platform_renderer_run_loop(DivisionContext* ctx)
 {
-    settings->init_callback(ctx);
+#if DIVISION_OPENGL_DEBUG
+    glEnable(GL_DEBUG_OUTPUT);
+    glDebugMessageCallback(gl_debug_message_callback, ctx);
+#endif
+
+    ctx->lifecycle.init_callback(ctx);
 
     DivisionRendererSystemContext* renderer_context = ctx->renderer_context;
     GLFWwindow* window = (GLFWwindow*)renderer_context->window_data;
@@ -97,7 +115,19 @@ void division_engine_internal_platform_renderer_run_loop(
             last_frame_time = current_time;
 
             ctx->state.delta_time = delta_time;
-            settings->update_callback(ctx);
+
+            int width, height;
+            glfwGetFramebufferSize(window, &width, &height);
+
+            if ((width != renderer_context->frame_buffer_width) |
+                (height != renderer_context->frame_buffer_height))
+            {
+                glViewport(0, 0, width, height);
+                renderer_context->frame_buffer_width = width;
+                renderer_context->frame_buffer_height = height;
+            }
+
+            ctx->lifecycle.update_callback(ctx);
             renderer_draw(ctx);
             glfwSwapBuffers(window);
         }
@@ -166,21 +196,25 @@ void renderer_draw(DivisionContext* ctx)
             glBindTextureUnit(tex_bind.shader_location, tex_impl->gl_texture);
         }
 
-        bool has_blend = division_utility_mask_has_flag(
-            pass->capabilities_mask, DIVISION_RENDER_PASS_CAPABILITY_ALPHA_BLEND
-        );
+        if (division_utility_mask_has_flag(
+                pass->capabilities_mask, DIVISION_RENDER_PASS_CAPABILITY_ALPHA_BLEND
+            ))
+        {
+            glEnable(GL_BLEND);
 
-        glEnable(has_blend * GL_BLEND);
-        glDisable(!has_blend * GL_BLEND);
-
-        glBlendFunc(pass_impl->gl_blend_src, pass_impl->gl_blend_dst);
-        glBlendEquation(pass_impl->gl_blend_equation);
-        glBlendColor(
-            const_blend_color[0],
-            const_blend_color[1],
-            const_blend_color[2],
-            const_blend_color[3]
-        );
+            glBlendFunc(pass_impl->gl_blend_src, pass_impl->gl_blend_dst);
+            glBlendEquation(pass_impl->gl_blend_equation);
+            glBlendColor(
+                const_blend_color[0],
+                const_blend_color[1],
+                const_blend_color[2],
+                const_blend_color[3]
+            );
+        }
+        else
+        {
+            glDisable(GL_BLEND);
+        }
 
         glColorMask(
             division_utility_mask_has_flag(pass->color_mask, DIVISION_COLOR_MASK_R),
@@ -190,7 +224,7 @@ void renderer_draw(DivisionContext* ctx)
         );
 
         if (division_utility_mask_has_flag(
-                pass->capabilities_mask, 
+                pass->capabilities_mask,
                 DIVISION_RENDER_PASS_CAPABILITY_INSTANCED_RENDERING
             ))
         {

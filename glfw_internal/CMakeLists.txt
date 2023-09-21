@@ -17,7 +17,10 @@ set(GLFW_INTERNAL_SOURCES
     lib/glad/include/glad/gl.h
     src/glfw_renderer.c
     src/glfw_vertex_buffer.c
-    src/glfw_shader.c src/glfw_uniform_buffer.c include/glfw_uniform_buffer.h src/glfw_render_pass.c src/glfw_texture.c)
+    src/glfw_shader.c src/glfw_uniform_buffer.c 
+    src/glfw_render_pass.c 
+    src/glfw_texture.c
+)
 
 add_library(glfw_internal STATIC ${GLFW_INTERNAL_SOURCES})
 
@@ -38,3 +41,7 @@ else()
     install(TARGETS glfw_internal DESTINATION ${CMAKE_INSTALL_PREFIX})
 endif()
 
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    message("Enabled OpenGL debug output")
+    target_compile_definitions(glfw_internal PUBLIC DIVISION_OPENGL_DEBUG)
+endif()

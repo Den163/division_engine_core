@@ -1,3 +1,4 @@
+#include "division_engine_core/context.h"
 #include "division_engine_core/platform_internal/platform_texture.h"
 
 #include <stdlib.h>
@@ -119,7 +120,7 @@ bool get_texture_traits(
         *out_traits = (GlTextureTraits_){GL_RGBA8, GL_RGBA};
         return true;
     default:
-        ctx->error_callback(DIVISION_INTERNAL_ERROR, "Unknown texture format type");
+        DIVISION_THROW_INTERNAL_ERROR(ctx, "Unknown texture format type");
         return false;
     }
 }
