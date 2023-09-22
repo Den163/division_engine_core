@@ -1,4 +1,5 @@
 #include "DivisionOSXAppDelegate.h"
+#include "division_engine_core/context.h"
 
 static NSMenu* createMenuBar(DivisionOSXAppDelegate* app_delegate);
 
@@ -26,14 +27,8 @@ static NSMenu* createMenuBar(DivisionOSXAppDelegate* app_delegate);
     return [[self alloc] initWithContext:aContext settings:aSettings];
 }
 
-- (void)onAppQuit:(void*)data selector:(SEL)sel sender:(NSObject*)sender
-{
-    [[NSApplication sharedApplication] terminate:sender];
-}
-
-- (void)onWindowClose:(void*)data selector:(SEL)sel sender:(NSObject*)sender
-{
-    [[[[NSApplication sharedApplication] windows] objectAtIndex:0] close];
+- (void)applicationWillTerminate:(NSNotification *)notification __attribute__((swift_attr("@UIActor"))) {
+    context->lifecycle.free_callback(context);
 }
 
 - (BOOL)applicationShouldTerminateAfterLastWindowClosed:(NSApplication*)sender

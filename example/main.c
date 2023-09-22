@@ -57,6 +57,7 @@ int main()
     DivisionLifecycle lifecycle = {
         .init_callback = init_callback,
         .update_callback = update_callback,
+        .free_callback = division_engine_context_finalize,
         .error_callback = error_callback,
     };
 
@@ -65,8 +66,6 @@ int main()
     division_engine_context_register_lifecycle(&ctx, &lifecycle);
 
     division_engine_renderer_run_loop(&ctx);
-    
-    division_engine_context_finalize(&ctx);
 }
 
 void init_callback(DivisionContext* ctx)

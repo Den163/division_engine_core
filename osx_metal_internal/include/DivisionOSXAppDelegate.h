@@ -24,7 +24,6 @@
 
 + (instancetype)withContext:(DivisionContext*)aContext settings:(const DivisionSettings*)aSettings;
 
-- (void)onAppQuit:(void*)data selector:(SEL)sel sender:(NSObject*)sender;
-- (void)onWindowClose:(void*)data selector:(SEL)sel sender:(NSObject*)sender;
+- (void)applicationWillTerminate:(NSNotification *)notification NS_SWIFT_UI_ACTOR;
 
 @end

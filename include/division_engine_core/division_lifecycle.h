@@ -11,5 +11,7 @@ struct DivisionLifecycle
 {
     DivisionLifecycleFunc init_callback;
     DivisionLifecycleFunc update_callback;
+    DivisionLifecycleFunc free_callback;
+
     DivisionErrorFunc error_callback;
 } typedef DivisionLifecycle;
