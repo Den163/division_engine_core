@@ -106,6 +106,17 @@ void division_engine_internal_platform_renderer_run_loop(DivisionContext* ctx)
     last_frame_time = glfwGetTime();
     while (!glfwWindowShouldClose(window))
     {
+        int width, height;
+        glfwGetFramebufferSize(window, &width, &height);
+
+        if ((width != renderer_context->frame_buffer_width) |
+            (height != renderer_context->frame_buffer_height))
+        {
+            glViewport(0, 0, width, height);
+            renderer_context->frame_buffer_width = width;
+            renderer_context->frame_buffer_height = height;
+        }
+
         current_time = glfwGetTime();
         delta_time = current_time - last_frame_time;
 
@@ -115,17 +126,6 @@ void division_engine_internal_platform_renderer_run_loop(DivisionContext* ctx)
             last_frame_time = current_time;
 
             ctx->state.delta_time = delta_time;
-
-            int width, height;
-            glfwGetFramebufferSize(window, &width, &height);
-
-            if ((width != renderer_context->frame_buffer_width) |
-                (height != renderer_context->frame_buffer_height))
-            {
-                glViewport(0, 0, width, height);
-                renderer_context->frame_buffer_width = width;
-                renderer_context->frame_buffer_height = height;
-            }
 
             ctx->lifecycle.update_callback(ctx);
             renderer_draw(ctx);
