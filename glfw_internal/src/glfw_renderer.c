@@ -134,6 +134,8 @@ void division_engine_internal_platform_renderer_run_loop(DivisionContext* ctx)
 
         glfwPollEvents();
     }
+
+    ctx->lifecycle.free_callback(ctx);
 }
 
 void division_engine_internal_platform_renderer_free(DivisionContext* ctx)
