@@ -5,6 +5,7 @@
 #include <stdlib.h>
 
 #include "division_engine_core/context.h"
+#include "division_engine_core/data_structures/ordered_id_table.h"
 #include "division_engine_core/platform_internal/platform_render_pass.h"
 
 static inline void handle_render_pass_alloc_error(
@@ -32,10 +33,10 @@ void division_engine_internal_render_pass_context_free(DivisionContext* ctx)
     DivisionRenderPassSystemContext* render_pass_ctx = ctx->render_pass_context;
     for (int i = 0; i < render_pass_ctx->render_pass_count; i++)
     {
-        DivisionRenderPass pass = render_pass_ctx->render_passes[i];
-        free(pass.uniform_vertex_buffers);
-        free(pass.uniform_fragment_buffers);
-        free(pass.fragment_textures);
+        DivisionRenderPass* pass = &render_pass_ctx->render_passes[i];
+        free(pass->uniform_vertex_buffers);
+        free(pass->uniform_fragment_buffers);
+        free(pass->fragment_textures);
     }
     free(render_pass_ctx->render_passes);
     free(render_pass_ctx);
@@ -174,5 +175,9 @@ void division_engine_render_pass_free(DivisionContext* ctx, uint32_t render_pass
     DivisionRenderPass* render_pass = &render_pass_ctx->render_passes[render_pass_id];
     free(render_pass->uniform_vertex_buffers);
     free(render_pass->uniform_fragment_buffers);
+    free(render_pass->fragment_textures);
+
     render_pass->uniform_vertex_buffers = NULL;
+    render_pass->uniform_fragment_buffers = NULL;
+    render_pass->fragment_textures = NULL;
 }
