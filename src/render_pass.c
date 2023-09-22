@@ -33,10 +33,10 @@ void division_engine_internal_render_pass_context_free(DivisionContext* ctx)
     DivisionRenderPassSystemContext* render_pass_ctx = ctx->render_pass_context;
     for (int i = 0; i < render_pass_ctx->render_pass_count; i++)
     {
-        DivisionRenderPass* pass = &render_pass_ctx->render_passes[i];
-        free(pass->uniform_vertex_buffers);
-        free(pass->uniform_fragment_buffers);
-        free(pass->fragment_textures);
+        DivisionRenderPass pass = render_pass_ctx->render_passes[i];
+        free(pass.uniform_vertex_buffers);
+        free(pass.uniform_fragment_buffers);
+        free(pass.fragment_textures);
     }
     free(render_pass_ctx->render_passes);
     free(render_pass_ctx);
