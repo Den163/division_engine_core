@@ -23,6 +23,9 @@ static inline void renderer_draw(DivisionContext* ctx);
 static inline void bind_uniform_buffer(
     DivisionUniformBufferSystemContext* ctx, const DivisionIdWithBinding* buffer_binding
 );
+static inline void check_window_resizing(
+    DivisionRendererSystemContext* renderer_context, GLFWwindow* window
+);
 
 typedef struct DivisionWindowContextPlatformInternal_*
     DivisionWindowContextPlatformInternalPtr_;
@@ -92,6 +95,12 @@ bool division_engine_internal_platform_renderer_alloc(
     return true;
 }
 
+void division_engine_internal_platform_renderer_free(DivisionContext* ctx)
+{
+    glfwDestroyWindow((GLFWwindow*)ctx->renderer_context->window_data);
+    glfwTerminate();
+}
+
 void division_engine_internal_platform_renderer_run_loop(DivisionContext* ctx)
 {
 #if DIVISION_OPENGL_DEBUG
@@ -108,22 +117,13 @@ void division_engine_internal_platform_renderer_run_loop(DivisionContext* ctx)
     last_frame_time = glfwGetTime();
     while (!glfwWindowShouldClose(window))
     {
-        int width, height;
-        glfwGetFramebufferSize(window, &width, &height);
-
-        if ((width != renderer_context->frame_buffer_width) |
-            (height != renderer_context->frame_buffer_height))
-        {
-            glViewport(0, 0, width, height);
-            renderer_context->frame_buffer_width = width;
-            renderer_context->frame_buffer_height = height;
-        }
-
         current_time = glfwGetTime();
         delta_time = current_time - last_frame_time;
 
         if (delta_time >= 1 / 60.f)
         {
+            check_window_resizing(renderer_context, window);
+
             delta_time = current_time - last_frame_time;
             last_frame_time = current_time;
 
@@ -140,10 +140,20 @@ void division_engine_internal_platform_renderer_run_loop(DivisionContext* ctx)
     ctx->lifecycle.free_callback(ctx);
 }
 
-void division_engine_internal_platform_renderer_free(DivisionContext* ctx)
+void check_window_resizing(
+    DivisionRendererSystemContext* renderer_context, GLFWwindow* window
+)
 {
-    glfwDestroyWindow((GLFWwindow*)ctx->renderer_context->window_data);
-    glfwTerminate();
+    int width, height;
+    glfwGetFramebufferSize(window, &width, &height);
+
+    if ((width != renderer_context->frame_buffer_width) |
+        (height != renderer_context->frame_buffer_height))
+    {
+        glViewport(0, 0, width, height);
+        renderer_context->frame_buffer_width = width;
+        renderer_context->frame_buffer_height = height;
+    }
 }
 
 void renderer_draw(DivisionContext* ctx)
