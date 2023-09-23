@@ -37,8 +37,7 @@ static void gl_debug_message_callback(
     const void* user_data
 )
 {
-    if ((source != GL_DEBUG_SOURCE_SHADER_COMPILER) & 
-        (type == GL_DEBUG_TYPE_ERROR))
+    if ((source != GL_DEBUG_SOURCE_SHADER_COMPILER) & (type == GL_DEBUG_TYPE_ERROR))
     {
         DivisionContext* ctx = (DivisionContext*)user_data;
         ctx->lifecycle.error_callback(ctx, id, message);
@@ -83,6 +82,9 @@ bool division_engine_internal_platform_renderer_alloc(
         window,
         &renderer_context->frame_buffer_width,
         &renderer_context->frame_buffer_height
+    );
+    glViewport(
+        0, 0, renderer_context->frame_buffer_width, renderer_context->frame_buffer_height
     );
 
     renderer_context->window_data = (DivisionWindowContextPlatformInternalPtr_)window;
