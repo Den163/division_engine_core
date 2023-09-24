@@ -51,13 +51,14 @@
         DivisionTextureSystemContext* tex_ctx = context->texture_context;
 
         CGSize drawable_size = [view drawableSize];
-        [renderEnc setViewport:(MTLViewport
-                               ){.originX = 0,
-                                 .originY = 0,
-                                 .width = drawable_size.width,
-                                 .height = drawable_size.height,
-                                 .znear = 0.0f,
-                                 .zfar = 1.0f}];
+        [renderEnc setViewport:(MTLViewport){
+                                   .originX = 0,
+                                   .originY = 0,
+                                   .width = drawable_size.width,
+                                   .height = drawable_size.height,
+                                   .znear = -1.0f,
+                                   .zfar = 1.0f,
+                               }];
         [renderEnc setFrontFacingWinding:MTLWindingCounterClockwise];
 
         uint32_t* render_pass_ids = render_pass_ctx->id_table.orders;
@@ -152,7 +153,7 @@
 - (void)mtkView:(nonnull MTKView*)view drawableSizeWillChange:(CGSize)size
 {
     DivisionRendererSystemContext* renderer = context->renderer_context;
-    
+
     renderer->frame_buffer_width = size.width;
     renderer->frame_buffer_height = size.height;
 }
