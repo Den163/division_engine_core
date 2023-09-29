@@ -3,7 +3,7 @@
 
 #include <stdlib.h>
 
-bool division_engine_internal_texture_context_alloc(
+bool division_engine_texture_system_context_alloc(
     DivisionContext* ctx, const DivisionSettings* settings
 )
 {
@@ -16,7 +16,7 @@ bool division_engine_internal_texture_context_alloc(
     return division_engine_internal_platform_texture_context_alloc(ctx, settings);
 }
 
-void division_engine_internal_texture_context_free(DivisionContext* ctx)
+void division_engine_texture_system_context_free(DivisionContext* ctx)
 {
     division_engine_internal_platform_texture_context_free(ctx);
     division_unordered_id_table_free(&ctx->texture_context->id_table);

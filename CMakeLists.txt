@@ -13,6 +13,8 @@ if (TARGET tests)
     add_subdirectory(tests)
 endif()
 
+find_package(Freetype REQUIRED)
+
 set(SOURCES
     src/context.c
     src/renderer.c
@@ -36,8 +38,15 @@ target_include_directories(
     ${PROJECT_SOURCE_DIR}/include 
     ${PROJECT_SOURCE_DIR}/third_party
     ${PROJECT_BINARY_DIR}
+    ${FREETYPE_INCLUDE_DIRS}
 )
-target_include_directories(division_engine_core PRIVATE ${PROJECT_SOURCE_DIR}/platform_internal_include)
+target_include_directories(
+    division_engine_core 
+    PRIVATE 
+    ${PROJECT_SOURCE_DIR}/platform_internal_include
+)
+
+target_link_libraries(division_engine_core PRIVATE freetype)
 
 GENERATE_EXPORT_HEADER(division_engine_core EXPORT_MACRO_NAME DIVISION_EXPORT)
 

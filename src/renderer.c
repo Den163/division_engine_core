@@ -3,7 +3,7 @@
 
 #include <stdlib.h>
 
-bool division_engine_internal_renderer_context_alloc(
+bool division_engine_renderer_system_context_alloc(
     DivisionContext* ctx, const DivisionSettings* settings
 )
 {
@@ -18,7 +18,7 @@ void division_engine_renderer_run_loop(DivisionContext* ctx)
     division_engine_internal_platform_renderer_run_loop(ctx);
 }
 
-void division_engine_internal_renderer_context_free(DivisionContext* ctx)
+void division_engine_renderer_system_context_free(DivisionContext* ctx)
 {
     division_engine_internal_platform_renderer_free(ctx);
     free(ctx->renderer_context);

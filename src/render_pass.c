@@ -12,7 +12,7 @@ static inline void handle_render_pass_alloc_error(
     DivisionContext* ctx, uint32_t render_pass_id, DivisionRenderPass* render_pass_copy
 );
 
-bool division_engine_internal_render_pass_context_alloc(
+bool division_engine_render_pass_system_context_alloc(
     DivisionContext* ctx, const DivisionSettings* settings
 )
 {
@@ -25,7 +25,7 @@ bool division_engine_internal_render_pass_context_alloc(
     return division_engine_internal_platform_render_pass_context_alloc(ctx, settings);
 }
 
-void division_engine_internal_render_pass_context_free(DivisionContext* ctx)
+void division_engine_render_pass_system_context_free(DivisionContext* ctx)
 {
     division_engine_internal_platform_render_pass_context_free(ctx);
     division_ordered_id_table_free(&ctx->render_pass_context->id_table);

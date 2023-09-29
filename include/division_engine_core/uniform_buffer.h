@@ -23,11 +23,11 @@ typedef struct DivisionUniformBufferSystemContext
     size_t uniform_buffer_count;
 } DivisionUniformBufferSystemContext;
 
-bool division_engine_internal_uniform_buffer_context_alloc(
+bool division_engine_uniform_buffer_system_context_alloc(
     DivisionContext* ctx, const DivisionSettings* settings
 );
 
-void division_engine_internal_uniform_buffer_context_free(DivisionContext* ctx);
+void division_engine_uniform_buffer_system_context_free(DivisionContext* ctx);
 
 #ifdef __cplusplus
 extern "C"

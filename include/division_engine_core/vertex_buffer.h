@@ -78,10 +78,10 @@ typedef struct DivisionVertexBufferBorrowedData
     uint32_t instance_count;
 } DivisionVertexBufferBorrowedData;
 
-bool division_engine_internal_vertex_buffer_context_alloc(
+bool division_engine_vertex_buffer_system_context_alloc(
     DivisionContext* ctx, const DivisionSettings* settings
 );
-void division_engine_internal_vertex_buffer_context_free(DivisionContext* ctx);
+void division_engine_vertex_buffer_system_context_free(DivisionContext* ctx);
 
 #ifdef __cplusplus
 extern "C"

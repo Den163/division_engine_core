@@ -30,10 +30,10 @@ typedef struct DivisionTextureSystemContext
     uint32_t texture_count;
 } DivisionTextureSystemContext;
 
-bool division_engine_internal_texture_context_alloc(
+bool division_engine_texture_system_context_alloc(
     DivisionContext* ctx, const DivisionSettings* settings
 );
-void division_engine_internal_texture_context_free(DivisionContext* ctx);
+void division_engine_texture_system_context_free(DivisionContext* ctx);
 
 #ifdef __cplusplus
 extern "C"

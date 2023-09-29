@@ -99,11 +99,11 @@ typedef struct DivisionRenderPassSystemContext
 #define DIVISION_GET_RENDER_PASS(ctx, render_pass_id)                                    \
     (&ctx->render_pass_context->render_passes[render_pass_id])
 
-bool division_engine_internal_render_pass_context_alloc(
+bool division_engine_render_pass_system_context_alloc(
     DivisionContext* ctx, const DivisionSettings* settings
 );
 
-void division_engine_internal_render_pass_context_free(DivisionContext* ctx);
+void division_engine_render_pass_system_context_free(DivisionContext* ctx);
 
 #ifdef __cplusplus
 extern "C"

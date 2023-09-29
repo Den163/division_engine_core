@@ -4,7 +4,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
-bool division_engine_internal_shader_system_context_alloc(
+bool division_engine_shader_system_context_alloc(
     DivisionContext* ctx, const DivisionSettings* settings
 )
 {
@@ -16,7 +16,7 @@ bool division_engine_internal_shader_system_context_alloc(
     return division_engine_internal_platform_shader_system_context_alloc(ctx, settings);
 }
 
-void division_engine_internal_shader_system_context_free(DivisionContext* ctx)
+void division_engine_shader_system_context_free(DivisionContext* ctx)
 {
     division_engine_internal_platform_shader_system_context_free(ctx);
 

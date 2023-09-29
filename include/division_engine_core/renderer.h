@@ -16,10 +16,10 @@ typedef struct DivisionRendererSystemContext
     struct DivisionWindowContextPlatformInternal_* window_data;
 } DivisionRendererSystemContext;
 
-bool division_engine_internal_renderer_context_alloc(
+bool division_engine_renderer_system_context_alloc(
     DivisionContext* ctx, const DivisionSettings* settings
 );
-void division_engine_internal_renderer_context_free(DivisionContext* ctx);
+void division_engine_renderer_system_context_free(DivisionContext* ctx);
 
 #ifdef __cplusplus
 extern "C"
