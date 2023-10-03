@@ -10,6 +10,7 @@ typedef struct
 {
     GLenum gl_sized_internal_format;
     GLenum gl_internal_format;
+    int pixel_bytes_alignment;
 } GlTextureTraits_;
 
 static inline bool get_texture_traits(
@@ -60,6 +61,7 @@ bool division_engine_internal_platform_texture_impl_init_new_element(
     }
 
     tex_impl->gl_texture_format = gl_traits.gl_internal_format;
+    tex_impl->pixel_byte_alignment = gl_traits.pixel_bytes_alignment;
 
     glCreateTextures(GL_TEXTURE_2D, 1, &tex_impl->gl_texture);
     glTextureStorage2D(
@@ -80,6 +82,8 @@ void division_engine_internal_platform_texture_set_data(
     DivisionTextureSystemContext* tex_ctx = ctx->texture_context;
     DivisionTextureImpl_* tex_impl = &tex_ctx->textures_impl[texture_id];
     DivisionTexture* tex = &tex_ctx->textures[texture_id];
+
+    glPixelStorei(GL_UNPACK_ALIGNMENT, tex_impl->pixel_byte_alignment);
 
     glTextureSubImage2D(
         tex_impl->gl_texture,
@@ -111,13 +115,13 @@ bool get_texture_traits(
     switch (texture_format)
     {
     case DIVISION_TEXTURE_FORMAT_R8Uint:
-        *out_traits = (GlTextureTraits_){GL_R8, GL_RED};
+        *out_traits = (GlTextureTraits_){GL_R8, GL_RED, 1};
         return true;
     case DIVISION_TEXTURE_FORMAT_RGB24Uint:
-        *out_traits = (GlTextureTraits_){GL_RGB8, GL_RGB};
+        *out_traits = (GlTextureTraits_){GL_RGB8, GL_RGB, 3};
         return true;
     case DIVISION_TEXTURE_FORMAT_RGBA32Uint:
-        *out_traits = (GlTextureTraits_){GL_RGBA8, GL_RGBA};
+        *out_traits = (GlTextureTraits_){GL_RGBA8, GL_RGBA, 4};
         return true;
     default:
         DIVISION_THROW_INTERNAL_ERROR(ctx, "Unknown texture format type");
