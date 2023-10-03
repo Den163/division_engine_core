@@ -91,33 +91,30 @@ void init_callback(DivisionContext* ctx)
     example_create_textures(ctx, &texture);
 
     uint32_t render_pass_id;
-    division_engine_render_pass_alloc(
-        ctx,
-        (DivisionRenderPass){
-            .alpha_blending_options =
-                (DivisionAlphaBlendingOptions){
-                    .src = DIVISION_ALPHA_BLEND_SRC_ALPHA,
-                    .dst = DIVISION_ALPHA_BLEND_ONE_MINUS_SRC_ALPHA,
-                    .operation = DIVISION_ALPHA_BLEND_OP_ADD,
-                    .constant_blend_color = {0, 0, 0, 0},
-                },
-            .first_vertex = 0,
-            .vertex_count = (size_t)vertex_count,
-            .instance_count = (size_t)instance_count,
-            .index_count = (size_t)index_count,
-            .uniform_vertex_buffer_count = 0,
-            .uniform_fragment_buffers = &uniform_buffer,
-            .uniform_fragment_buffer_count = 1,
-            .fragment_textures = &texture,
-            .fragment_texture_count = 1,
-            .vertex_buffer = vertex_buffer,
-            .shader_program = shader_program,
-            .capabilities_mask = DIVISION_RENDER_PASS_CAPABILITY_ALPHA_BLEND |
-                                 DIVISION_RENDER_PASS_CAPABILITY_INSTANCED_RENDERING,
-            .color_mask = DIVISION_COLOR_MASK_RGBA,
-        },
-        &render_pass_id
-    );
+    DivisionRenderPass render_pass = {
+        .alpha_blending_options =
+            (DivisionAlphaBlendingOptions){
+                .src = DIVISION_ALPHA_BLEND_SRC_ALPHA,
+                .dst = DIVISION_ALPHA_BLEND_ONE_MINUS_SRC_ALPHA,
+                .operation = DIVISION_ALPHA_BLEND_OP_ADD,
+                .constant_blend_color = {0, 0, 0, 0},
+            },
+        .first_vertex = 0,
+        .vertex_count = (size_t)vertex_count,
+        .instance_count = (size_t)instance_count,
+        .index_count = (size_t)index_count,
+        .uniform_vertex_buffer_count = 0,
+        .uniform_fragment_buffers = &uniform_buffer,
+        .uniform_fragment_buffer_count = 1,
+        .fragment_textures = &texture,
+        .fragment_texture_count = 1,
+        .vertex_buffer = vertex_buffer,
+        .shader_program = shader_program,
+        .capabilities_mask = DIVISION_RENDER_PASS_CAPABILITY_ALPHA_BLEND |
+                             DIVISION_RENDER_PASS_CAPABILITY_INSTANCED_RENDERING,
+        .color_mask = DIVISION_COLOR_MASK_RGBA,
+    };
+    division_engine_render_pass_alloc(ctx, &render_pass, &render_pass_id);
 }
 
 void update_callback(DivisionContext* ctx)
@@ -308,13 +305,10 @@ static void example_write_font_character(DivisionContext* ctx)
 
     assert(bitmap);
     assert(division_engine_font_rasterize_glyph(ctx, font_id, &glyph, bitmap));
-    
-    assert(stbi_write_jpg(
-        "example_font_bitmap.jpg", 
-        glyph.width, 
-        glyph.height, 
-        1, 
-        bitmap, 
-        100
-    ) > 0);
+
+    assert(
+        stbi_write_jpg(
+            "example_font_bitmap.jpg", glyph.width, glyph.height, 1, bitmap, 100
+        ) > 0
+    );
 }

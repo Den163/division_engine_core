@@ -111,7 +111,7 @@ extern "C"
 #endif
 
     DIVISION_EXPORT bool division_engine_render_pass_alloc(
-        DivisionContext* ctx, DivisionRenderPass render_pass, uint32_t* out_render_pass_id
+        DivisionContext* ctx, const DivisionRenderPass* render_pass, uint32_t* out_render_pass_id
     );
 
     DIVISION_EXPORT DivisionRenderPass* division_engine_render_pass_borrow(

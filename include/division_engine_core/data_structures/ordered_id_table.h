@@ -6,6 +6,11 @@
 #include <stddef.h>
 #include <stdint.h>
 
+/*
+    The data structure helps with managing resources ids, when there is a need to store them
+    in the ordered sequence. It wraps around an unordered id table and stores ids orders.
+    The data structure doesn't contains any resource data
+*/
 typedef struct DivisionOrderedIdTable
 {
     DivisionUnorderedIdTable unordered_id_table;

@@ -43,22 +43,22 @@ void division_engine_render_pass_system_context_free(DivisionContext* ctx)
 }
 
 bool division_engine_render_pass_alloc(
-    DivisionContext* ctx, DivisionRenderPass render_pass, uint32_t* out_render_pass_id
+    DivisionContext* ctx, const DivisionRenderPass* render_pass, uint32_t* out_render_pass_id
 )
 {
     DivisionRenderPassSystemContext* pass_ctx = ctx->render_pass_context;
     uint32_t render_pass_id = division_ordered_id_table_new_id(&pass_ctx->id_table);
 
-    DivisionRenderPass render_pass_copy = render_pass;
+    DivisionRenderPass render_pass_copy = *render_pass;
 
-    if (render_pass.uniform_vertex_buffer_count > 0)
+    if (render_pass_copy.uniform_vertex_buffer_count > 0)
     {
         size_t uniform_vert_buffs_bytes =
-            sizeof(DivisionIdWithBinding[render_pass.uniform_vertex_buffer_count]);
+            sizeof(DivisionIdWithBinding[render_pass->uniform_vertex_buffer_count]);
         render_pass_copy.uniform_vertex_buffers = malloc(uniform_vert_buffs_bytes);
         memcpy(
             render_pass_copy.uniform_vertex_buffers,
-            render_pass.uniform_vertex_buffers,
+            render_pass->uniform_vertex_buffers,
             uniform_vert_buffs_bytes
         );
     }
@@ -67,14 +67,14 @@ bool division_engine_render_pass_alloc(
         render_pass_copy.uniform_vertex_buffers = NULL;
     }
 
-    if (render_pass.uniform_fragment_buffer_count > 0)
+    if (render_pass_copy.uniform_fragment_buffer_count > 0)
     {
         size_t uniform_frag_buffs_bytes =
-            sizeof(DivisionIdWithBinding[render_pass.uniform_fragment_buffer_count]);
+            sizeof(DivisionIdWithBinding[render_pass_copy.uniform_fragment_buffer_count]);
         render_pass_copy.uniform_fragment_buffers = malloc(uniform_frag_buffs_bytes);
         memcpy(
             render_pass_copy.uniform_fragment_buffers,
-            render_pass.uniform_fragment_buffers,
+            render_pass->uniform_fragment_buffers,
             uniform_frag_buffs_bytes
         );
     }
@@ -83,14 +83,14 @@ bool division_engine_render_pass_alloc(
         render_pass_copy.uniform_fragment_buffers = NULL;
     }
 
-    if (render_pass.fragment_texture_count > 0)
+    if (render_pass_copy.fragment_texture_count > 0)
     {
         size_t fragment_textures_bytes =
-            sizeof(DivisionIdWithBinding[render_pass.fragment_texture_count]);
+            sizeof(DivisionIdWithBinding[render_pass_copy.fragment_texture_count]);
         render_pass_copy.fragment_textures = malloc(fragment_textures_bytes);
         memcpy(
             render_pass_copy.fragment_textures,
-            render_pass.fragment_textures,
+            render_pass->fragment_textures,
             fragment_textures_bytes
         );
     }

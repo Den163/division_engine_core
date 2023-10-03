@@ -7,8 +7,9 @@
 #include <stdbool.h>
 
 /*
- * Data structure, that creates new ids
- */
+    The data structure helps with managing resources ids. 
+    It doesn't contain any resource data. 
+*/
 typedef struct DivisionUnorderedIdTable
 {
     uint32_t max_id;
