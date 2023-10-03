@@ -3,7 +3,7 @@
 #include <ft2build.h>
 #include <stdint.h>
 #include <sys/types.h>
-#include <uchar.h>
+#include <unicode/uchar.h>
 #include FT_FREETYPE_H
 
 #include "data_structures/unordered_id_table.h"
@@ -51,7 +51,7 @@ extern "C"
     DIVISION_EXPORT bool division_engine_font_get_glyph(
         DivisionContext* ctx, 
         uint32_t font_id, 
-        char32_t character, 
+        int32_t character, 
         DivisionFontGlyph* out_glyph
     );
 

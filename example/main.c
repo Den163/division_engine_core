@@ -276,7 +276,7 @@ static void example_create_textures(
 {
     int image_width, image_height, channels_in_file;
     void* tex_data =
-        stbi_load("example_font_bitmap.jpg", &image_width, &image_height, &channels_in_file, 3);
+        stbi_load("nevsky.jpg", &image_width, &image_height, &channels_in_file, 3);
 
     DivisionTexture texture = {
         .texture_format = DIVISION_TEXTURE_FORMAT_RGB24Uint,
@@ -300,7 +300,6 @@ static void example_write_font_character(DivisionContext* ctx)
     size_t file_size;
     uint32_t font_id, bitmap_id;
     DivisionFontGlyph glyph;
-    const char32_t* characters = U"Su";
 
     assert(division_engine_font_alloc(ctx, "./Roboto-Medium.ttf", 64, &font_id));
     assert(division_engine_font_get_glyph(ctx, font_id, U'X', &glyph));

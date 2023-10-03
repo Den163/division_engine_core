@@ -1,3 +1,4 @@
+#include "division_engine_core/data_structures/unordered_id_table.h"
 #include "division_engine_core/division_lifecycle.h"
 #include "division_engine_core/platform_internal/platfrom_shader.h"
 
@@ -58,7 +59,7 @@ bool division_engine_internal_platform_shader_program_alloc(
         return false;
     }
 
-    uint32_t program_id = division_unordered_id_table_insert(&shader_ctx->id_table);
+    uint32_t program_id = division_unordered_id_table_new_id(&shader_ctx->id_table);
 
     if (program_id >= shader_program_count)
     {
@@ -68,7 +69,7 @@ bool division_engine_internal_platform_shader_program_alloc(
 
         if (shader_ctx->shaders_impl == NULL)
         {
-            division_unordered_id_table_remove(&shader_ctx->id_table, program_id);
+            division_unordered_id_table_remove_id(&shader_ctx->id_table, program_id);
             ctx->lifecycle.error_callback(
                 ctx,
                 DIVISION_INTERNAL_ERROR,
@@ -164,5 +165,5 @@ void division_engine_internal_platform_shader_program_free(
     shader->fragment_function = nil;
     shader->vertex_function = nil;
 
-    division_unordered_id_table_remove(&ctx->shader_context->id_table, shader_program_id);
+    division_unordered_id_table_remove_id(&ctx->shader_context->id_table, shader_program_id);
 }

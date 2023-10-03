@@ -4,6 +4,7 @@ project(division_engine_core)
 set(CMAKE_C_STANDARD 11)
 
 include(GenerateExportHeader)
+include(FetchContent)
 
 if(DEFINED ENV{DIVISION_BUILD_EXAMPLE})
     add_subdirectory(example)
@@ -13,7 +14,13 @@ if (TARGET tests)
     add_subdirectory(tests)
 endif()
 
-find_package(Freetype REQUIRED)
+FetchContent_Declare(
+    freetype
+    URL https://sourceforge.net/projects/freetype/files/freetype2/2.13.2/freetype-2.13.2.tar.gz/download
+    URL_HASH MD5=d99447cf00c5f2679918f66f2b5771f6
+)
+
+FetchContent_MakeAvailable(freetype)
 
 set(SOURCES
     src/context.c
@@ -40,7 +47,6 @@ target_include_directories(
     ${PROJECT_SOURCE_DIR}/include 
     ${PROJECT_SOURCE_DIR}/third_party
     ${PROJECT_BINARY_DIR}
-    ${FREETYPE_INCLUDE_DIRS}
 )
 target_include_directories(
     division_engine_core 
@@ -48,7 +54,7 @@ target_include_directories(
     ${PROJECT_SOURCE_DIR}/platform_internal_include
 )
 
-target_link_libraries(division_engine_core PRIVATE freetype)
+target_link_libraries(division_engine_core PUBLIC freetype)
 
 GENERATE_EXPORT_HEADER(division_engine_core EXPORT_MACRO_NAME DIVISION_EXPORT)
 

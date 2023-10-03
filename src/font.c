@@ -7,7 +7,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <uchar.h>
 
 bool division_engine_font_system_context_alloc(
     DivisionContext* ctx, const DivisionSettings* settings
@@ -90,7 +89,7 @@ bool division_engine_font_alloc(
 bool division_engine_font_get_glyph(
     DivisionContext* ctx,
     uint32_t font_id,
-    char32_t character,
+    int32_t character,
     DivisionFontGlyph* out_glyph
 )
 {
