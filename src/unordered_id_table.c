@@ -27,7 +27,7 @@ void division_unordered_id_table_free(DivisionUnorderedIdTable *table)
     table->free_ids_count = table->free_ids_capacity = table->max_id = 0;
 }
 
-uint32_t division_unordered_id_table_insert(DivisionUnorderedIdTable *table)
+uint32_t division_unordered_id_table_new_id(DivisionUnorderedIdTable *table)
 {
     if (table->free_ids_count > 0)
     {
@@ -43,7 +43,7 @@ uint32_t division_unordered_id_table_insert(DivisionUnorderedIdTable *table)
     return ++table->max_id;
 }
 
-void division_unordered_id_table_remove(DivisionUnorderedIdTable *table, uint32_t id)
+void division_unordered_id_table_remove_id(DivisionUnorderedIdTable *table, uint32_t id)
 {
     assert(id <= table->max_id && division_unordered_id_table_contains(table, id));
 
@@ -77,6 +77,35 @@ bool division_unordered_id_table_contains(
         {
             return false;
         }
+    }
+
+    return true;
+}
+
+bool division_unordered_id_table_data_grow(
+    DivisionUnorderedIdTable* id_table, 
+    void** data, 
+    size_t data_bytes,
+    size_t* elements_capacity, 
+    uint32_t* out_new_id
+)
+{
+    uint32_t new_id = division_unordered_id_table_new_id(id_table);
+    size_t new_capacity = *elements_capacity + 1;
+    
+    *out_new_id = new_id;
+
+    if (new_id >= *elements_capacity)
+    {
+        
+        void* new_data = realloc(*data, data_bytes * new_capacity);
+        if (new_data == NULL)
+        {
+            return false;
+        }
+
+        *data = new_data;
+        *elements_capacity = new_capacity;
     }
 
     return true;

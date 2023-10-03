@@ -1,6 +1,6 @@
 #include "division_engine_core/context.h"
 #include "division_engine_core/division_lifecycle.h"
-
+#include "division_engine_core/font.h"
 #include <division_engine_core/io_utility.h>
 #include <division_engine_core/render_pass.h>
 #include <division_engine_core/renderer.h>
@@ -11,11 +11,16 @@
 
 #include <assert.h>
 #include <memory.h>
+#include <stdbool.h>
 #include <stdint.h>
-#include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define STB_IMAGE_WRITE_IMPLEMENTATION
 
 #include <stb_image.h>
+#include <stb_image_write.h>
 
 static void error_callback(DivisionContext* ctx, int error_code, const char* message);
 static void init_callback(DivisionContext* ctx);
@@ -38,6 +43,8 @@ static void example_create_uniform_buffer(
 static void example_create_textures(
     DivisionContext* ctx, DivisionIdWithBinding* out_texture
 );
+
+static void example_write_font_character(DivisionContext* ctx);
 
 typedef struct VertexData
 {
@@ -62,7 +69,7 @@ int main()
     };
 
     DivisionContext ctx;
-    division_engine_context_initialize(&settings, &ctx);
+    assert(division_engine_context_initialize(&settings, &ctx));
     division_engine_context_register_lifecycle(&ctx, &lifecycle);
 
     division_engine_renderer_run_loop(&ctx);
@@ -80,6 +87,7 @@ void init_callback(DivisionContext* ctx)
         ctx, &vertex_buffer, &vertex_count, &index_count, &instance_count
     );
 
+    example_write_font_character(ctx);
     example_create_textures(ctx, &texture);
 
     uint32_t render_pass_id;
@@ -104,7 +112,7 @@ void init_callback(DivisionContext* ctx)
             .fragment_texture_count = 1,
             .vertex_buffer = vertex_buffer,
             .shader_program = shader_program,
-            .capabilities_mask = DIVISION_RENDER_PASS_CAPABILITY_ALPHA_BLEND | 
+            .capabilities_mask = DIVISION_RENDER_PASS_CAPABILITY_ALPHA_BLEND |
                                  DIVISION_RENDER_PASS_CAPABILITY_INSTANCED_RENDERING,
             .color_mask = DIVISION_COLOR_MASK_RGBA,
         },
@@ -195,14 +203,8 @@ void example_create_vertex_buffer(
     uint32_t indices[] = {0, 1, 2, 2, 3, 0};
 
     float local_to_word_mat[] = {
-        1, 0, 0, 0, 
-        0, 1, 0, 0, 
-        0, 0, 1, 0, 
-        0, 0, 0, 1, // 1
-        1, 0, 0, 1, 
-        0, 1, 0, 1, 
-        0, 0, 1, 0, 
-        0, 0, 0, 1  // 2
+        1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, // 1
+        1, 0, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1  // 2
     };
 
     size_t vertex_count = sizeof(vd) / sizeof(VertexData);
@@ -274,7 +276,7 @@ static void example_create_textures(
 {
     int image_width, image_height, channels_in_file;
     void* tex_data =
-        stbi_load("nevsky.jpg", &image_width, &image_height, &channels_in_file, 3);
+        stbi_load("example_font_bitmap.jpg", &image_width, &image_height, &channels_in_file, 3);
 
     DivisionTexture texture = {
         .texture_format = DIVISION_TEXTURE_FORMAT_RGB24Uint,
@@ -290,4 +292,30 @@ static void example_create_textures(
         .id = tex_id,
         .shader_location = 0,
     };
+}
+
+static void example_write_font_character(DivisionContext* ctx)
+{
+    void* font_file;
+    size_t file_size;
+    uint32_t font_id, bitmap_id;
+    DivisionFontGlyph glyph;
+    const char32_t* characters = U"Su";
+
+    assert(division_engine_font_alloc(ctx, "./Roboto-Medium.ttf", 64, &font_id));
+    assert(division_engine_font_get_glyph(ctx, font_id, U'X', &glyph));
+
+    void* bitmap = malloc(glyph.width * glyph.height);
+
+    assert(bitmap);
+    assert(division_engine_font_rasterize_glyph(ctx, font_id, &glyph, bitmap));
+    
+    assert(stbi_write_jpg(
+        "example_font_bitmap.jpg", 
+        glyph.width, 
+        glyph.height, 
+        1, 
+        bitmap, 
+        100
+    ) > 0);
 }

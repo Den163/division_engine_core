@@ -62,7 +62,7 @@ bool division_engine_internal_platform_shader_program_alloc(
 
     DivisionShaderSystemContext* shader_ctx = ctx->shader_context;
     uint32_t program_id =
-        division_unordered_id_table_insert(&ctx->shader_context->id_table);
+        division_unordered_id_table_new_id(&ctx->shader_context->id_table);
 
     if (program_id >= shader_ctx->shader_count)
     {
@@ -72,7 +72,7 @@ bool division_engine_internal_platform_shader_program_alloc(
 
         if (shader_ctx->shaders_impl == NULL)
         {
-            division_unordered_id_table_remove(&shader_ctx->id_table, program_id);
+            division_unordered_id_table_remove_id(&shader_ctx->id_table, program_id);
             DIVISION_THROW_INTERNAL_ERROR(
                 ctx, "Failed to realloc Shader Implementation array"
             );
@@ -98,7 +98,7 @@ void division_engine_internal_platform_shader_program_free(
     glDeleteProgram(prog->gl_shader_program);
     prog->gl_shader_program = 0;
 
-    division_unordered_id_table_remove(&ctx->shader_context->id_table, shader_program_id);
+    division_unordered_id_table_remove_id(&ctx->shader_context->id_table, shader_program_id);
 }
 
 bool attach_shader_to_program_from_source(

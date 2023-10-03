@@ -25,8 +25,8 @@ DIVISION_EXPORT void division_ordered_id_table_free(DivisionOrderedIdTable* id_t
 
 DIVISION_EXPORT bool division_ordered_id_table_contains(const DivisionOrderedIdTable* id_table, uint32_t id);
 
-DIVISION_EXPORT uint32_t division_ordered_id_table_insert(DivisionOrderedIdTable* id_table);
-DIVISION_EXPORT void division_ordered_id_table_remove(DivisionOrderedIdTable* id_table, uint32_t id);
+DIVISION_EXPORT uint32_t division_ordered_id_table_new_id(DivisionOrderedIdTable* id_table);
+DIVISION_EXPORT void division_ordered_id_table_remove_id(DivisionOrderedIdTable* id_table, uint32_t id);
 
 #ifdef __cplusplus
 }

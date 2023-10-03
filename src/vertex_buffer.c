@@ -12,8 +12,7 @@ typedef struct AttrTraits_
 } AttrTraits_;
 
 static inline AttrTraits_ division_attribute_get_traits(
-    DivisionContext* ctx,
-    DivisionShaderVariableType attributeType
+    DivisionContext* ctx, DivisionShaderVariableType attributeType
 );
 static inline void free_buffer_data_and_handle_error(
     DivisionContext* ctx, DivisionVertexBuffer* buffer, uint32_t buffer_id
@@ -27,20 +26,23 @@ static inline bool alloc_vert_attrs_(
     size_t* output_all_attributes_data_size
 );
 
-bool division_engine_internal_vertex_buffer_context_alloc(
+bool division_engine_vertex_buffer_system_context_alloc(
     DivisionContext* ctx, const DivisionSettings* settings
 )
 {
     ctx->vertex_buffer_context = malloc(sizeof(DivisionVertexBufferSystemContext));
-    *ctx->vertex_buffer_context = (DivisionVertexBufferSystemContext
-    ){.buffers = NULL, .buffers_impl = NULL, .buffers_count = 0};
+    *ctx->vertex_buffer_context = (DivisionVertexBufferSystemContext){
+        .buffers = NULL,
+        .buffers_impl = NULL,
+        .buffers_count = 0,
+    };
 
     division_unordered_id_table_alloc(&ctx->vertex_buffer_context->id_table, 10);
 
     return division_engine_internal_platform_vertex_buffer_context_alloc(ctx, settings);
 }
 
-void division_engine_internal_vertex_buffer_context_free(DivisionContext* ctx)
+void division_engine_vertex_buffer_system_context_free(DivisionContext* ctx)
 {
     division_engine_internal_platform_vertex_buffer_context_free(ctx);
 
@@ -66,7 +68,7 @@ bool division_engine_vertex_buffer_alloc(
 {
     DivisionVertexBufferSystemContext* vertex_ctx = ctx->vertex_buffer_context;
 
-    uint32_t vertex_buffer_id = division_unordered_id_table_insert(&vertex_ctx->id_table);
+    uint32_t vertex_buffer_id = division_unordered_id_table_new_id(&vertex_ctx->id_table);
 
     DivisionVertexBuffer vertex_buffer = {
         .per_vertex_attributes = NULL,
@@ -171,8 +173,8 @@ bool alloc_vert_attrs_(
 }
 
 AttrTraits_ division_attribute_get_traits(
-    DivisionContext* ctx,
-    DivisionShaderVariableType attributeType)
+    DivisionContext* ctx, DivisionShaderVariableType attributeType
+)
 {
     switch (attributeType)
     {
@@ -200,7 +202,7 @@ void free_buffer_data_and_handle_error(
     DivisionContext* ctx, DivisionVertexBuffer* buffer, uint32_t buffer_id
 )
 {
-    division_unordered_id_table_remove(&ctx->vertex_buffer_context->id_table, buffer_id);
+    division_unordered_id_table_remove_id(&ctx->vertex_buffer_context->id_table, buffer_id);
     free(buffer->per_vertex_attributes);
     free(buffer->per_instance_attributes);
     buffer->per_vertex_attributes = NULL;
@@ -224,7 +226,7 @@ void division_engine_vertex_buffer_free(DivisionContext* ctx, uint32_t vertex_bu
         vertex_buffer->per_instance_attributes = NULL;
     }
 
-    division_unordered_id_table_remove(
+    division_unordered_id_table_remove_id(
         &ctx->vertex_buffer_context->id_table, vertex_buffer_id
     );
 }

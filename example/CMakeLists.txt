@@ -10,6 +10,7 @@ set(EXAMPLE_RESOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/test.frag.metal
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/test.metal
     ${CMAKE_CURRENT_SOURCE_DIR}/images/nevsky.jpg
+    ${CMAKE_CURRENT_SOURCE_DIR}/fonts/Roboto-Medium.ttf
 )
 
 set(ENV{DIVISION_ENGINE_USE_SHADER_COMPILER} 1)

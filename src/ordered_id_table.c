@@ -25,9 +25,9 @@ void division_ordered_id_table_free(DivisionOrderedIdTable* id_table)
         0;
 }
 
-uint32_t division_ordered_id_table_insert(DivisionOrderedIdTable* id_table)
+uint32_t division_ordered_id_table_new_id(DivisionOrderedIdTable* id_table)
 {
-    uint32_t id = division_unordered_id_table_insert(&id_table->unordered_id_table);
+    uint32_t id = division_unordered_id_table_new_id(&id_table->unordered_id_table);
     if (id_table->orders_count == id_table->orders_capacity)
     {
         size_t new_capacity = id_table->orders_capacity * 2;
@@ -51,9 +51,9 @@ uint32_t division_ordered_id_table_insert(DivisionOrderedIdTable* id_table)
     return id;
 }
 
-void division_ordered_id_table_remove(DivisionOrderedIdTable* id_table, uint32_t id)
+void division_ordered_id_table_remove_id(DivisionOrderedIdTable* id_table, uint32_t id)
 {
-    division_unordered_id_table_remove(&id_table->unordered_id_table, id);
+    division_unordered_id_table_remove_id(&id_table->unordered_id_table, id);
 
     uint32_t order_idx = id_table->id_to_order[id];
     uint32_t* order_ptr = id_table->orders + order_idx;

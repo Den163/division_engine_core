@@ -47,7 +47,7 @@ bool division_engine_render_pass_alloc(
 )
 {
     DivisionRenderPassSystemContext* pass_ctx = ctx->render_pass_context;
-    uint32_t render_pass_id = division_ordered_id_table_insert(&pass_ctx->id_table);
+    uint32_t render_pass_id = division_ordered_id_table_new_id(&pass_ctx->id_table);
 
     DivisionRenderPass render_pass_copy = render_pass;
 
@@ -142,7 +142,7 @@ void handle_render_pass_alloc_error(
 )
 {
     DivisionRenderPassSystemContext* pass_ctx = ctx->render_pass_context;
-    division_ordered_id_table_remove(&pass_ctx->id_table, render_pass_id);
+    division_ordered_id_table_remove_id(&pass_ctx->id_table, render_pass_id);
     free(render_pass_copy->uniform_vertex_buffers);
     free(render_pass_copy->uniform_fragment_buffers);
     free(render_pass_copy->fragment_textures);
@@ -170,7 +170,7 @@ void division_engine_render_pass_free(DivisionContext* ctx, uint32_t render_pass
     division_engine_internal_platform_render_pass_free(ctx, render_pass_id);
 
     DivisionRenderPassSystemContext* render_pass_ctx = ctx->render_pass_context;
-    division_ordered_id_table_remove(&render_pass_ctx->id_table, render_pass_id);
+    division_ordered_id_table_remove_id(&render_pass_ctx->id_table, render_pass_id);
 
     DivisionRenderPass* render_pass = &render_pass_ctx->render_passes[render_pass_id];
     free(render_pass->uniform_vertex_buffers);

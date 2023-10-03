@@ -30,7 +30,7 @@ bool division_engine_texture_alloc(
 )
 {
     DivisionTextureSystemContext* tex_ctx = ctx->texture_context;
-    uint32_t tex_id = division_unordered_id_table_insert(&tex_ctx->id_table);
+    uint32_t tex_id = division_unordered_id_table_new_id(&tex_ctx->id_table);
     if (tex_id >= tex_ctx->texture_count)
     {
         size_t new_size = tex_id + 1;
@@ -54,7 +54,7 @@ bool division_engine_texture_alloc(
 void division_engine_texture_free(DivisionContext* ctx, uint32_t texture_id)
 {
     division_engine_internal_platform_texture_free(ctx, texture_id);
-    division_unordered_id_table_remove(&ctx->texture_context->id_table, texture_id);
+    division_unordered_id_table_remove_id(&ctx->texture_context->id_table, texture_id);
 }
 
 void division_engine_texture_set_data(
