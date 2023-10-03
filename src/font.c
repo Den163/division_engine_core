@@ -4,6 +4,7 @@
 #include "freetype/freetype.h"
 #include "freetype/fttypes.h"
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <uchar.h>
@@ -34,8 +35,8 @@ void division_engine_font_system_context_free(DivisionContext* ctx)
         FT_Done_Face(font_context->ft_faces[i]);
     }
 
-    FT_Done_FreeType(ctx->font_context->ft_library);
-    free(ctx->font_context);
+    FT_Done_FreeType(font_context->ft_library);
+    free(font_context);
 }
 
 bool division_engine_font_alloc(
