@@ -7,7 +7,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/_types/_null.h>
 
 bool division_engine_font_system_context_alloc(
     DivisionContext* ctx, const DivisionSettings* settings
@@ -61,9 +60,7 @@ bool division_engine_font_alloc(
             &font_id
         ))
     {
-        ctx->lifecycle.error_callback(
-            ctx, DIVISION_INTERNAL_ERROR, "Failed to realloc faces"
-        );
+        DIVISION_THROW_INTERNAL_ERROR(ctx, "Failed to realloc faces");
         return false;
     }
 
@@ -73,7 +70,7 @@ bool division_engine_font_alloc(
     if (ft_error)
     {
         division_unordered_id_table_remove_id(&font_context->face_id_table, font_id);
-        ctx->lifecycle.error_callback(ctx, DIVISION_INTERNAL_ERROR, "FT_New_Face failed");
+        DIVISION_THROW_INTERNAL_ERROR(ctx, "FT_New_Face failed");
         return false;
     }
 
@@ -81,9 +78,7 @@ bool division_engine_font_alloc(
     if (ft_error)
     {
         division_unordered_id_table_remove_id(&font_context->face_id_table, font_id);
-        ctx->lifecycle.error_callback(
-            ctx, DIVISION_INTERNAL_ERROR, "Failed to set character size"
-        );
+        DIVISION_THROW_INTERNAL_ERROR(ctx, "Failed to set character size");
         return false;
     }
 
@@ -104,9 +99,7 @@ bool division_engine_font_get_glyph(
     FT_Error ft_error = FT_Load_Glyph(ft_face, glyph_id, FT_LOAD_NO_BITMAP);
     if (ft_error)
     {
-        ctx->lifecycle.error_callback(
-            ctx, DIVISION_INTERNAL_ERROR, "FT_Load_Glyph failed"
-        );
+        DIVISION_THROW_INTERNAL_ERROR(ctx, "FT_Load_Glyph failed");
         return false;
     }
 
@@ -132,23 +125,16 @@ bool division_engine_font_rasterize_glyph(
     FT_Error ft_error = FT_Load_Glyph(ft_face, glyph->glyph_id, FT_LOAD_DEFAULT);
     if (ft_error)
     {
-        ctx->lifecycle.error_callback(
-            ctx, DIVISION_INTERNAL_ERROR, "FT_Load_Glyph failed (with bitmap)"
-        );
+        DIVISION_THROW_INTERNAL_ERROR(ctx, "FT_Load_Glyph failed (with bitmap)");
         return false;
     }
 
     FT_GlyphSlot ft_glyph = ft_face->glyph;
-    if (ft_glyph->format != FT_GLYPH_FORMAT_BITMAP)
+    ft_error = FT_Render_Glyph(ft_glyph, FT_RENDER_MODE_NORMAL);
+    if (ft_error)
     {
-        ft_error = FT_Render_Glyph(ft_glyph, FT_RENDER_MODE_NORMAL);
-        if (ft_error)
-        {
-            ctx->lifecycle.error_callback(
-                ctx, DIVISION_INTERNAL_ERROR, "FT_Render_Glyph failed"
-            );
-            return false;
-        }
+        DIVISION_THROW_INTERNAL_ERROR(ctx, "FT_Render_Glyph failed");
+        return false;
     }
 
     memcpy(bitmap, ft_glyph->bitmap.buffer, glyph->width * glyph->height);

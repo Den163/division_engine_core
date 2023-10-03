@@ -45,12 +45,10 @@ set(SOURCES
     src/hash_table.c
     src/texture.c
     src/font.c
-    
-    third_party/stb_image.h
-    third_party/stb_image_write.h
 )
 
 add_library(division_engine_core ${SOURCES})
+
 target_include_directories(
     division_engine_core 
     PUBLIC 
