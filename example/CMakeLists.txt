@@ -15,7 +15,7 @@ set(EXAMPLE_RESOURCES
 
 set(ENV{DIVISION_ENGINE_USE_SHADER_COMPILER} 1)
 
-    message("Copying example shaders...")
-    foreach(EXAMPLE_RES ${EXAMPLE_RESOURCES})
-        configure_file(${EXAMPLE_RES} ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
-    endforeach()
+message("Copying example shaders...")
+foreach(EXAMPLE_RES ${EXAMPLE_RESOURCES})
+    configure_file(${EXAMPLE_RES} ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
+endforeach()

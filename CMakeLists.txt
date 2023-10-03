@@ -14,6 +14,16 @@ if (TARGET tests)
     add_subdirectory(tests)
 endif()
 
+SET(FT_REQUIRE_HARFBUZZ BOOL OFF FORCE)
+SET(FT_REQUIRE_BZIP2 BOOL OFF FORCE)
+SET(FT_REQUIRE_PNG BOOL OFF FORCE)
+SET(FT_REQUIRE_BROTLI BOOL OFF FORCE)
+
+SET(FT_DISABLE_HARFBUZZ BOOL ON FORCE)
+SET(FT_DISABLE_BZIP2 BOOL ON FORCE)
+SET(FT_DISABLE_PNG BOOL ON FORCE)
+SET(FT_DISABLE_BROTLI BOOL ON FORCE)
+
 FetchContent_Declare(
     freetype
     URL https://sourceforge.net/projects/freetype/files/freetype2/2.13.2/freetype-2.13.2.tar.gz/download
@@ -67,3 +77,5 @@ elseif(UNIX OR WIN32)
     add_subdirectory(glfw_internal)
     target_link_libraries(division_engine_core PUBLIC glfw_internal)
 endif()
+
+install(TARGETS freetype DESTINATION ${CMAKE_INSTALL_NAME_DIR})
