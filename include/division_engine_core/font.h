@@ -48,6 +48,10 @@ extern "C"
         uint32_t* out_font_id
     );
 
+    DIVISION_EXPORT void division_engine_font_free(
+        DivisionContext* ctx, uint32_t font_id
+    );
+
     DIVISION_EXPORT bool division_engine_font_get_glyph(
         DivisionContext* ctx, 
         uint32_t font_id, 
@@ -60,10 +64,6 @@ extern "C"
         uint32_t font_id,
         const DivisionFontGlyph* glyph,
         uint8_t* bitmap
-    );
-
-    DIVISION_EXPORT void division_engine_font_free(
-        DivisionContext* ctx, uint32_t font_id
     );
 
 #ifdef __cplusplus

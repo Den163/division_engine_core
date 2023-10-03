@@ -10,7 +10,7 @@ if(DEFINED ENV{DIVISION_BUILD_EXAMPLE})
     add_subdirectory(example)
 endif()
 
-if (TARGET tests)
+if (DEFINED ENV{DIVISION_BUILD_TESTS})
     add_subdirectory(tests)
 endif()
 

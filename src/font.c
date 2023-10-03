@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/_types/_null.h>
 
 bool division_engine_font_system_context_alloc(
     DivisionContext* ctx, const DivisionSettings* settings
@@ -31,7 +32,11 @@ void division_engine_font_system_context_free(DivisionContext* ctx)
 
     for (int i = 0; i < font_context->ft_face_count; i++)
     {
-        FT_Done_Face(font_context->ft_faces[i]);
+        FT_Face ft_face = font_context->ft_faces[i];
+        if (ft_face != NULL)
+        {
+            FT_Done_Face(ft_face);
+        }
     }
 
     FT_Done_FreeType(font_context->ft_library);
@@ -155,10 +160,11 @@ void division_engine_font_free(DivisionContext* ctx, uint32_t font_id)
 {
     DivisionFontSystemContext* font_context = ctx->font_context;
 
-    FT_Face face = font_context->ft_faces[font_id];
-    if (face)
+    FT_Face* face_ptr = &font_context->ft_faces[font_id];
+    if (*face_ptr)
     {
-        FT_Done_Face(face);
+        FT_Done_Face(*face_ptr);
+        *face_ptr = NULL;
     }
 
     division_unordered_id_table_remove_id(&font_context->face_id_table, font_id);
