@@ -74,7 +74,7 @@ bool division_engine_font_alloc(
         return false;
     }
 
-    ft_error = FT_Set_Char_Size(*ft_face, 0, font_height * 64, 0, 0);
+    ft_error = FT_Set_Pixel_Sizes(*ft_face, 0, font_height);
     if (ft_error)
     {
         division_unordered_id_table_remove_id(&font_context->face_id_table, font_id);
@@ -107,8 +107,8 @@ bool division_engine_font_get_glyph(
 
     *out_glyph = (DivisionFontGlyph){
         .glyph_id = glyph_id,
-        .width = glyph_metrics->width / 64,
-        .height = glyph_metrics->height / 64,
+        .width = ft_face->glyph->bitmap.width,
+        .height = ft_face->glyph->bitmap.rows,
     };
 
     return true;
@@ -122,7 +122,7 @@ bool division_engine_font_rasterize_glyph(
 )
 {
     FT_Face ft_face = ctx->font_context->ft_faces[font_id];
-    FT_Error ft_error = FT_Load_Glyph(ft_face, glyph->glyph_id, FT_LOAD_DEFAULT);
+    FT_Error ft_error = FT_Load_Glyph(ft_face, glyph->glyph_id, FT_LOAD_RENDER);
     if (ft_error)
     {
         DIVISION_THROW_INTERNAL_ERROR(ctx, "FT_Load_Glyph failed (with bitmap)");
@@ -130,13 +130,6 @@ bool division_engine_font_rasterize_glyph(
     }
 
     FT_GlyphSlot ft_glyph = ft_face->glyph;
-    ft_error = FT_Render_Glyph(ft_glyph, FT_RENDER_MODE_NORMAL);
-    if (ft_error)
-    {
-        DIVISION_THROW_INTERNAL_ERROR(ctx, "FT_Render_Glyph failed");
-        return false;
-    }
-
     memcpy(bitmap, ft_glyph->bitmap.buffer, glyph->width * glyph->height);
 
     return true;

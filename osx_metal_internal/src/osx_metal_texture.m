@@ -12,6 +12,7 @@ typedef struct
     MTLPixelFormat pixel_format;
     int32_t mtl_bytes_per_pixel;
     int32_t src_data_bytes_per_pixel;
+    bool swizzle;
 } DivisionMTLTexTraits_;
 
 static inline bool try_get_texture_traits(
@@ -69,10 +70,21 @@ bool division_engine_internal_platform_texture_impl_init_new_element(
     @autoreleasepool
     {
         MTLSamplerDescriptor* sample_desc = [MTLSamplerDescriptor new];
-        MTLTextureDescriptor* tex_desc = [MTLTextureDescriptor new];
-        tex_desc.width = tex->width;
-        tex_desc.height = tex->height;
-        tex_desc.pixelFormat = traits.pixel_format;
+        MTLTextureDescriptor* tex_desc =
+            [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:traits.pixel_format
+                                                               width:tex->width
+                                                              height:tex->height
+                                                           mipmapped:NO];
+
+        if (traits.swizzle)
+        {
+            tex_desc.swizzle = MTLTextureSwizzleChannelsMake(
+                MTLTextureSwizzleRed,
+                MTLTextureSwizzleRed,
+                MTLTextureSwizzleRed,
+                MTLTextureSwizzleRed
+            );
+        }
 
         tex_impl->mtl_texture = [device newTextureWithDescriptor:tex_desc];
         tex_impl->mtl_sampler = [device newSamplerStateWithDescriptor:sample_desc];
@@ -141,13 +153,13 @@ bool try_get_texture_traits(
     switch (texture_format)
     {
     case DIVISION_TEXTURE_FORMAT_R8Uint:
-        *out_traits = (DivisionMTLTexTraits_){MTLPixelFormatR8Unorm, 1, 1};
+        *out_traits = (DivisionMTLTexTraits_){MTLPixelFormatR8Unorm, 1, 1, true};
         return true;
     case DIVISION_TEXTURE_FORMAT_RGB24Uint:
-        *out_traits = (DivisionMTLTexTraits_){MTLPixelFormatRGBA8Unorm, 4, 3};
+        *out_traits = (DivisionMTLTexTraits_){MTLPixelFormatRGBA8Unorm, 4, 3, false};
         return true;
     case DIVISION_TEXTURE_FORMAT_RGBA32Uint:
-        *out_traits = (DivisionMTLTexTraits_){MTLPixelFormatRGBA8Unorm, 4, 4};
+        *out_traits = (DivisionMTLTexTraits_){MTLPixelFormatRGBA8Unorm, 4, 4, false};
         return true;
     default:
         ctx->lifecycle.error_callback(
