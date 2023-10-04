@@ -12,7 +12,7 @@ typedef struct
     MTLPixelFormat pixel_format;
     int32_t mtl_bytes_per_pixel;
     int32_t src_data_bytes_per_pixel;
-    bool swizzle;
+    bool single_channel;
 } DivisionMTLTexTraits_;
 
 static inline bool try_get_texture_traits(
@@ -76,7 +76,7 @@ bool division_engine_internal_platform_texture_impl_init_new_element(
                                                               height:tex->height
                                                            mipmapped:NO];
 
-        if (traits.swizzle)
+        if (traits.single_channel)
         {
             tex_desc.swizzle = MTLTextureSwizzleChannelsMake(
                 MTLTextureSwizzleRed,
@@ -84,6 +84,9 @@ bool division_engine_internal_platform_texture_impl_init_new_element(
                 MTLTextureSwizzleRed,
                 MTLTextureSwizzleRed
             );
+
+            sample_desc.minFilter = MTLSamplerMinMagFilterLinear;
+            sample_desc.magFilter = MTLSamplerMinMagFilterLinear;
         }
 
         tex_impl->mtl_texture = [device newTextureWithDescriptor:tex_desc];
