@@ -1,8 +1,10 @@
 #include "division_engine_core/context.h"
 #include "division_engine_core/platform_internal/platform_texture.h"
 
+#include <stdbool.h>
 #include <stdlib.h>
 
+#include "division_engine_core/render_pass.h"
 #include "division_engine_core/texture.h"
 #include "glfw_texture.h"
 
@@ -17,6 +19,12 @@ static inline bool get_texture_traits(
     DivisionContext* ctx,
     DivisionTextureFormat texture_format,
     GlTextureTraits_* out_traits
+);
+
+static inline bool get_gl_swizzle_var(
+    DivisionContext* ctx,
+    DivisionTextureChannelSwizzleVariant swizzle,
+    GLint* out_gl_swizzle
 );
 
 bool division_engine_internal_platform_texture_context_alloc(
@@ -72,9 +80,20 @@ bool division_engine_internal_platform_texture_impl_init_new_element(
         (GLsizei)tex->height
     );
 
-    if (gl_traits.gl_sized_internal_format == GL_R8)
+    if (tex->has_channels_swizzle)
     {
-        GLint swizzle_mask[] = { GL_RED, GL_RED, GL_RED, GL_RED };
+        DivisionTextureChannelsSwizzle tex_swizzle = tex->channels_swizzle;
+
+        GLint swizzle_mask[4];
+        for (int i = 0; i < 4; i++)
+        {
+            if (!get_gl_swizzle_var(ctx, tex_swizzle.values[i], &swizzle_mask[i]))
+            {
+                glDeleteTextures(1, &tex_impl->gl_texture);
+                return false;
+            }
+        }
+
         glTextureParameteriv(tex_impl->gl_texture, GL_TEXTURE_SWIZZLE_RGBA, swizzle_mask);
     }
 
@@ -131,6 +150,38 @@ bool get_texture_traits(
         return true;
     default:
         DIVISION_THROW_INTERNAL_ERROR(ctx, "Unknown texture format type");
+        return false;
+    }
+}
+
+bool get_gl_swizzle_var(
+    DivisionContext* ctx,
+    DivisionTextureChannelSwizzleVariant color_channel,
+    GLint* out_variant
+)
+{
+    switch (color_channel)
+    {
+    case DIVISION_TEXTURE_CHANNEL_SWIZZLE_VARIANT_ZERO: 
+        *out_variant = GL_ZERO;
+        return true;
+    case DIVISION_TEXTURE_CHANNEL_SWIZZLE_VARIANT_ONE: 
+        *out_variant = GL_ONE;
+        return true;
+    case DIVISION_TEXTURE_CHANNEL_SWIZZLE_VARIANT_RED: 
+        *out_variant = GL_RED;
+        return true;
+    case DIVISION_TEXTURE_CHANNEL_SWIZZLE_VARIANT_GREEN:
+        *out_variant = GL_GREEN;
+        return true;
+    case DIVISION_TEXTURE_CHANNEL_SWIZZLE_VARIANT_BLUE:
+        *out_variant = GL_BLUE;
+        return true;
+    case DIVISION_TEXTURE_CHANNEL_SWIZZLE_VARIANT_ALPHA:
+        *out_variant = GL_ALPHA;
+        return true;
+    default:
+        DIVISION_THROW_INTERNAL_ERROR(ctx, "Unknown swizzle variant type");
         return false;
     }
 }

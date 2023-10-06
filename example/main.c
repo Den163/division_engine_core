@@ -277,6 +277,7 @@ static void example_create_textures(
         .texture_format = DIVISION_TEXTURE_FORMAT_RGB24Uint,
         .width = (uint32_t)image_width,
         .height = (uint32_t)image_height,
+        .has_channels_swizzle = false
     };
     uint32_t tex_id;
     division_engine_texture_alloc(ctx, &texture, &tex_id);
