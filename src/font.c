@@ -2,6 +2,7 @@
 #include "division_engine_core/context.h"
 #include "division_engine_core/data_structures/unordered_id_table.h"
 #include "freetype/freetype.h"
+#include "freetype/ftimage.h"
 #include "freetype/fttypes.h"
 #include <stdint.h>
 #include <stdio.h>
@@ -103,12 +104,11 @@ bool division_engine_font_get_glyph(
         return false;
     }
 
-    FT_Glyph_Metrics* glyph_metrics = &ft_face->glyph->metrics;
-
+    FT_Bitmap ft_bitmap = ft_face->glyph->bitmap;
     *out_glyph = (DivisionFontGlyph){
         .glyph_id = glyph_id,
-        .width = ft_face->glyph->bitmap.width,
-        .height = ft_face->glyph->bitmap.rows,
+        .width = ft_bitmap.width,
+        .height = ft_bitmap.rows,
     };
 
     return true;
@@ -129,8 +129,8 @@ bool division_engine_font_rasterize_glyph(
         return false;
     }
 
-    FT_GlyphSlot ft_glyph = ft_face->glyph;
-    memcpy(bitmap, ft_glyph->bitmap.buffer, glyph->width * glyph->height);
+    FT_Bitmap ft_bitmap = ft_face->glyph->bitmap;
+    memcpy(bitmap, ft_bitmap.buffer, ft_bitmap.width * ft_bitmap.rows);
 
     return true;
 }
