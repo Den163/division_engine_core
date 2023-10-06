@@ -303,7 +303,7 @@ static void example_write_font_character(DivisionContext* ctx)
     void* bitmap = malloc(glyph.width * glyph.height);
 
     assert(bitmap);
-    assert(division_engine_font_rasterize_glyph(ctx, font_id, &glyph, bitmap));
+    assert(division_engine_font_rasterize_glyph(ctx, font_id, U'X', bitmap));
 
     assert(
         stbi_write_jpg(

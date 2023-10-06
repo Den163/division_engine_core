@@ -104,11 +104,17 @@ bool division_engine_font_get_glyph(
         return false;
     }
 
+    FT_Glyph_Metrics metrics = ft_face->glyph->metrics;
     FT_Bitmap ft_bitmap = ft_face->glyph->bitmap;
     *out_glyph = (DivisionFontGlyph){
-        .glyph_id = glyph_id,
         .width = ft_bitmap.width,
         .height = ft_bitmap.rows,
+        .horAdvance = metrics.horiAdvance / 64.f,
+        .horBearingX = metrics.horiBearingX / 64.f,
+        .horBearingY = metrics.horiBearingY / 64.f,
+        .vertAdvcance = metrics.vertAdvance / 64.f,
+        .vertBearingX = metrics.vertBearingX / 64.f,
+        .vertBearingY = metrics.vertBearingY / 64.f,
     };
 
     return true;
@@ -117,12 +123,13 @@ bool division_engine_font_get_glyph(
 bool division_engine_font_rasterize_glyph(
     DivisionContext* ctx,
     uint32_t font_id,
-    const DivisionFontGlyph* glyph,
+    int32_t character,
     uint8_t* bitmap
 )
 {
     FT_Face ft_face = ctx->font_context->ft_faces[font_id];
-    FT_Error ft_error = FT_Load_Glyph(ft_face, glyph->glyph_id, FT_LOAD_RENDER);
+    FT_UInt glyph_id = FT_Get_Char_Index(ft_face, (FT_ULong)character);
+    FT_Error ft_error = FT_Load_Glyph(ft_face, glyph_id, FT_LOAD_RENDER);
     if (ft_error)
     {
         DIVISION_THROW_INTERNAL_ERROR(ctx, "FT_Load_Glyph failed (with bitmap)");

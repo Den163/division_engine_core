@@ -13,9 +13,14 @@
 
 typedef struct DivisionFontGlyph
 {
-    uint32_t glyph_id;
     uint32_t width;
     uint32_t height;
+    uint32_t horAdvance;
+    uint32_t horBearingX;
+    uint32_t horBearingY;
+    uint32_t vertAdvcance;
+    uint32_t vertBearingX;
+    uint32_t vertBearingY;
 
 } DivisionFontGlyph;
 
@@ -62,7 +67,7 @@ extern "C"
     DIVISION_EXPORT bool division_engine_font_rasterize_glyph(
         DivisionContext* ctx,
         uint32_t font_id,
-        const DivisionFontGlyph* glyph,
+        int32_t character,
         uint8_t* bitmap
     );
 
