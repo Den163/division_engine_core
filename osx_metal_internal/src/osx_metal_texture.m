@@ -1,3 +1,4 @@
+#include "division_engine_core/context.h"
 #include "division_engine_core/platform_internal/platform_texture.h"
 
 #include "division_engine_core/renderer.h"
@@ -12,13 +13,18 @@ typedef struct
     MTLPixelFormat pixel_format;
     int32_t mtl_bytes_per_pixel;
     int32_t src_data_bytes_per_pixel;
-    bool single_channel;
 } DivisionMTLTexTraits_;
 
 static inline bool try_get_texture_traits(
     DivisionContext* ctx,
     DivisionTextureFormat texture_format,
     DivisionMTLTexTraits_* out_traits
+);
+
+static inline bool try_get_texture_mtl_swizzle(
+    DivisionContext* ctx,
+    DivisionTextureChannelSwizzleVariant swizzle_variant,
+    MTLTextureSwizzle* out_mtl_swizzle
 );
 
 bool division_engine_internal_platform_texture_context_alloc(
@@ -76,17 +82,19 @@ bool division_engine_internal_platform_texture_impl_init_new_element(
                                                               height:tex->height
                                                            mipmapped:NO];
 
-        if (traits.single_channel)
+        if (tex->has_channels_swizzle)
         {
-            tex_desc.swizzle = MTLTextureSwizzleChannelsMake(
-                MTLTextureSwizzleRed,
-                MTLTextureSwizzleRed,
-                MTLTextureSwizzleRed,
-                MTLTextureSwizzleRed
-            );
+            DivisionTextureChannelsSwizzle swizzle = tex->channels_swizzle;
+            MTLTextureSwizzle red, green, blue, alpha;
+            if (!try_get_texture_mtl_swizzle(ctx, swizzle.red, &red) ||
+                !try_get_texture_mtl_swizzle(ctx, swizzle.green, &green) ||
+                !try_get_texture_mtl_swizzle(ctx, swizzle.blue, &blue) ||
+                !try_get_texture_mtl_swizzle(ctx, swizzle.alpha, &alpha))
+            {
+                return false;
+            }
 
-            sample_desc.minFilter = MTLSamplerMinMagFilterLinear;
-            sample_desc.magFilter = MTLSamplerMinMagFilterLinear;
+            tex_desc.swizzle = MTLTextureSwizzleChannelsMake(red, green, blue, alpha);
         }
 
         tex_impl->mtl_texture = [device newTextureWithDescriptor:tex_desc];
@@ -156,18 +164,48 @@ bool try_get_texture_traits(
     switch (texture_format)
     {
     case DIVISION_TEXTURE_FORMAT_R8Uint:
-        *out_traits = (DivisionMTLTexTraits_){MTLPixelFormatR8Unorm, 1, 1, true};
+        *out_traits = (DivisionMTLTexTraits_){MTLPixelFormatR8Unorm, 1, 1};
         return true;
     case DIVISION_TEXTURE_FORMAT_RGB24Uint:
-        *out_traits = (DivisionMTLTexTraits_){MTLPixelFormatRGBA8Unorm, 4, 3, false};
+        *out_traits = (DivisionMTLTexTraits_){MTLPixelFormatRGBA8Unorm, 4, 3};
         return true;
     case DIVISION_TEXTURE_FORMAT_RGBA32Uint:
-        *out_traits = (DivisionMTLTexTraits_){MTLPixelFormatRGBA8Unorm, 4, 4, false};
+        *out_traits = (DivisionMTLTexTraits_){MTLPixelFormatRGBA8Unorm, 4, 4};
         return true;
     default:
-        ctx->lifecycle.error_callback(
-            ctx, DIVISION_INTERNAL_ERROR, "Unknown texture format"
-        );
+        DIVISION_THROW_INTERNAL_ERROR(ctx, "Unknown texture format");
+        return false;
+    }
+}
+
+static inline bool try_get_texture_mtl_swizzle(
+    DivisionContext* ctx,
+    DivisionTextureChannelSwizzleVariant swizzle_variant,
+    MTLTextureSwizzle* out_mtl_swizzle
+)
+{
+    switch (swizzle_variant)
+    {
+    case DIVISION_TEXTURE_CHANNEL_SWIZZLE_VARIANT_ZERO:
+        *out_mtl_swizzle = MTLTextureSwizzleZero;
+        return true;
+    case DIVISION_TEXTURE_CHANNEL_SWIZZLE_VARIANT_ONE:
+        *out_mtl_swizzle = MTLTextureSwizzleOne;
+        return true;
+    case DIVISION_TEXTURE_CHANNEL_SWIZZLE_VARIANT_RED:
+        *out_mtl_swizzle = MTLTextureSwizzleRed;
+        return true;
+    case DIVISION_TEXTURE_CHANNEL_SWIZZLE_VARIANT_GREEN:
+        *out_mtl_swizzle = MTLTextureSwizzleGreen;
+        return true;
+    case DIVISION_TEXTURE_CHANNEL_SWIZZLE_VARIANT_BLUE:
+        *out_mtl_swizzle = MTLTextureSwizzleBlue;
+        return true;
+    case DIVISION_TEXTURE_CHANNEL_SWIZZLE_VARIANT_ALPHA:
+        *out_mtl_swizzle = MTLTextureSwizzleAlpha;
+        return true;
+    default:
+        DIVISION_THROW_INTERNAL_ERROR(ctx, "Unknown texture channel swizzle variant");
         return false;
     }
 }
