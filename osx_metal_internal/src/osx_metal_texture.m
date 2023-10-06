@@ -84,17 +84,19 @@ bool division_engine_internal_platform_texture_impl_init_new_element(
 
         if (tex->has_channels_swizzle)
         {
-            DivisionTextureChannelsSwizzle swizzle = tex->channels_swizzle;
-            MTLTextureSwizzle red, green, blue, alpha;
-            if (!try_get_texture_mtl_swizzle(ctx, swizzle.red, &red) ||
-                !try_get_texture_mtl_swizzle(ctx, swizzle.green, &green) ||
-                !try_get_texture_mtl_swizzle(ctx, swizzle.blue, &blue) ||
-                !try_get_texture_mtl_swizzle(ctx, swizzle.alpha, &alpha))
+            DivisionTextureChannelsSwizzle swiz = tex->channels_swizzle;
+            MTLTextureSwizzle swiz_rgba[4];
+            for (int i = 0; i < 4; i++)
             {
-                return false;
+                if (!try_get_texture_mtl_swizzle(ctx, swiz.values[i], &swiz_rgba[i]))
+                {
+                    return false;
+                }
             }
 
-            tex_desc.swizzle = MTLTextureSwizzleChannelsMake(red, green, blue, alpha);
+            tex_desc.swizzle = MTLTextureSwizzleChannelsMake(
+                swiz_rgba[0], swiz_rgba[1], swiz_rgba[2], swiz_rgba[3]
+            );
         }
 
         tex_impl->mtl_texture = [device newTextureWithDescriptor:tex_desc];
