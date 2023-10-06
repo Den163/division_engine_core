@@ -72,6 +72,12 @@ bool division_engine_internal_platform_texture_impl_init_new_element(
         (GLsizei)tex->height
     );
 
+    if (gl_traits.gl_sized_internal_format == GL_R8)
+    {
+        GLint swizzle_mask[] = { GL_RED, GL_RED, GL_RED, GL_RED };
+        glTextureParameteriv(tex_impl->gl_texture, GL_TEXTURE_SWIZZLE_RGBA, swizzle_mask);
+    }
+
     return true;
 }
 
