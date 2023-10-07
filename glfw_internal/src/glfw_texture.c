@@ -15,16 +15,20 @@ typedef struct
     int pixel_bytes_alignment;
 } GlTextureTraits_;
 
-static inline bool get_texture_traits(
+static inline bool try_get_texture_traits(
     DivisionContext* ctx,
     DivisionTextureFormat texture_format,
     GlTextureTraits_* out_traits
 );
 
-static inline bool get_gl_swizzle_var(
+static inline bool try_get_gl_swizzle_var(
     DivisionContext* ctx,
     DivisionTextureChannelSwizzleVariant swizzle,
     GLint* out_gl_swizzle
+);
+
+static inline bool try_get_filter(
+    DivisionContext* ctx, DivisionTextureMinMagFilter filter, GLint* out_gl_filter
 );
 
 bool division_engine_internal_platform_texture_context_alloc(
@@ -63,7 +67,7 @@ bool division_engine_internal_platform_texture_impl_init_new_element(
     DivisionTexture* tex = &tex_ctx->textures[texture_id];
 
     GlTextureTraits_ gl_traits;
-    if (!get_texture_traits(ctx, tex->texture_format, &gl_traits))
+    if (!try_get_texture_traits(ctx, tex->texture_format, &gl_traits))
     {
         return false;
     }
@@ -87,7 +91,7 @@ bool division_engine_internal_platform_texture_impl_init_new_element(
         GLint swizzle_mask[4];
         for (int i = 0; i < 4; i++)
         {
-            if (!get_gl_swizzle_var(ctx, tex_swizzle.values[i], &swizzle_mask[i]))
+            if (!try_get_gl_swizzle_var(ctx, tex_swizzle.values[i], &swizzle_mask[i]))
             {
                 glDeleteTextures(1, &tex_impl->gl_texture);
                 return false;
@@ -96,6 +100,19 @@ bool division_engine_internal_platform_texture_impl_init_new_element(
 
         glTextureParameteriv(tex_impl->gl_texture, GL_TEXTURE_SWIZZLE_RGBA, swizzle_mask);
     }
+
+    DivisionTextureMinMagFilter filters[2] = { tex->min_filter, tex->mag_filter };
+    GLint gl_filters[2];
+    for (int i = 0; i < 2; i++)
+    {
+        if (!try_get_filter(ctx, filters[i], &gl_filters[i]))
+        {
+            return false;
+        }
+    }
+
+    glTextureParameteri(tex_impl->gl_texture, GL_TEXTURE_MIN_FILTER, gl_filters[0]);
+    glTextureParameteri(tex_impl->gl_texture, GL_TEXTURE_MAG_FILTER, gl_filters[1]);
 
     return true;
 }
@@ -131,7 +148,7 @@ void division_engine_internal_platform_texture_free(
     texture->gl_texture = 0;
 }
 
-bool get_texture_traits(
+bool try_get_texture_traits(
     DivisionContext* ctx,
     DivisionTextureFormat texture_format,
     GlTextureTraits_* out_traits
@@ -154,7 +171,7 @@ bool get_texture_traits(
     }
 }
 
-bool get_gl_swizzle_var(
+bool try_get_gl_swizzle_var(
     DivisionContext* ctx,
     DivisionTextureChannelSwizzleVariant color_channel,
     GLint* out_variant
@@ -162,13 +179,13 @@ bool get_gl_swizzle_var(
 {
     switch (color_channel)
     {
-    case DIVISION_TEXTURE_CHANNEL_SWIZZLE_VARIANT_ZERO: 
+    case DIVISION_TEXTURE_CHANNEL_SWIZZLE_VARIANT_ZERO:
         *out_variant = GL_ZERO;
         return true;
-    case DIVISION_TEXTURE_CHANNEL_SWIZZLE_VARIANT_ONE: 
+    case DIVISION_TEXTURE_CHANNEL_SWIZZLE_VARIANT_ONE:
         *out_variant = GL_ONE;
         return true;
-    case DIVISION_TEXTURE_CHANNEL_SWIZZLE_VARIANT_RED: 
+    case DIVISION_TEXTURE_CHANNEL_SWIZZLE_VARIANT_RED:
         *out_variant = GL_RED;
         return true;
     case DIVISION_TEXTURE_CHANNEL_SWIZZLE_VARIANT_GREEN:
@@ -182,6 +199,23 @@ bool get_gl_swizzle_var(
         return true;
     default:
         DIVISION_THROW_INTERNAL_ERROR(ctx, "Unknown swizzle variant type");
+        return false;
+    }
+}
+
+bool try_get_filter(
+    DivisionContext* ctx, DivisionTextureMinMagFilter filter, GLint* out_gl_filter
+)
+{
+    switch (filter) {
+    case DIVISION_TEXTURE_MIN_MAG_FILTER_NEAREST:
+        *out_gl_filter = GL_NEAREST;
+        return true;
+    case DIVISION_TEXTURE_MIN_MAG_FILTER_LINEAR:
+        *out_gl_filter = GL_LINEAR;
+        return true;
+    default:
+        DIVISION_THROW_INTERNAL_ERROR(ctx, "Unknown texture min mag filter type");
         return false;
     }
 }
