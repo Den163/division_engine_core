@@ -24,6 +24,12 @@ typedef enum DivisionTextureChannelSwizzleVariant
     DIVISION_TEXTURE_CHANNEL_SWIZZLE_VARIANT_ALPHA = 5,
 } DivisionTextureChannelSwizzleVariant;
 
+typedef enum DivisionTextureMinMagFilter 
+{
+    DIVISION_TEXTURE_MIN_MAG_FILTER_NEAREST = 1,
+    DIVISION_TEXTURE_MIN_MAG_FILTER_LINEAR = 2
+} DivisionTextureMinMagFilter;
+
 typedef union DivisionTextureChannelsSwizzle
 {
     struct {
@@ -39,6 +45,8 @@ typedef struct DivisionTexture
 {
     DivisionTextureChannelsSwizzle channels_swizzle;
     DivisionTextureFormat texture_format;
+    DivisionTextureMinMagFilter min_filter;
+    DivisionTextureMinMagFilter mag_filter;
     uint32_t width;
     uint32_t height;
     bool has_channels_swizzle;

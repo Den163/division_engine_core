@@ -7,6 +7,7 @@
 #include "osx_texture.h"
 #include "osx_window_context.h"
 #include <Metal/Metal.h>
+#include <stdbool.h>
 
 typedef struct
 {
@@ -25,6 +26,12 @@ static inline bool try_get_texture_mtl_swizzle(
     DivisionContext* ctx,
     DivisionTextureChannelSwizzleVariant swizzle_variant,
     MTLTextureSwizzle* out_mtl_swizzle
+);
+
+static inline bool try_get_texture_filter(
+    DivisionContext* ctx,
+    DivisionTextureMinMagFilter filter,
+    MTLSamplerMinMagFilter* out_filter
 );
 
 bool division_engine_internal_platform_texture_context_alloc(
@@ -98,6 +105,19 @@ bool division_engine_internal_platform_texture_impl_init_new_element(
                 swiz_rgba[0], swiz_rgba[1], swiz_rgba[2], swiz_rgba[3]
             );
         }
+
+        DivisionTextureMinMagFilter filters[2] = { tex->min_filter, tex->mag_filter };
+        MTLSamplerMinMagFilter mtl_filters[2];
+        for (int i = 0; i < 2; i++)
+        {
+            if (!try_get_texture_filter(ctx, filters[i], &mtl_filters[i]))
+            {
+                return false;
+            }
+        }
+
+        sample_desc.minFilter = mtl_filters[0];
+        sample_desc.magFilter = mtl_filters[1];
 
         tex_impl->mtl_texture = [device newTextureWithDescriptor:tex_desc];
         tex_impl->mtl_sampler = [device newSamplerStateWithDescriptor:sample_desc];
@@ -208,6 +228,26 @@ static inline bool try_get_texture_mtl_swizzle(
         return true;
     default:
         DIVISION_THROW_INTERNAL_ERROR(ctx, "Unknown texture channel swizzle variant");
+        return false;
+    }
+}
+
+static inline bool try_get_texture_filter(
+    DivisionContext* ctx,
+    DivisionTextureMinMagFilter filter,
+    MTLSamplerMinMagFilter* out_filter
+)
+{
+    switch (filter)
+    {
+    case DIVISION_TEXTURE_MIN_MAG_FILTER_NEAREST:
+        *out_filter = MTLSamplerMinMagFilterNearest;
+        return true;
+    case DIVISION_TEXTURE_MIN_MAG_FILTER_LINEAR:
+        *out_filter = MTLSamplerMinMagFilterLinear;
+        return true;
+    default:
+        DIVISION_THROW_INTERNAL_ERROR(ctx, "Unknow texture min mag filter");
         return false;
     }
 }
