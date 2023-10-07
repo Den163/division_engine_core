@@ -4,7 +4,8 @@ project(division_engine_core)
 set(CMAKE_C_STANDARD 11)
 
 include(GenerateExportHeader)
-include(FetchContent)
+
+add_subdirectory(third_party/freetype-2.13.2)
 
 if(DEFINED ENV{DIVISION_BUILD_EXAMPLE})
     add_subdirectory(example)
@@ -18,14 +19,6 @@ SET(FT_DISABLE_HARFBUZZ ON CACHE BOOL "Disable harfbuzz" FORCE)
 SET(FT_DISABLE_BZIP2 ON CACHE BOOL "Disable bzip2" FORCE)
 SET(FT_DISABLE_PNG ON CACHE BOOL "Disable png" FORCE)
 SET(FT_DISABLE_BROTLI ON CACHE BOOL "Disable brotli (woff2)" FORCE)
-
-FetchContent_Declare(
-    freetype
-    URL https://sourceforge.net/projects/freetype/files/freetype2/2.13.2/freetype-2.13.2.tar.gz/download
-    URL_HASH MD5=d99447cf00c5f2679918f66f2b5771f6
-)
-
-FetchContent_MakeAvailable(freetype)
 
 set(SOURCES
     src/context.c
