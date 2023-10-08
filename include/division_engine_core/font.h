@@ -15,12 +15,9 @@ typedef struct DivisionFontGlyph
 {
     uint32_t width;
     uint32_t height;
-    uint32_t horAdvance;
-    uint32_t horBearingX;
-    uint32_t horBearingY;
-    uint32_t vertAdvcance;
-    uint32_t vertBearingX;
-    uint32_t vertBearingY;
+    uint32_t advance_x;
+    uint32_t left;
+    uint32_t top;
 
 } DivisionFontGlyph;
 

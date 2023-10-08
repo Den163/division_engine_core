@@ -104,17 +104,15 @@ bool division_engine_font_get_glyph(
         return false;
     }
 
-    FT_Glyph_Metrics metrics = ft_face->glyph->metrics;
-    FT_Bitmap ft_bitmap = ft_face->glyph->bitmap;
+    FT_GlyphSlot ft_glyph = ft_face->glyph;
+    FT_Glyph_Metrics ft_metrics = ft_glyph->metrics;
+    FT_Bitmap ft_bitmap = ft_glyph->bitmap;
     *out_glyph = (DivisionFontGlyph){
         .width = ft_bitmap.width,
         .height = ft_bitmap.rows,
-        .horAdvance = metrics.horiAdvance / 64.f,
-        .horBearingX = metrics.horiBearingX / 64.f,
-        .horBearingY = metrics.horiBearingY / 64.f,
-        .vertAdvcance = metrics.vertAdvance / 64.f,
-        .vertBearingX = metrics.vertBearingX / 64.f,
-        .vertBearingY = metrics.vertBearingY / 64.f,
+        .advance_x = ft_glyph->advance.x / 64.0f,
+        .left = ft_face->glyph->bitmap_left,
+        .top = ft_face->glyph->bitmap_top,
     };
 
     return true;
