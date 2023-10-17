@@ -15,11 +15,6 @@ if (DEFINED ENV{DIVISION_BUILD_TESTS})
     add_subdirectory(tests)
 endif()
 
-SET(FT_DISABLE_HARFBUZZ ON CACHE BOOL "Disable harfbuzz" FORCE)
-SET(FT_DISABLE_BZIP2 ON CACHE BOOL "Disable bzip2" FORCE)
-SET(FT_DISABLE_PNG ON CACHE BOOL "Disable png" FORCE)
-SET(FT_DISABLE_BROTLI ON CACHE BOOL "Disable brotli (woff2)" FORCE)
-
 set(SOURCES
     src/context.c
     src/renderer.c
