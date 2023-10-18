@@ -10,7 +10,7 @@ typedef void (*DivisionLifecycleFunc)(struct DivisionContext* ctx);
 struct DivisionLifecycle
 {
     DivisionLifecycleFunc init_callback;
-    DivisionLifecycleFunc update_callback;
+    DivisionLifecycleFunc ready_to_draw_callback;
     DivisionLifecycleFunc free_callback;
 
     DivisionErrorFunc error_callback;

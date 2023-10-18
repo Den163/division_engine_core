@@ -12,7 +12,7 @@
 
 #include "division_engine_core/division_lifecycle.h"
 #include "division_engine_core/font.h"
-#include "division_engine_core/render_pass.h"
+#include "division_engine_core/render_pass_descriptor.h"
 #include "division_engine_core/renderer.h"
 #include "division_engine_core/shader.h"
 #include "division_engine_core/texture.h"

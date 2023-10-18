@@ -1,11 +1,11 @@
 #pragma once
 
 #include <Foundation/Foundation.h>
-#include <MetalKit/MetalKit.h>
 #include <Metal/Metal.h>
+#include <MetalKit/MetalKit.h>
 
 #include "division_engine_core/context.h"
-#include "division_engine_core/render_pass.h"
+#include "division_engine_core/render_pass_descriptor.h"
 #include "division_engine_core/vertex_buffer.h"
 #include "osx_shader_context.h"
 
@@ -14,20 +14,18 @@
 
 @interface DivisionOSXViewDelegate : NSObject <MTKViewDelegate>
 {
-@public
+  @public
     DivisionContext* context;
-@public
+  @public
     const DivisionSettings* settings;
-@public
-    id <MTLDevice> device;
-@public
-    id <MTLCommandQueue> commandQueue;
+  @public
+    id<MTLDevice> device;
+  @public
+    id<MTLCommandQueue> commandQueue;
 };
 
-+ (instancetype)withContext:(DivisionContext*)aContext
-                     device:(id)aDevice;
++ (instancetype)withContext:(DivisionContext*)aContext device:(id)aDevice;
 
-- (instancetype)initWithContext:(DivisionContext*)aContext
-                         device:(id)aDevice;
+- (instancetype)initWithContext:(DivisionContext*)aContext device:(id)aDevice;
 
 @end

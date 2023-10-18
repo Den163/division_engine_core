@@ -1,6 +1,6 @@
 #pragma once
 
-#include "division_engine_core/render_pass.h"
+#include "division_engine_core/render_pass_descriptor.h"
 #include "division_engine_core_export.h"
 
 #include "context.h"

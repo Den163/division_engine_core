@@ -21,7 +21,8 @@ set(SOURCES
     src/shader.c
     src/vertex_buffer.c
     src/uniform_buffer.c
-    src/render_pass.c
+    src/render_pass_descriptor.c
+    src/render_pass_instance.c
     src/unordered_id_table.c
     src/ordered_id_table.c
     src/io_utility.c

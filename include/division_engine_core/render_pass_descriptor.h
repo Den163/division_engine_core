@@ -5,13 +5,8 @@
 
 #include "context.h"
 #include "division_engine_core/data_structures/ordered_id_table.h"
+#include "division_engine_core/data_structures/unordered_id_table.h"
 #include "division_engine_core_export.h"
-
-typedef struct DivisionIdWithBinding
-{
-    uint32_t id;
-    uint32_t shader_location;
-} DivisionIdWithBinding;
 
 typedef enum DivisionColorMask
 {
@@ -25,12 +20,11 @@ typedef enum DivisionColorMask
     DIVISION_COLOR_MASK_RGBA = DIVISION_COLOR_MASK_RGB | DIVISION_COLOR_MASK_A,
 } DivisionColorMask;
 
-typedef enum DivisionRenderPassCapabilityMask
+typedef enum DivisionRenderPassDescriptorCapabilityMask
 {
-    DIVISION_RENDER_PASS_CAPABILITY_NONE = 0,
-    DIVISION_RENDER_PASS_CAPABILITY_ALPHA_BLEND = 1 << 0,
-    DIVISION_RENDER_PASS_CAPABILITY_INSTANCED_RENDERING = 1 << 1
-} DivisionRenderPassCapabilityMask;
+    DIVISION_RENDER_PASS_DESCRIPTOR_CAPABILITY_NONE = 0,
+    DIVISION_RENDER_PASS_DESCRIPTOR_CAPABILITY_ALPHA_BLEND = 1 << 0,
+} DivisionRenderPassDescriptorCapabilityMask;
 
 typedef enum DivisionAlphaBlend
 {
@@ -68,36 +62,25 @@ typedef struct DivisionAlphaBlendingOptions
     float constant_blend_color[4];
 } DivisionAlphaBlendingOptions;
 
-typedef struct DivisionRenderPass
+typedef struct DivisionRenderPassDescriptor
 {
     DivisionAlphaBlendingOptions alpha_blending_options;
-
-    size_t first_vertex;
-    size_t vertex_count;
-    size_t index_count;
-    size_t instance_count;
-    DivisionIdWithBinding* uniform_vertex_buffers;
-    int32_t uniform_vertex_buffer_count;
-    DivisionIdWithBinding* uniform_fragment_buffers;
-    int32_t uniform_fragment_buffer_count;
-    DivisionIdWithBinding* fragment_textures;
-    int32_t fragment_texture_count;
-    uint32_t vertex_buffer;
     uint32_t shader_program;
-    DivisionRenderPassCapabilityMask capabilities_mask;
+    uint32_t vertex_buffer_id;
+    DivisionRenderPassDescriptorCapabilityMask capabilities_mask;
     DivisionColorMask color_mask;
-} DivisionRenderPass;
+} DivisionRenderPassDescriptor;
 
 typedef struct DivisionRenderPassSystemContext
 {
-    DivisionOrderedIdTable id_table;
-    DivisionRenderPass* render_passes;
-    struct DivisionRenderPassInternalPlatform_* render_passes_impl;
+    DivisionUnorderedIdTable id_table;
+    DivisionRenderPassDescriptor* render_pass_descriptors;
+    struct DivisionRenderPassInternalPlatform_* render_passes_descriptors_impl;
     int32_t render_pass_count;
 } DivisionRenderPassSystemContext;
 
-#define DIVISION_GET_RENDER_PASS(ctx, render_pass_id)                                    \
-    (&ctx->render_pass_context->render_passes[render_pass_id])
+#define DIVISION_GET_RENDER_PASS_DESCRIPTOR(ctx, render_pass_id) \
+    (&ctx->render_pass_context->render_pass_descriptors[render_pass_id])
 
 bool division_engine_render_pass_system_context_alloc(
     DivisionContext* ctx, const DivisionSettings* settings
@@ -110,19 +93,25 @@ extern "C"
 {
 #endif
 
-    DIVISION_EXPORT bool division_engine_render_pass_alloc(
-        DivisionContext* ctx, const DivisionRenderPass* render_pass, uint32_t* out_render_pass_id
+    DIVISION_EXPORT bool division_engine_render_pass_descriptor_alloc(
+        DivisionContext* ctx,
+        const DivisionRenderPassDescriptor* render_pass_descriptor,
+        uint32_t* out_render_pass_descriptor_id
     );
 
-    DIVISION_EXPORT DivisionRenderPass* division_engine_render_pass_borrow(
+    // TODO: delete
+    DIVISION_EXPORT DivisionRenderPassDescriptor* division_engine_render_pass_descriptor_borrow(
         DivisionContext* ctx, uint32_t render_pass_id
     );
 
-    DIVISION_EXPORT void division_engine_render_pass_return(
-        DivisionContext* ctx, uint32_t render_pass_id, DivisionRenderPass* render_pass_ptr
+    // TODO: delete
+    DIVISION_EXPORT void division_engine_render_pass_descriptor_return(
+        DivisionContext* ctx,
+        uint32_t render_pass_id,
+        DivisionRenderPassDescriptor* render_pass_ptr
     );
 
-    DIVISION_EXPORT void division_engine_render_pass_free(
+    DIVISION_EXPORT void division_engine_render_pass_descriptor_free(
         DivisionContext* ctx, uint32_t render_pass_id
     );
 

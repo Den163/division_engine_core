@@ -27,7 +27,9 @@ static NSMenu* createMenuBar(DivisionOSXAppDelegate* app_delegate);
     return [[self alloc] initWithContext:aContext settings:aSettings];
 }
 
-- (void)applicationWillTerminate:(NSNotification *)notification __attribute__((swift_attr("@UIActor"))) {
+- (void)applicationWillTerminate:(NSNotification*)notification
+    __attribute__((swift_attr("@UIActor")))
+{
     context->lifecycle.free_callback(context);
 }
 

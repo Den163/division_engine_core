@@ -5,7 +5,8 @@ set(OSX_METAL_INTERNAL_SOURCES
     src/osx_metal_shader.m
     src/osx_metal_vertex_buffer.m
     src/osx_metal_uniform_buffer.m
-    src/osx_render_pass.m
+    src/osx_render_pass_descriptor.m
+    src/osx_render_pass_instance.m
     src/osx_metal_texture.m
 )
 

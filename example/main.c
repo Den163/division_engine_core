@@ -1,8 +1,9 @@
 #include "division_engine_core/context.h"
 #include "division_engine_core/division_lifecycle.h"
 #include "division_engine_core/font.h"
+#include "division_engine_core/render_pass_instance.h"
 #include <division_engine_core/io_utility.h>
-#include <division_engine_core/render_pass.h>
+#include <division_engine_core/render_pass_descriptor.h>
 #include <division_engine_core/renderer.h>
 #include <division_engine_core/shader.h>
 #include <division_engine_core/texture.h>
@@ -20,18 +21,29 @@
 #include <stb_image.h>
 #include <stb_image_write.h>
 
+typedef struct UserData_
+{
+    uint32_t render_pass_desc_id;
+    uint32_t vertex_count;
+    uint32_t index_count;
+    uint32_t instance_count;
+
+    DivisionIdWithBinding uniform_buffer;
+    DivisionIdWithBinding texture;
+} UserData_;
+
 static void error_callback(DivisionContext* ctx, int error_code, const char* message);
 static void init_callback(DivisionContext* ctx);
-static void update_callback(DivisionContext* ctx);
+static void draw_callback(DivisionContext* ctx);
 
 static void example_create_shader_program(DivisionContext* ctx, uint32_t* out_shader_id);
 
 static void example_create_vertex_buffer(
     DivisionContext* ctx,
     uint32_t* out_vertex_buffer_id,
-    size_t* out_vertex_count,
-    size_t* out_index_count,
-    size_t* out_instance_count
+    uint32_t* out_vertex_count,
+    uint32_t* out_index_count,
+    uint32_t* out_instance_count
 );
 
 static void example_create_uniform_buffer(
@@ -61,12 +73,15 @@ int main()
 
     DivisionLifecycle lifecycle = {
         .init_callback = init_callback,
-        .update_callback = update_callback,
+        .ready_to_draw_callback = draw_callback,
         .free_callback = division_engine_context_finalize,
         .error_callback = error_callback,
     };
 
+    UserData_ user_data;
     DivisionContext ctx;
+
+    ctx.user_data = &user_data;
     assert(division_engine_context_initialize(&settings, &ctx));
     division_engine_context_register_lifecycle(&ctx, &lifecycle);
 
@@ -75,21 +90,24 @@ int main()
 
 void init_callback(DivisionContext* ctx)
 {
-    DivisionIdWithBinding uniform_buffer, texture;
-    uint32_t vertex_buffer, shader_program;
-    size_t vertex_count, index_count, instance_count;
+    UserData_* user_data = ctx->user_data;
+    uint32_t vertex_buffer_id, shader_program;
 
     example_create_shader_program(ctx, &shader_program);
-    example_create_uniform_buffer(ctx, &uniform_buffer);
+    example_create_uniform_buffer(ctx, &user_data->uniform_buffer);
     example_create_vertex_buffer(
-        ctx, &vertex_buffer, &vertex_count, &index_count, &instance_count
+        ctx,
+        &vertex_buffer_id,
+        &user_data->vertex_count,
+        &user_data->index_count,
+        &user_data->instance_count
     );
 
     example_write_font_character(ctx);
-    example_create_textures(ctx, &texture);
+    example_create_textures(ctx, &user_data->texture);
 
     uint32_t render_pass_id;
-    DivisionRenderPass render_pass = {
+    DivisionRenderPassDescriptor render_pass_desc = {
         .alpha_blending_options =
             (DivisionAlphaBlendingOptions){
                 .src = DIVISION_ALPHA_BLEND_SRC_ALPHA,
@@ -97,26 +115,34 @@ void init_callback(DivisionContext* ctx)
                 .operation = DIVISION_ALPHA_BLEND_OP_ADD,
                 .constant_blend_color = {0, 0, 0, 0},
             },
-        .first_vertex = 0,
-        .vertex_count = (size_t)vertex_count,
-        .instance_count = (size_t)instance_count,
-        .index_count = (size_t)index_count,
-        .uniform_vertex_buffer_count = 0,
-        .uniform_fragment_buffers = &uniform_buffer,
-        .uniform_fragment_buffer_count = 1,
-        .fragment_textures = &texture,
-        .fragment_texture_count = 1,
-        .vertex_buffer = vertex_buffer,
+        .vertex_buffer_id = vertex_buffer_id,
         .shader_program = shader_program,
-        .capabilities_mask = DIVISION_RENDER_PASS_CAPABILITY_ALPHA_BLEND |
-                             DIVISION_RENDER_PASS_CAPABILITY_INSTANCED_RENDERING,
+        .capabilities_mask = DIVISION_RENDER_PASS_DESCRIPTOR_CAPABILITY_ALPHA_BLEND,
         .color_mask = DIVISION_COLOR_MASK_RGBA,
     };
-    division_engine_render_pass_alloc(ctx, &render_pass, &render_pass_id);
+    division_engine_render_pass_descriptor_alloc(
+        ctx, &render_pass_desc, &user_data->render_pass_desc_id
+    );
 }
 
-void update_callback(DivisionContext* ctx)
+void draw_callback(DivisionContext* ctx)
 {
+    UserData_* user_data = ctx->user_data;
+    DivisionRenderPassInstance render_pass_instance = (DivisionRenderPassInstance){
+        .first_vertex = 0,
+        .vertex_count = user_data->vertex_count,
+        .instance_count = user_data->instance_count,
+        .index_count = user_data->index_count,
+        .uniform_vertex_buffer_count = 0,
+        .uniform_fragment_buffers = &user_data->uniform_buffer,
+        .uniform_fragment_buffer_count = 1,
+        .fragment_textures = &user_data->texture,
+        .fragment_texture_count = 1,
+        .render_pass_descriptor_id = user_data->render_pass_desc_id,
+        .capabilities_mask = DIVISION_RENDER_PASS_INSTANCE_CAPABILITY_INSTANCED_RENDERING,
+    };
+
+    division_engine_render_pass_instance_draw(ctx, &render_pass_instance, 1);
 }
 
 void error_callback(DivisionContext* ctx, int error_code, const char* message)
@@ -183,9 +209,9 @@ static void example_create_shader_program(DivisionContext* ctx, uint32_t* out_sh
 void example_create_vertex_buffer(
     DivisionContext* ctx,
     uint32_t* out_vertex_buffer_id,
-    size_t* out_vertex_count,
-    size_t* out_index_count,
-    size_t* out_instance_count
+    uint32_t* out_vertex_count,
+    uint32_t* out_index_count,
+    uint32_t* out_instance_count
 )
 {
     VertexData vd[] = {
@@ -202,9 +228,9 @@ void example_create_vertex_buffer(
         1, 0, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1  // 2
     };
 
-    size_t vertex_count = sizeof(vd) / sizeof(VertexData);
-    size_t index_count = sizeof(indices) / sizeof(int32_t);
-    size_t instance_count = sizeof(local_to_word_mat) / (sizeof(float) * 16);
+    uint32_t vertex_count = sizeof(vd) / sizeof(VertexData);
+    uint32_t index_count = sizeof(indices) / sizeof(int32_t);
+    uint32_t instance_count = sizeof(local_to_word_mat) / (sizeof(float) * 16);
 
     DivisionVertexAttributeSettings vertex_attrs[] = {
         {.type = DIVISION_FVEC3, .location = 0},
@@ -277,10 +303,12 @@ static void example_create_textures(
         .texture_format = DIVISION_TEXTURE_FORMAT_RGB24Uint,
         .width = (uint32_t)image_width,
         .height = (uint32_t)image_height,
-        .has_channels_swizzle = false
+        .has_channels_swizzle = false,
+        .min_filter = DIVISION_TEXTURE_MIN_MAG_FILTER_NEAREST,
+        .mag_filter = DIVISION_TEXTURE_MIN_MAG_FILTER_NEAREST,
     };
     uint32_t tex_id;
-    division_engine_texture_alloc(ctx, &texture, &tex_id);
+    assert(division_engine_texture_alloc(ctx, &texture, &tex_id));
     division_engine_texture_set_data(ctx, tex_id, tex_data);
     stbi_image_free(tex_data);
 

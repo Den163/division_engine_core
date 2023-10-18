@@ -247,7 +247,7 @@ static inline bool try_get_texture_filter(
         *out_filter = MTLSamplerMinMagFilterLinear;
         return true;
     default:
-        DIVISION_THROW_INTERNAL_ERROR(ctx, "Unknow texture min mag filter");
+        DIVISION_THROW_INTERNAL_ERROR(ctx, "Unknown texture min mag filter");
         return false;
     }
 }
