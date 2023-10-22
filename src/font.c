@@ -39,7 +39,9 @@ void division_engine_font_system_context_free(DivisionContext* ctx)
         }
     }
 
+    division_unordered_id_table_free(&font_context->face_id_table);
     FT_Done_FreeType(font_context->ft_library);
+    free(font_context->ft_faces);
     free(font_context);
 }
 
