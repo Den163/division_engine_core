@@ -9,7 +9,6 @@
 
 typedef struct DivisionRendererSystemContext
 {
-    DivisionColor clear_color;
     int32_t frame_buffer_width;
     int32_t frame_buffer_height;
 

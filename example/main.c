@@ -73,7 +73,7 @@ int main()
 
     DivisionLifecycle lifecycle = {
         .init_callback = init_callback,
-        .ready_to_draw_callback = draw_callback,
+        .draw_callback = draw_callback,
         .free_callback = division_engine_context_finalize,
         .error_callback = error_callback,
     };
@@ -142,7 +142,8 @@ void draw_callback(DivisionContext* ctx)
         .capabilities_mask = DIVISION_RENDER_PASS_INSTANCE_CAPABILITY_INSTANCED_RENDERING,
     };
 
-    division_engine_render_pass_instance_draw(ctx, &render_pass_instance, 1);
+    DivisionColor clear_color = { 0., 0., 0., 1. };
+    division_engine_render_pass_instance_draw(ctx, &clear_color, &render_pass_instance, 1);
 }
 
 void error_callback(DivisionContext* ctx, int error_code, const char* message)

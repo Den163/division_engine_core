@@ -11,6 +11,7 @@ extern "C"
 
 DIVISION_EXPORT void division_engine_internal_platform_render_pass_instance_draw(
     DivisionContext* ctx,
+    const DivisionColor* clear_color,
     const DivisionRenderPassInstance* render_pass_instances,
     uint32_t render_pass_instance_count
 );

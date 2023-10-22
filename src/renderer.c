@@ -8,7 +8,6 @@ bool division_engine_renderer_system_context_alloc(
 )
 {
     ctx->renderer_context = malloc(sizeof(DivisionRendererSystemContext));
-    *ctx->renderer_context = (DivisionRendererSystemContext){.clear_color = {0, 0, 0, 1}};
 
     return division_engine_internal_platform_renderer_alloc(ctx, settings);
 }

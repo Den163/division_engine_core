@@ -115,7 +115,7 @@ void division_engine_internal_platform_renderer_run_loop(DivisionContext* ctx)
 
             ctx->state.delta_time = delta_time;
 
-            ctx->lifecycle.ready_to_draw_callback(ctx);
+            ctx->lifecycle.draw_callback(ctx);
             glfwSwapBuffers(window);
         }
 

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "division_engine_core/color.h"
 #include <stddef.h>
 #include <stdint.h>
 #include <division_engine_core/context.h>
@@ -41,6 +42,7 @@ extern "C"
 
 DIVISION_EXPORT void division_engine_render_pass_instance_draw(
     DivisionContext* ctx,
+    const DivisionColor* clear_color,
     const DivisionRenderPassInstance* render_pass_instances,
     uint32_t render_pass_instance_count
 );

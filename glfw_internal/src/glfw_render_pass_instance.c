@@ -20,18 +20,18 @@ static inline void bind_uniform_buffer(
 
 void division_engine_internal_platform_render_pass_instance_draw(
     DivisionContext* ctx,
+    const DivisionColor* clear_color,
     const DivisionRenderPassInstance* render_pass_instances,
     uint32_t render_pass_instance_count
 )
 {
-    DivisionRendererSystemContext* renderer_ctx = ctx->renderer_context;
     DivisionVertexBufferSystemContext* vert_buff_ctx = ctx->vertex_buffer_context;
     DivisionUniformBufferSystemContext* uniform_buff_ctx = ctx->uniform_buffer_context;
     DivisionRenderPassSystemContext* render_pass_ctx = ctx->render_pass_context;
     DivisionShaderSystemContext* shader_ctx = ctx->shader_context;
     DivisionTextureSystemContext* tex_ctx = ctx->texture_context;
 
-    glClearBufferfv(GL_COLOR, 0, (const GLfloat*)&renderer_ctx->clear_color);
+    glClearBufferfv(GL_COLOR, 0, (const GLfloat*)clear_color);
 
     for (int32_t i = 0; i < render_pass_instance_count; i++)
     {
