@@ -1,5 +1,6 @@
 #include "division_engine_core/context.h"
-#include "division_engine_core/platform_internal/platform_render_pass.h"
+#include "division_engine_core/platform_internal/platform_render_pass_descriptor.h"
+#include "division_engine_core/render_pass_descriptor.h"
 #include "division_engine_core/utility.h"
 
 #include "glfw_render_pass.h"
@@ -17,7 +18,7 @@ bool division_engine_internal_platform_render_pass_context_alloc(
     DivisionContext* ctx, const DivisionSettings* settings
 )
 {
-    ctx->render_pass_context->render_passes_impl = NULL;
+    ctx->render_pass_context->render_passes_descriptors_impl = NULL;
 
     return true;
 }
@@ -29,7 +30,7 @@ void division_engine_internal_platform_render_pass_context_free(DivisionContext*
     {
         division_engine_internal_platform_render_pass_free(ctx, i);
     }
-    free(pass_ctx->render_passes_impl);
+    free(pass_ctx->render_passes_descriptors_impl);
 }
 
 bool division_engine_internal_platform_render_pass_realloc(
@@ -37,12 +38,12 @@ bool division_engine_internal_platform_render_pass_realloc(
 )
 {
     DivisionRenderPassSystemContext* pass_ctx = ctx->render_pass_context;
-    pass_ctx->render_passes_impl = realloc(
-        pass_ctx->render_passes_impl,
+    pass_ctx->render_passes_descriptors_impl = realloc(
+        pass_ctx->render_passes_descriptors_impl,
         sizeof(DivisionRenderPassInternalPlatform_[new_size])
     );
 
-    return pass_ctx->render_passes_impl != NULL;
+    return pass_ctx->render_passes_descriptors_impl != NULL;
 }
 
 bool division_engine_internal_platform_render_pass_impl_init_element(
@@ -52,15 +53,17 @@ bool division_engine_internal_platform_render_pass_impl_init_element(
     const size_t cap_capacity = 10;
 
     DivisionRenderPassSystemContext* pass_ctx = ctx->render_pass_context;
-    const DivisionRenderPass* pass = &pass_ctx->render_passes[render_pass_id];
+    const DivisionRenderPassDescriptor* pass_desc = 
+        &pass_ctx->render_pass_descriptors[render_pass_id];
     DivisionRenderPassInternalPlatform_* pass_impl =
-        &pass_ctx->render_passes_impl[render_pass_id];
+        &pass_ctx->render_passes_descriptors_impl[render_pass_id];
 
-    if (division_utility_mask_has_flag(
-            pass->capabilities_mask, DIVISION_RENDER_PASS_CAPABILITY_ALPHA_BLEND
+    if (division_mask_has_flag(
+            pass_desc->capabilities_mask, 
+            DIVISION_RENDER_PASS_DESCRIPTOR_CAPABILITY_ALPHA_BLEND
         ))
     {
-        const DivisionAlphaBlendingOptions* blend_options = &pass->alpha_blending_options;
+        const DivisionAlphaBlendingOptions* blend_options = &pass_desc->alpha_blending_options;
 
         if (!try_get_gl_blend_arg(ctx, blend_options->src, &pass_impl->gl_blend_src) ||
             !try_get_gl_blend_arg(ctx, blend_options->dst, &pass_impl->gl_blend_dst) ||

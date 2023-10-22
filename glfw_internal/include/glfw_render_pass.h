@@ -1,6 +1,5 @@
 #pragma once
 
-#include "division_engine_core/render_pass.h"
 #include "glad_restrict.h"
 
 typedef struct DivisionRenderPassInternalPlatform_

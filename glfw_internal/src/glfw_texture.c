@@ -4,7 +4,6 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
-#include "division_engine_core/render_pass.h"
 #include "division_engine_core/texture.h"
 #include "glfw_texture.h"
 
