@@ -114,13 +114,14 @@ void division_engine_internal_platform_render_pass_instance_draw(
                 DIVISION_RENDER_PASS_INSTANCE_CAPABILITY_INSTANCED_RENDERING
             ))
         {
-            glDrawElementsInstancedBaseVertex(
+            glDrawElementsInstancedBaseVertexBaseInstance(
                 vb_internal.gl_topology,
                 pass_instance->index_count,
                 GL_UNSIGNED_INT,
                 NULL,
                 pass_instance->instance_count,
-                pass_instance->first_vertex
+                pass_instance->first_vertex,
+                pass_instance->first_instance
             );
         }
         else

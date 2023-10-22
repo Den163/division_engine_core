@@ -159,7 +159,7 @@ bool try_get_texture_traits(
         *out_traits = (GlTextureTraits_){GL_R8, GL_RED, 1};
         return true;
     case DIVISION_TEXTURE_FORMAT_RGB24Uint:
-        *out_traits = (GlTextureTraits_){GL_RGB8, GL_RGB, 3};
+        *out_traits = (GlTextureTraits_){GL_RGB8, GL_RGB, 4};
         return true;
     case DIVISION_TEXTURE_FORMAT_RGBA32Uint:
         *out_traits = (GlTextureTraits_){GL_RGBA8, GL_RGBA, 4};

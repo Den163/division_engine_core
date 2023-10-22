@@ -1,3 +1,4 @@
+#include <stdio.h>
 #define GLFW_INCLUDE_NONE
 #define GLAD_GL_IMPLEMENTATION
 
@@ -28,8 +29,7 @@ static void gl_debug_message_callback(
 {
     if ((source != GL_DEBUG_SOURCE_SHADER_COMPILER) & (type == GL_DEBUG_TYPE_ERROR))
     {
-        DivisionContext* ctx = (DivisionContext*)user_data;
-        ctx->lifecycle.error_callback(ctx, id, message);
+        fprintf(stderr, "GLFW error: %s\n", message);
     }
 }
 
