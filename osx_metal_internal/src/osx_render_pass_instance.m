@@ -23,13 +23,12 @@ void division_engine_internal_platform_render_pass_instance_draw(
     uint32_t render_pass_instance_count
 )
 {
-    DivisionOSXWindowContext* window_context = context->renderer_context->window_data;
-    MTKView* view = window_context->app_delegate->view;
-    id<MTLCommandQueue> commandQueue =
-        window_context->app_delegate->viewDelegate->commandQueue;
-
     @autoreleasepool
     {
+        DivisionOSXWindowContext* window_context = context->renderer_context->window_data;
+        MTKView* view = window_context->app_delegate->view;
+        id<MTLCommandQueue> commandQueue =
+            window_context->app_delegate->viewDelegate->commandQueue;
         MTLClearColor mtl_clear_color = MTLClearColorMake(
             clear_color->r, clear_color->g, clear_color->b, clear_color->a
         );
@@ -37,8 +36,6 @@ void division_engine_internal_platform_render_pass_instance_draw(
 
         id<MTLCommandBuffer> cmdBuffer = [commandQueue commandBuffer];
         MTLRenderPassDescriptor* renderPassDesc = [view currentRenderPassDescriptor];
-        id<MTLRenderCommandEncoder> renderEnc =
-            [cmdBuffer renderCommandEncoderWithDescriptor:renderPassDesc];
 
         const DivisionRenderPassSystemContext* render_pass_ctx =
             context->render_pass_context;
@@ -48,6 +45,8 @@ void division_engine_internal_platform_render_pass_instance_draw(
             context->uniform_buffer_context;
         const DivisionTextureSystemContext* tex_ctx = context->texture_context;
 
+        id<MTLRenderCommandEncoder> renderEnc =
+            [cmdBuffer renderCommandEncoderWithDescriptor:renderPassDesc];
         const CGSize drawable_size = [view drawableSize];
         [renderEnc setViewport:(MTLViewport){
                                    .originX = 0,
@@ -61,16 +60,14 @@ void division_engine_internal_platform_render_pass_instance_draw(
 
         for (size_t i = 0; i < render_pass_instance_count; i++)
         {
-            const DivisionRenderPassInstance* render_pass_instance =
-                &render_pass_instances[i];
+            const DivisionRenderPassInstance* pass = &render_pass_instances[i];
 
             const uint32_t render_pass_descriptor_id =
-                render_pass_instances->render_pass_descriptor_id;
+                pass->render_pass_descriptor_id;
             const DivisionRenderPassDescriptor* pass_desc =
                 &render_pass_ctx->render_pass_descriptors[render_pass_descriptor_id];
             const DivisionRenderPassInternalPlatform_* pass_desc_impl =
-                &render_pass_ctx
-                     ->render_passes_descriptors_impl[render_pass_descriptor_id];
+                &render_pass_ctx->render_passes_descriptors_impl[render_pass_descriptor_id];
             const DivisionVertexBufferInternalPlatform_* vert_buffer_impl =
                 &vert_buff_ctx->buffers_impl[pass_desc->vertex_buffer_id];
 
@@ -89,11 +86,11 @@ void division_engine_internal_platform_render_pass_instance_draw(
                                    blue:blend_color[2]
                                   alpha:blend_color[3]];
 
-            size_t vert_uniform_count = render_pass_instance->uniform_vertex_buffer_count;
+            size_t vert_uniform_count = pass->uniform_vertex_buffer_count;
             for (int ubIdx = 0; ubIdx < vert_uniform_count; ubIdx++)
             {
                 const DivisionIdWithBinding* buff_binding =
-                    &render_pass_instance->uniform_vertex_buffers[ubIdx];
+                    &pass->uniform_vertex_buffers[ubIdx];
                 id<MTLBuffer> uniformBuff =
                     uniform_buff_ctx->uniform_buffers_impl[buff_binding->id].mtl_buffer;
                 [renderEnc setVertexBuffer:uniformBuff
@@ -102,11 +99,11 @@ void division_engine_internal_platform_render_pass_instance_draw(
             }
 
             size_t frag_uniform_count =
-                render_pass_instance->uniform_fragment_buffer_count;
+                pass->uniform_fragment_buffer_count;
             for (int ubIdx = 0; ubIdx < frag_uniform_count; ubIdx++)
             {
                 const DivisionIdWithBinding* buff_binding =
-                    &render_pass_instance->uniform_fragment_buffers[ubIdx];
+                    &pass->uniform_fragment_buffers[ubIdx];
                 id<MTLBuffer> uniformBuff =
                     uniform_buff_ctx->uniform_buffers_impl[buff_binding->id].mtl_buffer;
                 [renderEnc setFragmentBuffer:uniformBuff
@@ -114,11 +111,11 @@ void division_engine_internal_platform_render_pass_instance_draw(
                                      atIndex:buff_binding->shader_location];
             }
 
-            size_t texture_count = render_pass_instance->fragment_texture_count;
+            size_t texture_count = pass->fragment_texture_count;
             for (int texIdx = 0; texIdx < texture_count; texIdx++)
             {
                 const DivisionIdWithBinding* texture_binding =
-                    &render_pass_instance->fragment_textures[texIdx];
+                    &pass->fragment_textures[texIdx];
                 const DivisionTextureImpl_* tex_impl =
                     &tex_ctx->textures_impl[texture_binding->id];
 
@@ -129,7 +126,7 @@ void division_engine_internal_platform_render_pass_instance_draw(
             }
 
             if (division_mask_has_flag(
-                    render_pass_instance->capabilities_mask,
+                    pass->capabilities_mask,
                     DIVISION_RENDER_PASS_INSTANCE_CAPABILITY_INSTANCED_RENDERING
                 ))
             {
@@ -138,18 +135,18 @@ void division_engine_internal_platform_render_pass_instance_draw(
                                    atIndex:DIVISION_MTL_VERTEX_DATA_INSTANCE_ARRAY_INDEX];
 
                 [renderEnc drawIndexedPrimitives:vert_buffer_impl->mtl_primitive_type
-                                      indexCount:render_pass_instance->index_count
+                                      indexCount:pass->index_count
                                        indexType:MTLIndexTypeUInt32
                                      indexBuffer:vert_buffer_impl->mtl_index_buffer
                                indexBufferOffset:0
-                                   instanceCount:render_pass_instance->instance_count
-                                      baseVertex:render_pass_instance->first_vertex
-                                    baseInstance:render_pass_instance->first_instance];
+                                   instanceCount:pass->instance_count
+                                      baseVertex:pass->first_vertex
+                                    baseInstance:pass->first_instance];
             }
             else
             {
                 [renderEnc drawIndexedPrimitives:vert_buffer_impl->mtl_primitive_type
-                                      indexCount:render_pass_instance->index_count
+                                      indexCount:pass->index_count
                                        indexType:MTLIndexTypeUInt32
                                      indexBuffer:vert_buffer_impl->mtl_index_buffer
                                indexBufferOffset:0
