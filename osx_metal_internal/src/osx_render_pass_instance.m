@@ -1,3 +1,4 @@
+#include "division_engine_core/color.h"
 #include "division_engine_core/render_pass_instance.h"
 #include "division_engine_core/utility.h"
 #include "osx_render_pass.h"
@@ -5,6 +6,7 @@
 #include "osx_uniform_buffer.h"
 #include "osx_vertex_buffer.h"
 #include "osx_window_context.h"
+#include <Metal/Metal.h>
 #include <MetalKit/MetalKit.h>
 
 #include <division_engine_core/platform_internal/platform_render_pass_instance.h>
@@ -16,6 +18,7 @@
 
 void division_engine_internal_platform_render_pass_instance_draw(
     DivisionContext* context,
+    const DivisionColor* clear_color,
     const DivisionRenderPassInstance* render_pass_instances,
     uint32_t render_pass_instance_count
 )
@@ -27,10 +30,10 @@ void division_engine_internal_platform_render_pass_instance_draw(
 
     @autoreleasepool
     {
-        const DivisionColor clearColor = context->renderer_context->clear_color;
-        [view setClearColor:MTLClearColorMake(
-                                clearColor.r, clearColor.g, clearColor.b, clearColor.a
-                            )];
+        MTLClearColor mtl_clear_color = MTLClearColorMake(
+            clear_color->r, clear_color->g, clear_color->b, clear_color->a
+        );
+        [view setClearColor:mtl_clear_color];
 
         id<MTLCommandBuffer> cmdBuffer = [commandQueue commandBuffer];
         MTLRenderPassDescriptor* renderPassDesc = [view currentRenderPassDescriptor];

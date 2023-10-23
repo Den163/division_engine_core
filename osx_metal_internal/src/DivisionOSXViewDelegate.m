@@ -31,7 +31,7 @@
 
 - (void)drawInMTKView:(nonnull MTKView*)view
 {
-    context->lifecycle.ready_to_draw_callback(context);
+    context->lifecycle.draw_callback(context);
 }
 
 - (void)mtkView:(nonnull MTKView*)view drawableSizeWillChange:(CGSize)size
