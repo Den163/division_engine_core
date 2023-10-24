@@ -106,7 +106,6 @@ void init_callback(DivisionContext* ctx)
     example_write_font_character(ctx);
     example_create_textures(ctx, &user_data->texture);
 
-    uint32_t render_pass_id;
     DivisionRenderPassDescriptor render_pass_desc = {
         .alpha_blending_options =
             (DivisionAlphaBlendingOptions){
@@ -326,9 +325,7 @@ static void example_create_textures(
 
 static void example_write_font_character(DivisionContext* ctx)
 {
-    void* font_file;
-    size_t file_size;
-    uint32_t font_id, bitmap_id;
+    uint32_t font_id;
     DivisionFontGlyph glyph;
 
     assert(division_engine_font_alloc(ctx, "./Roboto-Medium.ttf", 64, &font_id));

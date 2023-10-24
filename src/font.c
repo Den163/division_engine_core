@@ -107,7 +107,6 @@ bool division_engine_font_get_glyph(
     }
 
     FT_GlyphSlot ft_glyph = ft_face->glyph;
-    FT_Glyph_Metrics ft_metrics = ft_glyph->metrics;
     FT_Bitmap ft_bitmap = ft_glyph->bitmap;
     *out_glyph = (DivisionFontGlyph){
         .width = ft_bitmap.width,

@@ -29,14 +29,10 @@ bool division_engine_render_pass_system_context_alloc(
 
 void division_engine_render_pass_system_context_free(DivisionContext* ctx)
 {
+    DivisionRenderPassSystemContext* render_pass_ctx = ctx->render_pass_context;
+
     division_engine_internal_platform_render_pass_context_free(ctx);
     division_unordered_id_table_free(&ctx->render_pass_context->id_table);
-
-    DivisionRenderPassSystemContext* render_pass_ctx = ctx->render_pass_context;
-    for (int i = 0; i < render_pass_ctx->render_pass_count; i++)
-    {
-        DivisionRenderPassDescriptor pass = render_pass_ctx->render_pass_descriptors[i];
-    }
     free(render_pass_ctx->render_pass_descriptors);
     free(render_pass_ctx);
 }
@@ -117,7 +113,4 @@ void division_engine_render_pass_descriptor_free(
 
     DivisionRenderPassSystemContext* render_pass_ctx = ctx->render_pass_context;
     division_unordered_id_table_remove_id(&render_pass_ctx->id_table, render_pass_id);
-
-    DivisionRenderPassDescriptor* render_pass =
-        &render_pass_ctx->render_pass_descriptors[render_pass_id];
 }

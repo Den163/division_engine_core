@@ -108,7 +108,6 @@ bool division_engine_internal_platform_render_pass_impl_init_element(
         MTLBlendOperation mtl_blend_op;
         MTLBlendFactor mtl_src;
         MTLBlendFactor mtl_dst;
-        MTLColorWriteMask mtl_color_mask;
         if (!try_get_mtl_blend_arg(ctx, blend_options->src, &mtl_src) ||
             !try_get_mtl_blend_arg(ctx, blend_options->dst, &mtl_dst) ||
             !try_get_mtl_blend_op(ctx, blend_options->operation, &mtl_blend_op))

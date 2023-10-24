@@ -43,7 +43,6 @@ bool division_engine_internal_platform_shader_program_alloc(
     uint32_t* out_shader_program_id
 )
 {
-    DivisionOSXWindowContext* window_ctx = ctx->renderer_context->window_data;
     DivisionShaderSystemContext* shader_ctx = ctx->shader_context;
     size_t shader_program_count = shader_ctx->shader_count;
 

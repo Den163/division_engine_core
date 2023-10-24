@@ -1,6 +1,8 @@
 #pragma once
 
 #include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
 #include <stdlib.h>
 
 #include "context.h"
@@ -15,21 +17,6 @@ typedef enum DivisionRenderTopology
     DIVISION_TOPOLOGY_LINES = 3
 } DivisionRenderTopology;
 
-typedef struct DivisionVertexAttributeSettings
-{
-    DivisionShaderVariableType type;
-    int32_t location;
-} DivisionVertexAttributeSettings;
-
-typedef struct DivisionVertexAttribute
-{
-    int32_t location;
-    int32_t offset;
-    int32_t base_size;
-    int32_t component_count;
-    DivisionShaderVariableType type;
-} DivisionVertexAttribute;
-
 typedef struct DivisionVertexBufferSize
 {
     uint32_t vertex_count;
@@ -37,19 +24,38 @@ typedef struct DivisionVertexBufferSize
     uint32_t instance_count;
 } DivisionVertexBufferSize;
 
-typedef struct DivisionVertexBuffer
+typedef struct DivisionVertexAttributeSettings
+{
+    DivisionShaderVariableType type;
+    int32_t location;
+} DivisionVertexAttributeSettings;
+
+typedef struct DivisionVertexBufferSettings
 {
     DivisionVertexBufferSize size;
+    DivisionVertexAttributeSettings* per_vertex_attributes;
+    DivisionVertexAttributeSettings* per_instance_attributes;
+    int32_t per_vertex_attribute_count;
+    int32_t per_instance_attribute_count;
+    DivisionRenderTopology topology;
+} DivisionVertexBufferSettings;
+
+typedef struct DivisionVertexAttribute
+{
+    int32_t offset;
+    int32_t base_size;
+    int32_t component_count;
+} DivisionVertexAttribute;
+
+typedef struct DivisionVertexBuffer
+{
+    DivisionVertexBufferSettings settings;
 
     DivisionVertexAttribute* per_vertex_attributes;
-    int32_t per_vertex_attribute_count;
-    size_t per_vertex_data_size;
-
     DivisionVertexAttribute* per_instance_attributes;
-    int32_t per_instance_attribute_count;
-    size_t per_instance_data_size;
 
-    DivisionRenderTopology topology;
+    size_t per_vertex_data_size;
+    size_t per_instance_data_size;
 } DivisionVertexBuffer;
 
 typedef struct DivisionVertexBufferSystemContext
@@ -59,16 +65,6 @@ typedef struct DivisionVertexBufferSystemContext
     struct DivisionVertexBufferInternalPlatform_* buffers_impl;
     size_t buffers_count;
 } DivisionVertexBufferSystemContext;
-
-typedef struct DivisionVertexBufferSettings
-{
-    DivisionVertexBufferSize size;
-    const DivisionVertexAttributeSettings* per_vertex_attributes;
-    const DivisionVertexAttributeSettings* per_instance_attributes;
-    int32_t per_vertex_attribute_count;
-    int32_t per_instance_attribute_count;
-    DivisionRenderTopology topology;
-} DivisionVertexBufferSettings;
 
 typedef struct DivisionVertexBufferBorrowedData
 {
@@ -117,7 +113,34 @@ extern "C"
         uint32_t vertex_buffer,
         DivisionVertexBufferBorrowedData* borrow_data
     );
-    
+
+    DIVISION_EXPORT bool division_engine_vertex_buffer_resize(
+        DivisionContext* ctx, uint32_t vertex_buffer, DivisionVertexBufferSize new_size
+    );
+
 #ifdef __cplusplus
 }
 #endif
+
+static inline size_t division_engine_vertex_buffer_vertices_bytes(
+    const DivisionVertexBuffer* vertex_buffer
+)
+{
+    return vertex_buffer->settings.size.vertex_count *
+           vertex_buffer->per_vertex_data_size;
+}
+
+static inline size_t division_engine_vertex_buffer_indices_bytes(
+    const DivisionVertexBuffer* vertex_buffer
+)
+{
+    return vertex_buffer->settings.size.index_count * sizeof(uint32_t);
+}
+
+static inline size_t division_engine_vertex_buffer_instances_bytes(
+    const DivisionVertexBuffer* vertex_buffer
+)
+{
+    return vertex_buffer->settings.size.instance_count *
+           vertex_buffer->per_instance_data_size;
+}

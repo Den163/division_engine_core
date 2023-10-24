@@ -3,9 +3,13 @@
 #include "division_engine_core/context.h"
 #include "division_engine_core/platform_internal/platform_vertex_buffer.h"
 #include "division_engine_core/renderer.h"
+#include "division_engine_core/utility.h"
 #include "division_engine_core/vertex_buffer.h"
 #include "osx_vertex_buffer.h"
 #include "osx_window_context.h"
+
+#include <memory.h>
+#include <string.h>
 
 typedef struct
 {
@@ -26,6 +30,7 @@ static inline MTLVertexDescriptor* create_vertex_descriptor(
 static inline void define_msl_vertex_attributes(
     DivisionContext* ctx,
     const DivisionVertexAttribute* attributes,
+    const DivisionVertexAttributeSettings* attribute_settings,
     int32_t attribute_count,
     MTLVertexAttributeDescriptorArray* attr_desc_arr,
     size_t attributes_offset,
@@ -75,12 +80,12 @@ bool division_engine_internal_platform_vertex_buffer_borrow_data_pointer(
     out_borrow_data->index_data_ptr = [impl_buffer->mtl_index_buffer contents];
     out_borrow_data->vertex_data_ptr = ptr;
     out_borrow_data->instance_data_ptr =
-        ptr + vertex_buffer->size.vertex_count * vertex_buffer->per_vertex_data_size;
+        ptr + division_engine_vertex_buffer_vertices_bytes(vertex_buffer);
 
     return true;
 }
 
-void division_engine_internal_platform_vertex_buffer_return_data_pointer(
+void division_engine_internal_platform_vertex_buffer_return_data(
     DivisionContext* ctx,
     uint32_t buffer_id,
     DivisionVertexBufferBorrowedData* data_pointer
@@ -124,10 +129,10 @@ bool division_engine_internal_platform_vertex_buffer_impl_init_element(
 {
     DivisionOSXWindowContext* window_context = ctx->renderer_context->window_data;
     id<MTLDevice> device = window_context->app_delegate->viewDelegate->device;
-    
+
     DivisionVertexBufferSystemContext* vert_buffer_ctx = ctx->vertex_buffer_context;
     const DivisionVertexBuffer* vertex_buffer = &vert_buffer_ctx->buffers[buffer_id];
-    DivisionVertexBufferSize buffer_size = vertex_buffer->size;
+    DivisionVertexBufferSize buffer_size = vertex_buffer->settings.size;
     DivisionVertexBufferInternalPlatform_* impl_buffer =
         &vert_buffer_ctx->buffers_impl[buffer_id];
 
@@ -161,9 +166,61 @@ bool division_engine_internal_platform_vertex_buffer_impl_init_element(
     impl_buffer->mtl_index_buffer = idx_buffer;
     impl_buffer->mtl_vertex_descriptor = vertex_descriptor;
     impl_buffer->mtl_primitive_type =
-        division_topology_to_mtl_type(ctx, vertex_buffer->topology);
+        division_topology_to_mtl_type(ctx, vertex_buffer->settings.topology);
 
     return true;
+}
+
+DIVISION_EXPORT void division_engine_internal_platform_vertex_buffer_copy_data(
+    DivisionContext* ctx, uint32_t src_buffer_id, uint32_t dst_buffer_id
+)
+{
+    DivisionVertexBufferSystemContext* vb_ctx = ctx->vertex_buffer_context;
+    const DivisionVertexBuffer* src_buff = &vb_ctx->buffers[src_buffer_id];
+    const DivisionVertexBuffer* dst_buff = &vb_ctx->buffers[dst_buffer_id];
+    const DivisionVertexBufferInternalPlatform_* src_buffer_impl =
+        &vb_ctx->buffers_impl[src_buffer_id];
+    DivisionVertexBufferInternalPlatform_* dst_buffer_impl =
+        &vb_ctx->buffers_impl[dst_buffer_id];
+
+    const void* src_vertex_ptr = [src_buffer_impl->mtl_vertex_buffer contents];
+    void* dst_vertex_ptr = [dst_buffer_impl->mtl_vertex_buffer contents];
+    size_t src_vert_bytes = division_engine_vertex_buffer_vertices_bytes(src_buff);
+    size_t dst_vert_bytes = division_engine_vertex_buffer_vertices_bytes(dst_buff);
+
+    memcpy(dst_vertex_ptr, src_vertex_ptr, DIVISION_MIN(src_vert_bytes, dst_vert_bytes));
+
+    const void* src_instance_ptr = src_vertex_ptr + src_vert_bytes;
+    void* dst_instance_ptr = dst_vertex_ptr + dst_vert_bytes;
+    memcpy(
+        dst_instance_ptr,
+        src_instance_ptr,
+        DIVISION_MIN(
+            division_engine_vertex_buffer_instances_bytes(src_buff),
+            division_engine_vertex_buffer_instances_bytes(dst_buff)
+        )
+    );
+
+    memcpy(
+        [dst_buffer_impl->mtl_index_buffer contents],
+        [src_buffer_impl->mtl_index_buffer contents],
+        DIVISION_MIN(
+            division_engine_vertex_buffer_indices_bytes(src_buff),
+            division_engine_vertex_buffer_indices_bytes(dst_buff)
+        )
+    );
+}
+
+DIVISION_EXPORT void division_engine_internal_platform_vertex_buffer_swap_data(
+    DivisionContext* ctx, uint32_t src_id, uint32_t dst_id
+)
+{
+    DivisionVertexBufferSystemContext* vb_ctx = ctx->vertex_buffer_context;
+    DIVISION_SWAP(
+        DivisionVertexBufferInternalPlatform_,
+        vb_ctx->buffers_impl[src_id],
+        vb_ctx->buffers_impl[dst_id]
+    );
 }
 
 MTLPrimitiveType division_topology_to_mtl_type(
@@ -196,7 +253,8 @@ MTLVertexDescriptor* create_vertex_descriptor(
     define_msl_vertex_attributes(
         ctx,
         vertex_buffer->per_vertex_attributes,
-        vertex_buffer->per_vertex_attribute_count,
+        vertex_buffer->settings.per_vertex_attributes,
+        vertex_buffer->settings.per_vertex_attribute_count,
         attrDescArray,
         0,
         DIVISION_MTL_VERTEX_DATA_BUFFER_INDEX
@@ -208,14 +266,15 @@ MTLVertexDescriptor* create_vertex_descriptor(
     [perVertexLayoutDesc setStride:vertex_buffer->per_vertex_data_size];
     [perVertexLayoutDesc setStepFunction:MTLVertexStepFunctionPerVertex];
 
-    if (vertex_buffer->per_instance_attribute_count > 0)
+    if (vertex_buffer->settings.per_instance_attribute_count > 0)
     {
         define_msl_vertex_attributes(
             ctx,
             vertex_buffer->per_instance_attributes,
-            vertex_buffer->per_instance_attribute_count,
+            vertex_buffer->settings.per_instance_attributes,
+            vertex_buffer->settings.per_instance_attribute_count,
             attrDescArray,
-            vertex_buffer->per_vertex_data_size * vertex_buffer->size.vertex_count,
+            division_engine_vertex_buffer_vertices_bytes(vertex_buffer),
             DIVISION_MTL_VERTEX_DATA_INSTANCE_ARRAY_INDEX
         );
 
@@ -232,6 +291,7 @@ MTLVertexDescriptor* create_vertex_descriptor(
 void define_msl_vertex_attributes(
     DivisionContext* ctx,
     const DivisionVertexAttribute* attributes,
+    const DivisionVertexAttributeSettings* attribute_settings,
     int32_t attribute_count,
     MTLVertexAttributeDescriptorArray* attr_desc_arr,
     size_t attributes_offset,
@@ -241,15 +301,17 @@ void define_msl_vertex_attributes(
     for (int i = 0; i < attribute_count; i++)
     {
         const DivisionVertexAttribute* attr = &attributes[i];
-        DivisionToMslAttrTraits_ traits = get_vert_attr_msl_traits_(ctx, attr->type);
+        const DivisionVertexAttributeSettings* attr_setting = &attribute_settings[i];
+        DivisionToMslAttrTraits_ traits =
+            get_vert_attr_msl_traits_(ctx, attr_setting->type);
         size_t gl_attr_comp_count = (attr->component_count / traits.divide_by_components);
         size_t comp_size = attr->base_size * gl_attr_comp_count;
         size_t offset = attributes_offset + attr->offset;
 
         for (int comp_idx = 0; comp_idx < gl_attr_comp_count; comp_idx++)
         {
-            MTLVertexAttributeDescriptor* attrDesc =
-                [attr_desc_arr objectAtIndexedSubscript:attr->location + comp_idx];
+            MTLVertexAttributeDescriptor* attrDesc = [attr_desc_arr
+                objectAtIndexedSubscript:attr_setting->location + comp_idx];
             [attrDesc setOffset:offset + comp_idx * comp_size];
             [attrDesc setBufferIndex:buffer_index];
             [attrDesc setFormat:traits.vertex_format];
