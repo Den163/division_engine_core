@@ -28,6 +28,7 @@ set(SOURCES
     src/io_utility.c
     src/hash_table.c
     src/texture.c
+    src/input.c
     src/font.c
 )
 

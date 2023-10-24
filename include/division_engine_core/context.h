@@ -19,6 +19,7 @@ struct DivisionVertexBufferSystemContext;
 struct DivisionUniformBufferSystemContext;
 struct DivisionRenderPassSystemContext;
 struct DivisionTextureSystemContext;
+struct DivisionInputSystemContext;
 struct DivisionFontSystemContext;
 
 typedef struct DivisionContext
@@ -32,6 +33,7 @@ typedef struct DivisionContext
     struct DivisionUniformBufferSystemContext* uniform_buffer_context;
     struct DivisionTextureSystemContext* texture_context;
     struct DivisionRenderPassSystemContext* render_pass_context;
+    struct DivisionInputSystemContext* input_context;
     struct DivisionFontSystemContext* font_context;
 
     void* user_data;
