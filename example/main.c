@@ -142,8 +142,10 @@ void draw_callback(DivisionContext* ctx)
         .capabilities_mask = DIVISION_RENDER_PASS_INSTANCE_CAPABILITY_INSTANCED_RENDERING,
     };
 
-    DivisionColor clear_color = { 0., 0., 0., 1. };
-    division_engine_render_pass_instance_draw(ctx, &clear_color, &render_pass_instance, 1);
+    DivisionColor clear_color = {0., 0., 0., 1.};
+    division_engine_render_pass_instance_draw(
+        ctx, &clear_color, &render_pass_instance, 1
+    );
 }
 
 void error_callback(DivisionContext* ctx, int error_code, const char* message)
@@ -246,9 +248,12 @@ void example_create_vertex_buffer(
         .per_instance_attributes = instance_attrs,
         .per_vertex_attribute_count = 3,
         .per_instance_attribute_count = 1,
-        .vertex_count = vertex_count,
-        .instance_count = instance_count,
-        .index_count = index_count,
+        .size =
+            (DivisionVertexBufferSize){
+                .vertex_count = vertex_count,
+                .index_count = index_count,
+                .instance_count = instance_count,
+            },
         .topology = DIVISION_TOPOLOGY_TRIANGLES,
     };
 

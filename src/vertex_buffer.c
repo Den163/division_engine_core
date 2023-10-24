@@ -76,10 +76,9 @@ bool division_engine_vertex_buffer_alloc(
         .per_instance_attributes = NULL,
         .per_instance_attribute_count =
             vertex_buffer_settings->per_instance_attribute_count,
-        .vertex_count = vertex_buffer_settings->vertex_count,
-        .index_count = vertex_buffer_settings->index_count,
-        .instance_count = vertex_buffer_settings->instance_count,
-        .topology = vertex_buffer_settings->topology};
+        .size = vertex_buffer_settings->size,
+        .topology = vertex_buffer_settings->topology,
+    };
 
     if (!alloc_vert_attrs_(
             ctx,
@@ -126,6 +125,68 @@ bool division_engine_vertex_buffer_alloc(
     vertex_ctx->buffers[vertex_buffer_id] = vertex_buffer;
     return division_engine_internal_platform_vertex_buffer_impl_init_element(
         ctx, vertex_buffer_id
+    );
+}
+
+void free_buffer_data_and_handle_error(
+    DivisionContext* ctx, DivisionVertexBuffer* buffer, uint32_t buffer_id
+)
+{
+    division_unordered_id_table_remove_id(
+        &ctx->vertex_buffer_context->id_table, buffer_id
+    );
+    free(buffer->per_vertex_attributes);
+    free(buffer->per_instance_attributes);
+    buffer->per_vertex_attributes = NULL;
+    buffer->per_instance_attributes = NULL;
+
+    ctx->lifecycle.error_callback(
+        ctx, DIVISION_INTERNAL_ERROR, "Division error: Failed to alloc a Vertex Buffer"
+    );
+}
+
+void division_engine_vertex_buffer_free(DivisionContext* ctx, uint32_t vertex_buffer_id)
+{
+    division_engine_internal_platform_vertex_buffer_free(ctx, vertex_buffer_id);
+    DivisionVertexBuffer* vertex_buffer =
+        &ctx->vertex_buffer_context->buffers[vertex_buffer_id];
+    for (int i = 0; i < vertex_buffer->per_vertex_attribute_count; i++)
+    {
+        free(vertex_buffer->per_vertex_attributes);
+        free(vertex_buffer->per_instance_attributes);
+        vertex_buffer->per_vertex_attributes = NULL;
+        vertex_buffer->per_instance_attributes = NULL;
+    }
+
+    division_unordered_id_table_remove_id(
+        &ctx->vertex_buffer_context->id_table, vertex_buffer_id
+    );
+}
+
+bool division_engine_vertex_buffer_borrow_data(
+    DivisionContext* ctx,
+    uint32_t vertex_buffer,
+    DivisionVertexBufferBorrowedData* out_borrow_data
+)
+{
+    const DivisionVertexBuffer* buff =
+        &ctx->vertex_buffer_context->buffers[vertex_buffer];
+
+    out_borrow_data->size = buff->size;
+
+    return division_engine_internal_platform_vertex_buffer_borrow_data_pointer(
+        ctx, vertex_buffer, out_borrow_data
+    );
+}
+
+void division_engine_vertex_buffer_return_data(
+    DivisionContext* ctx,
+    uint32_t vertex_buffer,
+    DivisionVertexBufferBorrowedData* borrow_data
+)
+{
+    division_engine_internal_platform_vertex_buffer_return_data_pointer(
+        ctx, vertex_buffer, borrow_data
     );
 }
 
@@ -196,66 +257,4 @@ AttrTraits_ division_attribute_get_traits(
         DIVISION_THROW_INTERNAL_ERROR(ctx, "Unknown attribute type");
     }
     }
-}
-
-void free_buffer_data_and_handle_error(
-    DivisionContext* ctx, DivisionVertexBuffer* buffer, uint32_t buffer_id
-)
-{
-    division_unordered_id_table_remove_id(&ctx->vertex_buffer_context->id_table, buffer_id);
-    free(buffer->per_vertex_attributes);
-    free(buffer->per_instance_attributes);
-    buffer->per_vertex_attributes = NULL;
-    buffer->per_instance_attributes = NULL;
-
-    ctx->lifecycle.error_callback(
-        ctx, DIVISION_INTERNAL_ERROR, "Division error: Failed to alloc a Vertex Buffer"
-    );
-}
-
-void division_engine_vertex_buffer_free(DivisionContext* ctx, uint32_t vertex_buffer_id)
-{
-    division_engine_internal_platform_vertex_buffer_free(ctx, vertex_buffer_id);
-    DivisionVertexBuffer* vertex_buffer =
-        &ctx->vertex_buffer_context->buffers[vertex_buffer_id];
-    for (int i = 0; i < vertex_buffer->per_vertex_attribute_count; i++)
-    {
-        free(vertex_buffer->per_vertex_attributes);
-        free(vertex_buffer->per_instance_attributes);
-        vertex_buffer->per_vertex_attributes = NULL;
-        vertex_buffer->per_instance_attributes = NULL;
-    }
-
-    division_unordered_id_table_remove_id(
-        &ctx->vertex_buffer_context->id_table, vertex_buffer_id
-    );
-}
-
-bool division_engine_vertex_buffer_borrow_data(
-    DivisionContext* ctx,
-    uint32_t vertex_buffer,
-    DivisionVertexBufferBorrowedData* out_borrow_data
-)
-{
-    const DivisionVertexBuffer* buff =
-        &ctx->vertex_buffer_context->buffers[vertex_buffer];
-
-    out_borrow_data->vertex_count = buff->vertex_count;
-    out_borrow_data->index_count = buff->index_count;
-    out_borrow_data->instance_count = buff->instance_count;
-
-    return division_engine_internal_platform_vertex_buffer_borrow_data_pointer(
-        ctx, vertex_buffer, out_borrow_data
-    );
-}
-
-void division_engine_vertex_buffer_return_data(
-    DivisionContext* ctx,
-    uint32_t vertex_buffer,
-    DivisionVertexBufferBorrowedData* borrow_data
-)
-{
-    division_engine_internal_platform_vertex_buffer_return_data_pointer(
-        ctx, vertex_buffer, borrow_data
-    );
 }

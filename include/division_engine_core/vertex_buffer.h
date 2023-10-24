@@ -30,8 +30,17 @@ typedef struct DivisionVertexAttribute
     DivisionShaderVariableType type;
 } DivisionVertexAttribute;
 
+typedef struct DivisionVertexBufferSize
+{
+    uint32_t vertex_count;
+    uint32_t index_count;
+    uint32_t instance_count;
+} DivisionVertexBufferSize;
+
 typedef struct DivisionVertexBuffer
 {
+    DivisionVertexBufferSize size;
+
     DivisionVertexAttribute* per_vertex_attributes;
     int32_t per_vertex_attribute_count;
     size_t per_vertex_data_size;
@@ -39,10 +48,6 @@ typedef struct DivisionVertexBuffer
     DivisionVertexAttribute* per_instance_attributes;
     int32_t per_instance_attribute_count;
     size_t per_instance_data_size;
-
-    int32_t vertex_count;
-    int32_t index_count;
-    int32_t instance_count;
 
     DivisionRenderTopology topology;
 } DivisionVertexBuffer;
@@ -57,25 +62,21 @@ typedef struct DivisionVertexBufferSystemContext
 
 typedef struct DivisionVertexBufferSettings
 {
+    DivisionVertexBufferSize size;
     const DivisionVertexAttributeSettings* per_vertex_attributes;
     const DivisionVertexAttributeSettings* per_instance_attributes;
     int32_t per_vertex_attribute_count;
     int32_t per_instance_attribute_count;
-    int32_t vertex_count;
-    int32_t index_count;
-    int32_t instance_count;
     DivisionRenderTopology topology;
 } DivisionVertexBufferSettings;
 
 typedef struct DivisionVertexBufferBorrowedData
 {
+    DivisionVertexBufferSize size;
+
     void* vertex_data_ptr;
     void* index_data_ptr;
     void* instance_data_ptr;
-
-    uint32_t vertex_count;
-    uint32_t index_count;
-    uint32_t instance_count;
 } DivisionVertexBufferBorrowedData;
 
 bool division_engine_vertex_buffer_system_context_alloc(

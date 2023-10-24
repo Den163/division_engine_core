@@ -3,6 +3,7 @@
 #include "division_engine_core/context.h"
 #include "division_engine_core/platform_internal/platform_vertex_buffer.h"
 #include "division_engine_core/renderer.h"
+#include "division_engine_core/vertex_buffer.h"
 #include "osx_vertex_buffer.h"
 #include "osx_window_context.h"
 
@@ -74,7 +75,7 @@ bool division_engine_internal_platform_vertex_buffer_borrow_data_pointer(
     out_borrow_data->index_data_ptr = [impl_buffer->mtl_index_buffer contents];
     out_borrow_data->vertex_data_ptr = ptr;
     out_borrow_data->instance_data_ptr =
-        ptr + vertex_buffer->vertex_count * vertex_buffer->per_vertex_data_size;
+        ptr + vertex_buffer->size.vertex_count * vertex_buffer->per_vertex_data_size;
 
     return true;
 }
@@ -123,15 +124,17 @@ bool division_engine_internal_platform_vertex_buffer_impl_init_element(
 {
     DivisionOSXWindowContext* window_context = ctx->renderer_context->window_data;
     id<MTLDevice> device = window_context->app_delegate->viewDelegate->device;
+    
     DivisionVertexBufferSystemContext* vert_buffer_ctx = ctx->vertex_buffer_context;
     const DivisionVertexBuffer* vertex_buffer = &vert_buffer_ctx->buffers[buffer_id];
+    DivisionVertexBufferSize buffer_size = vertex_buffer->size;
     DivisionVertexBufferInternalPlatform_* impl_buffer =
         &vert_buffer_ctx->buffers_impl[buffer_id];
 
-    size_t idx_buffer_size = sizeof(uint32_t[vertex_buffer->index_count]);
+    size_t idx_buffer_size = sizeof(uint32_t[buffer_size.index_count]);
     size_t vert_buffer_size =
-        vertex_buffer->per_vertex_data_size * vertex_buffer->vertex_count +
-        vertex_buffer->per_instance_data_size * vertex_buffer->instance_count;
+        vertex_buffer->per_vertex_data_size * buffer_size.vertex_count +
+        vertex_buffer->per_instance_data_size * buffer_size.instance_count;
 
     id<MTLBuffer> vert_buffer =
         [device newBufferWithLength:vert_buffer_size
@@ -212,7 +215,7 @@ MTLVertexDescriptor* create_vertex_descriptor(
             vertex_buffer->per_instance_attributes,
             vertex_buffer->per_instance_attribute_count,
             attrDescArray,
-            vertex_buffer->per_vertex_data_size * vertex_buffer->vertex_count,
+            vertex_buffer->per_vertex_data_size * vertex_buffer->size.vertex_count,
             DIVISION_MTL_VERTEX_DATA_INSTANCE_ARRAY_INDEX
         );
 
