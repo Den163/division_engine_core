@@ -16,6 +16,11 @@
 #include <MetalKit/MetalKit.h>
 #include <stdbool.h>
 
+const DivisionInputState input_state_map[] = {
+    [true] = DIVISION_INPUT_STATE_DOWN,
+    [false] = DIVISION_INPUT_STATE_UP
+};
+
 @implementation DivisionOSXViewDelegate
 - (instancetype)initWithContext:(DivisionContext*)aContext device:(id)aDevice
 {
@@ -52,12 +57,9 @@
 
         mouse->pos_x = mouse_location.x;
         mouse->pos_y = mouse_location.y;
-        mouse->left_button =
-            left_button_pressed ? DIVISION_INPUT_STATE_DOWN : DIVISION_INPUT_STATE_UP;
-        mouse->right_button = 
-            right_button_pressed ? DIVISION_INPUT_STATE_DOWN : DIVISION_INPUT_STATE_UP;
-        mouse->middle_button =
-            middle_button_pressed ? DIVISION_INPUT_STATE_DOWN : DIVISION_INPUT_STATE_UP;
+        mouse->left_button = input_state_map[left_button_pressed];
+        mouse->right_button = input_state_map[right_button_pressed];
+        mouse->middle_button = input_state_map[middle_button_pressed];
     }
 
     context->lifecycle.draw_callback(context);
