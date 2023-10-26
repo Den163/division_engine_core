@@ -1,6 +1,7 @@
 #include "glfw_vertex_buffer.h"
 #include "division_engine_core/context.h"
 #include "division_engine_core/platform_internal/platform_vertex_buffer.h"
+#include "division_engine_core/utility.h"
 #include "division_engine_core/vertex_buffer.h"
 
 #include <stdio.h>
@@ -20,6 +21,7 @@ static inline GLenum topology_to_gl_type(DivisionContext* ctx, DivisionRenderTop
 static inline void enable_gl_attributes(
     DivisionContext* ctx,
     const DivisionVertexAttribute* attributes,
+    const DivisionVertexAttributeSettings* attribute_settings,
     int32_t attribute_count,
     size_t attributes_offset,
     size_t attributes_data_size,
@@ -99,10 +101,12 @@ bool division_engine_internal_platform_vertex_buffer_impl_init_element(
 )
 {
     DivisionVertexBufferSystemContext* vertex_ctx = ctx->vertex_buffer_context;
-    DivisionVertexBuffer* vertex_buffer = &vertex_ctx->buffers[buffer_id];
+    const DivisionVertexBuffer* vb = &vertex_ctx->buffers[buffer_id];
+    const DivisionVertexBufferSettings* vb_settings = &vb->settings;
+    const DivisionVertexBufferSize* vb_size = &vb_settings->size;
 
     DivisionVertexBufferInternalPlatform_ vertex_buffer_impl = {
-        .gl_topology = topology_to_gl_type(ctx, vertex_buffer->topology),
+        .gl_topology = topology_to_gl_type(ctx, vb->settings.topology),
     };
 
     glGenVertexArrays(1, &vertex_buffer_impl.gl_vao);
@@ -113,7 +117,7 @@ bool division_engine_internal_platform_vertex_buffer_impl_init_element(
 
     glBufferData(
         GL_ELEMENT_ARRAY_BUFFER,
-        (GLsizei)sizeof(uint32_t[vertex_buffer->index_count]),
+        (GLsizei)sizeof(uint32_t[vb_size->index_count]),
         NULL,
         GL_DYNAMIC_DRAW
     );
@@ -121,36 +125,38 @@ bool division_engine_internal_platform_vertex_buffer_impl_init_element(
     glGenBuffers(1, &vertex_buffer_impl.gl_vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_impl.gl_vbo);
 
-    size_t per_vertex_data_size = vertex_buffer->per_vertex_data_size;
-    size_t per_instance_data_size = vertex_buffer->per_instance_data_size;
-    size_t vertex_count = vertex_buffer->vertex_count;
-    size_t instance_count = vertex_buffer->instance_count;
+    size_t per_vertex_data_size = vb->per_vertex_data_size;
+    size_t per_instance_data_size = vb->per_instance_data_size;
+    size_t vertex_count = vb_size->vertex_count;
+    size_t instance_count = vb_size->instance_count;
 
     enable_gl_attributes(
         ctx,
-        vertex_buffer->per_vertex_attributes,
-        vertex_buffer->per_vertex_attribute_count,
+        vb->per_vertex_attributes,
+        vb_settings->per_vertex_attributes,
+        vb_settings->per_vertex_attribute_count,
         0,
-        vertex_buffer->per_vertex_data_size,
+        vb->per_vertex_data_size,
         false
     );
 
-    if (vertex_buffer->per_instance_attribute_count > 0)
+    if (vb_settings->per_instance_attribute_count > 0)
     {
         enable_gl_attributes(
             ctx,
-            vertex_buffer->per_instance_attributes,
-            vertex_buffer->per_instance_attribute_count,
-            vertex_buffer->per_vertex_data_size * vertex_count,
-            vertex_buffer->per_instance_data_size,
+            vb->per_instance_attributes,
+            vb_settings->per_instance_attributes,
+            vb_settings->per_instance_attribute_count,
+            vb->per_vertex_data_size * vertex_count,
+            vb->per_instance_data_size,
             true
         );
     }
 
     glBufferData(
         GL_ARRAY_BUFFER,
-        (GLsizei)(per_vertex_data_size * vertex_count +
-                  per_instance_data_size * instance_count),
+        (GLsizei)(division_engine_vertex_buffer_vertices_bytes(vb) +
+                  division_engine_vertex_buffer_instances_bytes(vb)),
         NULL,
         GL_DYNAMIC_DRAW
     );
@@ -197,7 +203,8 @@ bool division_engine_internal_platform_vertex_buffer_borrow_data_pointer(
 
     out_borrow_data->vertex_data_ptr = vbo_ptr;
     out_borrow_data->instance_data_ptr =
-        vbo_ptr + vertex_buffer->vertex_count * vertex_buffer->per_vertex_data_size;
+        vbo_ptr + division_engine_vertex_buffer_vertices_bytes(vertex_buffer);
+
     out_borrow_data->index_data_ptr = idx_ptr;
 
     return true;
@@ -221,9 +228,70 @@ void division_engine_internal_platform_vertex_buffer_return_data_pointer(
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
+void division_engine_internal_platform_vertex_buffer_copy_data(
+    DivisionContext* ctx, uint32_t src_buffer, uint32_t dst_buffer
+)
+{
+    DivisionVertexBufferSystemContext* vb_context = ctx->vertex_buffer_context;
+    const DivisionVertexBuffer* src_vb = &vb_context->buffers[src_buffer];
+    const DivisionVertexBufferInternalPlatform_* src_vb_impl =
+        &vb_context->buffers_impl[src_buffer];
+    DivisionVertexBuffer* dst_vb = &vb_context->buffers[dst_buffer];
+    DivisionVertexBufferInternalPlatform_* dst_vb_impl =
+        &vb_context->buffers_impl[dst_buffer];
+
+    const size_t src_vertices_bytes =
+        division_engine_vertex_buffer_vertices_bytes(src_vb);
+    const size_t dst_vertices_bytes =
+        division_engine_vertex_buffer_vertices_bytes(dst_vb);
+
+    glCopyNamedBufferSubData(
+        src_vb_impl->gl_vbo,
+        dst_vb_impl->gl_vbo,
+        0,
+        0,
+        DIVISION_MIN(src_vertices_bytes, dst_vertices_bytes)
+    );
+
+    glCopyNamedBufferSubData(
+        src_vb_impl->gl_vbo,
+        dst_vb_impl->gl_vbo,
+        src_vertices_bytes,
+        dst_vertices_bytes,
+        DIVISION_MIN(
+            division_engine_vertex_buffer_instances_bytes(src_vb),
+            division_engine_vertex_buffer_instances_bytes(dst_vb)
+        )
+    );
+
+    glCopyNamedBufferSubData(
+        src_vb_impl->gl_index_buffer,
+        dst_vb_impl->gl_index_buffer,
+        0,
+        0,
+        DIVISION_MIN(
+            division_engine_vertex_buffer_indices_bytes(src_vb),
+            division_engine_vertex_buffer_indices_bytes(dst_vb)
+        )
+    );
+}
+
+void division_engine_internal_platform_vertex_buffer_swap_data(
+    DivisionContext* ctx, uint32_t src_id, uint32_t dst_id
+)
+{
+    DivisionVertexBufferSystemContext* vb_context = ctx->vertex_buffer_context;
+    DIVISION_SWAP(
+        DivisionVertexBufferInternalPlatform_,
+        vb_context->buffers_impl[src_id],
+        vb_context->buffers_impl[dst_id]
+    );
+}
+
 void enable_gl_attributes(
     DivisionContext* ctx,
     const DivisionVertexAttribute* attributes,
+    const DivisionVertexAttributeSettings* attribute_settings,
     int32_t attribute_count,
     size_t attributes_offset,
     size_t attributes_data_size,
@@ -233,14 +301,15 @@ void enable_gl_attributes(
     for (int32_t i = 0; i < attribute_count; i++)
     {
         const DivisionVertexAttribute* at = &attributes[i];
-        GlAttrTraits_ gl_attr_traits = get_gl_attr_traits(ctx, at->type);
+        const DivisionVertexAttributeSettings* setting = &attribute_settings[i];
+        GlAttrTraits_ gl_attr_traits = get_gl_attr_traits(ctx, setting->type);
         int gl_comp_count = at->component_count / gl_attr_traits.divide_by_components;
         size_t gl_comp_size = gl_comp_count * at->base_size;
         size_t attr_base_offset = attributes_offset + at->offset;
 
         for (int comp_idx = 0; comp_idx < gl_attr_traits.divide_by_components; comp_idx++)
         {
-            GLuint gl_location = at->location + comp_idx;
+            GLuint gl_location = setting->location + comp_idx;
 
             glEnableVertexAttribArray(gl_location);
             glVertexAttribPointer(

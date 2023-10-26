@@ -85,7 +85,7 @@ bool division_engine_internal_platform_vertex_buffer_borrow_data_pointer(
     return true;
 }
 
-void division_engine_internal_platform_vertex_buffer_return_data(
+void division_engine_internal_platform_vertex_buffer_return_data_pointer(
     DivisionContext* ctx,
     uint32_t buffer_id,
     DivisionVertexBufferBorrowedData* data_pointer

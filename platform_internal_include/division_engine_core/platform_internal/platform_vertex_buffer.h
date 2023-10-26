@@ -42,7 +42,7 @@ extern "C"
     );
 
     DIVISION_EXPORT
-    void division_engine_internal_platform_vertex_buffer_return_data(
+    void division_engine_internal_platform_vertex_buffer_return_data_pointer(
         DivisionContext* ctx,
         uint32_t buffer_id,
         DivisionVertexBufferBorrowedData* data_pointer

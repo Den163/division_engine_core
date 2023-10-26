@@ -8,7 +8,6 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/_types/_null.h>
 
 typedef struct AttrTraits_
 {
@@ -203,7 +202,7 @@ void division_engine_vertex_buffer_return_data(
     DivisionVertexBufferBorrowedData* borrow_data
 )
 {
-    division_engine_internal_platform_vertex_buffer_return_data(
+    division_engine_internal_platform_vertex_buffer_return_data_pointer(
         ctx, vertex_buffer, borrow_data
     );
 }
