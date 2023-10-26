@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <threads.h>
 #define GLFW_INCLUDE_NONE
 #define GLAD_GL_IMPLEMENTATION
 
@@ -6,16 +7,22 @@
 #include "glad/gl.h"
 
 #include "division_engine_core/context.h"
+#include "division_engine_core/input.h"
 #include "division_engine_core/renderer.h"
 
 #include <stdint.h>
 
-static inline void check_window_resizing(
-    DivisionRendererSystemContext* renderer_context, GLFWwindow* window
-);
+thread_local const DivisionInputState input_state_map[] = {
+    [GLFW_PRESS] = DIVISION_INPUT_STATE_DOWN,
+    [GLFW_RELEASE] = DIVISION_INPUT_STATE_UP,
+};
 
 typedef struct DivisionWindowContextPlatformInternal_*
     DivisionWindowContextPlatformInternalPtr_;
+
+static inline void check_window_resizing(
+    DivisionRendererSystemContext* renderer_context, GLFWwindow* window
+);
 
 static void gl_debug_message_callback(
     GLenum source,
@@ -97,8 +104,13 @@ void division_engine_internal_platform_renderer_run_loop(DivisionContext* ctx)
     ctx->lifecycle.init_callback(ctx);
 
     DivisionRendererSystemContext* renderer_context = ctx->renderer_context;
+    DivisionInputSystemContext* input_context = ctx->input_context;
+    DivisionMouseInput* mouse_input = &ctx->input_context->input.mouse;
     GLFWwindow* window = (GLFWwindow*)renderer_context->window_data;
     double last_frame_time, current_time, delta_time;
+    double mouse_x, mouse_y;
+
+    glfwSetInputMode(window, GLFW_STICKY_MOUSE_BUTTONS, GLFW_TRUE);
 
     last_frame_time = glfwGetTime();
     while (!glfwWindowShouldClose(window))
@@ -114,6 +126,14 @@ void division_engine_internal_platform_renderer_run_loop(DivisionContext* ctx)
             last_frame_time = current_time;
 
             ctx->state.delta_time = delta_time;
+
+            glfwGetCursorPos(window, &mouse_x, &mouse_y);
+            mouse_input->pos_x = mouse_x;
+            mouse_input->pos_y = mouse_y;
+
+            mouse_input->left_button = glfwGetMouseButton(window, 0);
+            mouse_input->right_button = glfwGetMouseButton(window, 1);
+            mouse_input->middle_button = glfwGetMouseButton(window, 2);
 
             ctx->lifecycle.draw_callback(ctx);
             glfwSwapBuffers(window);

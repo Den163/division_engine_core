@@ -4,9 +4,8 @@
 
 typedef enum DivisionInputState
 {
-    DIVISION_INPUT_STATE_DOWN,
-    DIVISION_INPUT_STATE_HOLD,
-    DIVISION_INPUT_STATE_UP,
+    DIVISION_INPUT_STATE_UP = 0,
+    DIVISION_INPUT_STATE_DOWN = 1,
 } DivisionInputState;
 
 typedef struct DivisionMouseInput
