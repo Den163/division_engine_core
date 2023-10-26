@@ -1,26 +1,44 @@
+#pragma once
+
 #include "division_engine_core/context.h"
 #include "division_engine_core_export.h"
+#include "keycode.h"
+
 #include <stdint.h>
 
-typedef enum DivisionInputState
-{
-    DIVISION_INPUT_STATE_UP = 0,
-    DIVISION_INPUT_STATE_DOWN = 1,
-} DivisionInputState;
+static const int DIVISION_INPUT_MOUSE_LEFT = 0;
+static const int DIVISION_INPUT_MOUSE_RIGHT = 1;
+static const int DIVISION_INPUT_MOUSE_MIDDLE = 2;
+
+static const int DIVISION_INPUT_MOUSE_BUTTON_COUNT = 3;
+
+static const int DIVISION_INPUT_KEY_STATE_MASK_ARR_LEN = (DIVISION_KEYCODE_COUNT / 32) + 1;
+
+#define DIVISION_INPUT_SET_KEYBOARD_KEY_STATE(maskptr, key, is_pressed) \
+    int mask_index = key / 32; \
+    int mask_bit_offset = key % 32; \
+    (maskptr[mask_index]) |= (((uint32_t) is_pressed) << mask_bit_offset)
+
+#define DIVISION_INPUT_SET_MOUSE_KEY_STATE(mask, key, is_pressed) \
+    (mask) |= (((uint32_t) is_pressed) << key)
 
 typedef struct DivisionMouseInput
 {
     int32_t pos_x;
     int32_t pos_y;
 
-    DivisionInputState left_button;
-    DivisionInputState right_button;
-    DivisionInputState middle_button;
+    uint32_t mouse_button_state_mask;
 } DivisionMouseInput;
+
+typedef struct DivisionKeyboardInput
+{
+    uint32_t key_state_mask[DIVISION_INPUT_KEY_STATE_MASK_ARR_LEN];
+} DivisionKeyboardInput;
 
 typedef struct DivisionInput
 {
     DivisionMouseInput mouse;
+    DivisionKeyboardInput keyboard;
 } DivisionInput;
 
 typedef struct DivisionInputSystemContext

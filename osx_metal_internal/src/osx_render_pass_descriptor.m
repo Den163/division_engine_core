@@ -100,7 +100,7 @@ bool division_engine_internal_platform_render_pass_impl_init_element(
     [color_attach_desc
         setWriteMask:division_to_mtl_color_mask(render_pass_desc->color_mask)];
 
-    if (division_mask_has_flag(
+    if (DIVISION_MASK_HAS_FLAG(
             render_pass_desc->capabilities_mask,
             DIVISION_RENDER_PASS_DESCRIPTOR_CAPABILITY_ALPHA_BLEND
         ))
@@ -238,13 +238,13 @@ MTLColorWriteMask division_to_mtl_color_mask(DivisionColorMask color_mask)
 {
     MTLColorWriteMask result_mask = MTLColorWriteMaskNone;
     result_mask |=
-        (MTLColorWriteMaskRed * division_mask_has_flag(color_mask, DIVISION_COLOR_MASK_R));
+        (MTLColorWriteMaskRed * DIVISION_MASK_HAS_FLAG(color_mask, DIVISION_COLOR_MASK_R));
     result_mask |=
-        (MTLColorWriteMaskGreen * division_mask_has_flag(color_mask, DIVISION_COLOR_MASK_G));
+        (MTLColorWriteMaskGreen * DIVISION_MASK_HAS_FLAG(color_mask, DIVISION_COLOR_MASK_G));
     result_mask |=
-        (MTLColorWriteMaskBlue * division_mask_has_flag(color_mask, DIVISION_COLOR_MASK_B));
+        (MTLColorWriteMaskBlue * DIVISION_MASK_HAS_FLAG(color_mask, DIVISION_COLOR_MASK_B));
     result_mask |=
-        (MTLColorWriteMaskAlpha * division_mask_has_flag(color_mask, DIVISION_COLOR_MASK_A));
+        (MTLColorWriteMaskAlpha * DIVISION_MASK_HAS_FLAG(color_mask, DIVISION_COLOR_MASK_A));
 
     return result_mask;
 }

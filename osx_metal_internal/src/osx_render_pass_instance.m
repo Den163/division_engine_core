@@ -125,7 +125,7 @@ void division_engine_internal_platform_render_pass_instance_draw(
                                            atIndex:texture_binding->shader_location];
             }
 
-            if (division_mask_has_flag(
+            if (DIVISION_MASK_HAS_FLAG(
                     pass->capabilities_mask,
                     DIVISION_RENDER_PASS_INSTANCE_CAPABILITY_INSTANCED_RENDERING
                 ))

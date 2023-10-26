@@ -4,6 +4,7 @@
 #include <Foundation/Foundation.h>
 #include <AppKit/AppKit.h>
 #include <Metal/MTLDevice.h>
+#include <objc/NSObject.h>
 
 #include "DivisionOSXViewDelegate.h"
 

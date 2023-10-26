@@ -2,24 +2,35 @@
 
 #include "division_engine_core/context.h"
 #include "division_engine_core/input.h"
+#include "division_engine_core/keycode.h"
 #include "division_engine_core/renderer.h"
 #include "division_engine_core/texture.h"
 #include "division_engine_core/uniform_buffer.h"
 #include "division_engine_core/utility.h"
+#include "osx_keycode_map.h"
 #include "osx_render_pass.h"
 #include "osx_texture.h"
 #include "osx_uniform_buffer.h"
 #include "osx_vertex_buffer.h"
 #include <AppKit/AppKit.h>
+#import <Carbon/Carbon.h>
+#include <string.h>
 #include <Foundation/Foundation.h>
 #include <GameController/GameController.h>
 #include <MetalKit/MetalKit.h>
 #include <stdbool.h>
+#include <stdint.h>
 
-const DivisionInputState input_state_map[] = {
-    [true] = DIVISION_INPUT_STATE_DOWN,
-    [false] = DIVISION_INPUT_STATE_UP
-};
+static inline void handle_inputs(DivisionContext* ctx, GCKeyCode* keycode_map);
+
+#define DIVISION_DEBUG_CHECK_PRESSED_KEY()                                      \
+        GCKeyboardInput* __kb = [[GCKeyboard coalescedKeyboard] keyboardInput]; \
+        for (NSString* s in [__kb buttons]) {                                   \
+            GCControllerButtonInput* b = [[__kb buttons] objectForKey:s];       \
+            if ([b isPressed]) {                                                \
+                NSLog(@"%@", s);                                                \
+            }                                                                   \
+        }                                                                       
 
 @implementation DivisionOSXViewDelegate
 - (instancetype)initWithContext:(DivisionContext*)aContext device:(id)aDevice
@@ -30,6 +41,7 @@ const DivisionInputState input_state_map[] = {
         context = aContext;
         device = aDevice;
         commandQueue = [device newCommandQueue];
+        keycode_map = osx_keycode_map_alloc();
     }
 
     return self;
@@ -42,26 +54,7 @@ const DivisionInputState input_state_map[] = {
 
 - (void)drawInMTKView:(nonnull MTKView*)view
 {
-    // TODO: move input to the higher frequency update polling loop
-    @autoreleasepool
-    {
-        DivisionInputSystemContext* input_ctx = context->input_context;
-        DivisionMouseInput* mouse = &input_ctx->input.mouse;
-
-        GCMouseInput* mouse_input = [[GCMouse current] mouseInput];
-        bool left_button_pressed = [[mouse_input leftButton] isPressed];
-        bool right_button_pressed = [[mouse_input rightButton] isPressed];
-        bool middle_button_pressed = [[mouse_input middleButton] isPressed];
-
-        NSPoint mouse_location = [NSEvent mouseLocation];
-
-        mouse->pos_x = mouse_location.x;
-        mouse->pos_y = mouse_location.y;
-        mouse->left_button = input_state_map[left_button_pressed];
-        mouse->right_button = input_state_map[right_button_pressed];
-        mouse->middle_button = input_state_map[middle_button_pressed];
-    }
-
+    handle_inputs(context, keycode_map);
     context->lifecycle.draw_callback(context);
 }
 
@@ -72,4 +65,61 @@ const DivisionInputState input_state_map[] = {
     renderer->frame_buffer_width = size.width;
     renderer->frame_buffer_height = size.height;
 }
+
+- (void)keyDown:(NSEvent *)event {
+    // Silent beeps
+}
+
+- (void)dealloc
+{
+    osx_keycode_map_free(keycode_map);
+}
 @end
+
+void handle_inputs(DivisionContext* ctx, GCKeyCode* keycode_map)
+{
+@autoreleasepool
+    {
+        DivisionInputSystemContext* input_ctx = ctx->input_context;
+        DivisionMouseInput* mouse = &input_ctx->input.mouse;
+        DivisionKeyboardInput* keyboard = &input_ctx->input.keyboard;
+        GCMouseInput* osx_mouse_input = [[GCMouse current] mouseInput];
+        bool left_button_pressed = [[osx_mouse_input leftButton] isPressed];
+        bool right_button_pressed = [[osx_mouse_input rightButton] isPressed];
+        bool middle_button_pressed = [[osx_mouse_input middleButton] isPressed];
+
+        NSPoint osx_mouse_location = [NSEvent mouseLocation];
+
+        GCKeyboardInput* keyboardInput = [[GCKeyboard coalescedKeyboard] keyboardInput];
+
+        mouse->pos_x = osx_mouse_location.x;
+        mouse->pos_y = osx_mouse_location.y;
+
+        bool mouse_buttons_is_pressed[] = {
+            [DIVISION_INPUT_MOUSE_LEFT] = left_button_pressed,
+            [DIVISION_INPUT_MOUSE_RIGHT] = right_button_pressed,
+            [DIVISION_INPUT_MOUSE_MIDDLE] = middle_button_pressed,
+        };
+
+        mouse->mouse_button_state_mask = 0;
+        for (int i = 0; i < DIVISION_INPUT_MOUSE_BUTTON_COUNT; i++)
+        {
+            bool is_pressed = mouse_buttons_is_pressed[i];
+            DIVISION_INPUT_SET_MOUSE_KEY_STATE(
+                mouse->mouse_button_state_mask, i, is_pressed
+            );
+        }
+
+        memset(keyboard->key_state_mask, 0, DIVISION_INPUT_KEY_STATE_MASK_ARR_LEN * 4);
+        for (int i = 1; i < DIVISION_KEYCODE_COUNT; i++)
+        {
+            GCKeyCode keycode = keycode_map[i];
+            GCControllerButtonInput* button = [keyboardInput buttonForKeyCode:keycode];
+            bool is_button_pressed = [button isPressed];
+
+            DIVISION_INPUT_SET_KEYBOARD_KEY_STATE(
+                keyboard->key_state_mask, i, is_button_pressed
+            );
+        }
+    }
+}

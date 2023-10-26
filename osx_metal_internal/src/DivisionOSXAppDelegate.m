@@ -1,5 +1,7 @@
 #include "DivisionOSXAppDelegate.h"
 #include "division_engine_core/context.h"
+#include <Foundation/Foundation.h>
+#include <stdbool.h>
 
 static NSMenu* createMenuBar(DivisionOSXAppDelegate* app_delegate);
 
@@ -65,6 +67,7 @@ static NSMenu* createMenuBar(DivisionOSXAppDelegate* app_delegate);
     [window setContentView:view];
     [window setTitle:windowTitle];
     [window makeKeyAndOrderFront:NULL];
+    [window setNextResponder:viewDelegate];
 
     NSApplication* app = [notification object];
     [app activateIgnoringOtherApps:true];
