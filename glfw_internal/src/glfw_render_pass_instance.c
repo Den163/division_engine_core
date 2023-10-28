@@ -81,7 +81,7 @@ void division_engine_internal_platform_render_pass_instance_draw(
             glBindTextureUnit(tex_bind.shader_location, tex_impl->gl_texture);
         }
 
-        if (division_mask_has_flag(
+        if (DIVISION_MASK_HAS_FLAG(
                 pass_desc->capabilities_mask,
                 DIVISION_RENDER_PASS_DESCRIPTOR_CAPABILITY_ALPHA_BLEND
             ))
@@ -103,13 +103,13 @@ void division_engine_internal_platform_render_pass_instance_draw(
         }
 
         glColorMask(
-            division_mask_has_flag(pass_desc->color_mask, DIVISION_COLOR_MASK_R),
-            division_mask_has_flag(pass_desc->color_mask, DIVISION_COLOR_MASK_G),
-            division_mask_has_flag(pass_desc->color_mask, DIVISION_COLOR_MASK_B),
-            division_mask_has_flag(pass_desc->color_mask, DIVISION_COLOR_MASK_A)
+            DIVISION_MASK_HAS_FLAG(pass_desc->color_mask, DIVISION_COLOR_MASK_R),
+            DIVISION_MASK_HAS_FLAG(pass_desc->color_mask, DIVISION_COLOR_MASK_G),
+            DIVISION_MASK_HAS_FLAG(pass_desc->color_mask, DIVISION_COLOR_MASK_B),
+            DIVISION_MASK_HAS_FLAG(pass_desc->color_mask, DIVISION_COLOR_MASK_A)
         );
 
-        if (division_mask_has_flag(
+        if (DIVISION_MASK_HAS_FLAG(
                 pass_desc->capabilities_mask,
                 DIVISION_RENDER_PASS_INSTANCE_CAPABILITY_INSTANCED_RENDERING
             ))

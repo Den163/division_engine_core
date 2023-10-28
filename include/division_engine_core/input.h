@@ -6,13 +6,11 @@
 
 #include <stdint.h>
 
-static const int DIVISION_INPUT_MOUSE_LEFT = 0;
-static const int DIVISION_INPUT_MOUSE_RIGHT = 1;
-static const int DIVISION_INPUT_MOUSE_MIDDLE = 2;
-
-static const int DIVISION_INPUT_MOUSE_BUTTON_COUNT = 3;
-
-static const int DIVISION_INPUT_KEY_STATE_MASK_ARR_LEN = (DIVISION_KEYCODE_COUNT / 32) + 1;
+#define DIVISION_INPUT_MOUSE_LEFT 0
+#define DIVISION_INPUT_MOUSE_RIGHT 1
+#define DIVISION_INPUT_MOUSE_MIDDLE 2
+#define DIVISION_INPUT_MOUSE_BUTTON_COUNT 3
+#define DIVISION_INPUT_KEY_STATE_MASK_ARR_LEN (DIVISION_KEYCODE_COUNT / 32) + 1
 
 #define DIVISION_INPUT_SET_KEYBOARD_KEY_STATE(maskptr, key, is_pressed) \
     int mask_index = key / 32; \
@@ -32,7 +30,7 @@ typedef struct DivisionMouseInput
 
 typedef struct DivisionKeyboardInput
 {
-    uint32_t key_state_mask[DIVISION_INPUT_KEY_STATE_MASK_ARR_LEN];
+    uint32_t key_state_mask[4];
 } DivisionKeyboardInput;
 
 typedef struct DivisionInput

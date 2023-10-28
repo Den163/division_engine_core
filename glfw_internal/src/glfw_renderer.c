@@ -1,21 +1,19 @@
-#include <stdio.h>
-#include <threads.h>
 #define GLFW_INCLUDE_NONE
 #define GLAD_GL_IMPLEMENTATION
 
 #include "GLFW/glfw3.h"
 #include "glad/gl.h"
 
+#include "division_engine_core/keycode.h"
+#include <stdio.h>
+
 #include "division_engine_core/context.h"
 #include "division_engine_core/input.h"
 #include "division_engine_core/renderer.h"
 
-#include <stdint.h>
+#include "glfw_keycode_map.h"
 
-thread_local const DivisionInputState input_state_map[] = {
-    [GLFW_PRESS] = DIVISION_INPUT_STATE_DOWN,
-    [GLFW_RELEASE] = DIVISION_INPUT_STATE_UP,
-};
+#include <stdint.h>
 
 typedef struct DivisionWindowContextPlatformInternal_*
     DivisionWindowContextPlatformInternalPtr_;
@@ -23,6 +21,8 @@ typedef struct DivisionWindowContextPlatformInternal_*
 static inline void check_window_resizing(
     DivisionRendererSystemContext* renderer_context, GLFWwindow* window
 );
+
+static inline void handle_input(GLFWwindow* window, DivisionContext* ctx);
 
 static void gl_debug_message_callback(
     GLenum source,
@@ -100,7 +100,6 @@ void division_engine_internal_platform_renderer_run_loop(DivisionContext* ctx)
     glEnable(GL_DEBUG_OUTPUT);
     glDebugMessageCallback(gl_debug_message_callback, ctx);
 #endif
-
     ctx->lifecycle.init_callback(ctx);
 
     DivisionRendererSystemContext* renderer_context = ctx->renderer_context;
@@ -108,9 +107,9 @@ void division_engine_internal_platform_renderer_run_loop(DivisionContext* ctx)
     DivisionMouseInput* mouse_input = &ctx->input_context->input.mouse;
     GLFWwindow* window = (GLFWwindow*)renderer_context->window_data;
     double last_frame_time, current_time, delta_time;
-    double mouse_x, mouse_y;
 
     glfwSetInputMode(window, GLFW_STICKY_MOUSE_BUTTONS, GLFW_TRUE);
+    glfwSetInputMode(window, GLFW_STICKY_KEYS, GLFW_TRUE);
 
     last_frame_time = glfwGetTime();
     while (!glfwWindowShouldClose(window))
@@ -127,14 +126,7 @@ void division_engine_internal_platform_renderer_run_loop(DivisionContext* ctx)
 
             ctx->state.delta_time = delta_time;
 
-            glfwGetCursorPos(window, &mouse_x, &mouse_y);
-            mouse_input->pos_x = mouse_x;
-            mouse_input->pos_y = mouse_y;
-
-            mouse_input->left_button = glfwGetMouseButton(window, 0);
-            mouse_input->right_button = glfwGetMouseButton(window, 1);
-            mouse_input->middle_button = glfwGetMouseButton(window, 2);
-
+            handle_input(window, ctx);
             ctx->lifecycle.draw_callback(ctx);
             glfwSwapBuffers(window);
         }
@@ -142,6 +134,7 @@ void division_engine_internal_platform_renderer_run_loop(DivisionContext* ctx)
         glfwPollEvents();
     }
 
+    // free(keycode_map);
     ctx->lifecycle.free_callback(ctx);
 }
 
@@ -158,5 +151,47 @@ void check_window_resizing(
         glViewport(0, 0, width, height);
         renderer_context->frame_buffer_width = width;
         renderer_context->frame_buffer_height = height;
+    }
+}
+
+void handle_input(GLFWwindow* window, DivisionContext* ctx)
+{
+    DivisionInput* input = &ctx->input_context->input;
+    DivisionMouseInput* mouse_input = &input->mouse;
+    DivisionKeyboardInput* keyboard_input = &input->keyboard;
+
+    double mouse_x, mouse_y;
+
+    glfwGetCursorPos(window, &mouse_x, &mouse_y);
+    mouse_input->pos_x = mouse_x;
+    mouse_input->pos_y = mouse_y;
+
+    mouse_input->mouse_button_state_mask = 0;
+    DIVISION_INPUT_SET_MOUSE_KEY_STATE(
+        mouse_input->mouse_button_state_mask,
+        DIVISION_INPUT_MOUSE_LEFT,
+        glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT)
+    );
+
+    DIVISION_INPUT_SET_MOUSE_KEY_STATE(
+        mouse_input->mouse_button_state_mask,
+        DIVISION_INPUT_MOUSE_MIDDLE,
+        glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE)
+    );
+
+    DIVISION_INPUT_SET_MOUSE_KEY_STATE(
+        mouse_input->mouse_button_state_mask,
+        DIVISION_INPUT_MOUSE_RIGHT,
+        glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT)
+    );
+
+    memset(keyboard_input->key_state_mask, 0, sizeof(uint32_t[4]));
+    for (int i = 1; i < DIVISION_KEYCODE_COUNT; i++)
+    {
+        DIVISION_INPUT_SET_KEYBOARD_KEY_STATE(
+            keyboard_input->key_state_mask,
+            i,
+            glfwGetKey(window, DIVISION_GLFW_KEYCODE_MAP[i])
+        );
     }
 }

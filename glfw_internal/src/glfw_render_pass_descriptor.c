@@ -58,7 +58,7 @@ bool division_engine_internal_platform_render_pass_impl_init_element(
     DivisionRenderPassInternalPlatform_* pass_impl =
         &pass_ctx->render_passes_descriptors_impl[render_pass_id];
 
-    if (division_mask_has_flag(
+    if (DIVISION_MASK_HAS_FLAG(
             pass_desc->capabilities_mask, 
             DIVISION_RENDER_PASS_DESCRIPTOR_CAPABILITY_ALPHA_BLEND
         ))
