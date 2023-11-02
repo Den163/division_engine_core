@@ -110,7 +110,7 @@ void handle_inputs(DivisionContext* ctx, GCKeyCode* keycode_map)
             );
         }
 
-        memset(keyboard->key_state_mask, 0, DIVISION_INPUT_KEY_STATE_MASK_ARR_LEN * 4);
+        memset(keyboard->key_state_mask, 0, sizeof(uint32_t[4]));
         for (int i = 1; i < DIVISION_KEYCODE_COUNT; i++)
         {
             GCKeyCode keycode = keycode_map[i];
