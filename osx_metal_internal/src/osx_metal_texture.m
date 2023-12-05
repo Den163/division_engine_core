@@ -89,6 +89,8 @@ bool division_engine_internal_platform_texture_impl_init_new_element(
                                                               height:tex->height
                                                            mipmapped:NO];
 
+        tex_desc.storageMode = MTLStorageModeManaged;
+        
         if (tex->has_channels_swizzle)
         {
             DivisionTextureChannelsSwizzle swiz = tex->channels_swizzle;
