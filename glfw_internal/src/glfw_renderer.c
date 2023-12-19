@@ -5,6 +5,7 @@
 #include "glad/gl.h"
 
 #include "division_engine_core/keycode.h"
+#include <math.h>
 #include <stdio.h>
 
 #include "division_engine_core/context.h"
@@ -134,7 +135,6 @@ void division_engine_internal_platform_renderer_run_loop(DivisionContext* ctx)
         glfwPollEvents();
     }
 
-    // free(keycode_map);
     ctx->lifecycle.free_callback(ctx);
 }
 
@@ -163,8 +163,8 @@ void handle_input(GLFWwindow* window, DivisionContext* ctx)
     double mouse_x, mouse_y;
 
     glfwGetCursorPos(window, &mouse_x, &mouse_y);
-    mouse_input->pos_x = mouse_x;
-    mouse_input->pos_y = mouse_y;
+    mouse_input->pos_x = floor(mouse_x);
+    mouse_input->pos_y = ctx->renderer_context->frame_buffer_height - floor(mouse_y);
 
     mouse_input->mouse_button_state_mask = 0;
     DIVISION_INPUT_SET_MOUSE_KEY_STATE(
