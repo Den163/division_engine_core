@@ -1,6 +1,7 @@
 #include "DivisionOSXAppDelegate.h"
 #include "division_engine_core/context.h"
 #include <Foundation/Foundation.h>
+#include <objc/objc.h>
 #include <stdbool.h>
 
 static NSMenu* createMenuBar(DivisionOSXAppDelegate* app_delegate);

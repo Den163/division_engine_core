@@ -14,23 +14,28 @@
 #include "osx_vertex_buffer.h"
 #include <AppKit/AppKit.h>
 #import <Carbon/Carbon.h>
-#include <string.h>
 #include <Foundation/Foundation.h>
 #include <GameController/GameController.h>
 #include <MetalKit/MetalKit.h>
+#include <objc/objc.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <string.h>
 
-static inline void handle_inputs(DivisionContext* ctx, GCKeyCode* keycode_map);
+static inline void handle_inputs(
+    MTKView* view, DivisionContext* ctx, GCKeyCode* keycode_map
+);
 
-#define DIVISION_DEBUG_CHECK_PRESSED_KEY()                                      \
-        GCKeyboardInput* __kb = [[GCKeyboard coalescedKeyboard] keyboardInput]; \
-        for (NSString* s in [__kb buttons]) {                                   \
-            GCControllerButtonInput* b = [[__kb buttons] objectForKey:s];       \
-            if ([b isPressed]) {                                                \
-                NSLog(@"%@", s);                                                \
-            }                                                                   \
-        }                                                                       
+#define DIVISION_DEBUG_CHECK_PRESSED_KEY()                                               \
+    GCKeyboardInput* __kb = [[GCKeyboard coalescedKeyboard] keyboardInput];              \
+    for (NSString * s in [__kb buttons])                                                 \
+    {                                                                                    \
+        GCControllerButtonInput* b = [[__kb buttons] objectForKey:s];                    \
+        if ([b isPressed])                                                               \
+        {                                                                                \
+            NSLog(@"%@", s);                                                             \
+        }                                                                                \
+    }
 
 @implementation DivisionOSXViewDelegate
 - (instancetype)initWithContext:(DivisionContext*)aContext device:(id)aDevice
@@ -54,7 +59,7 @@ static inline void handle_inputs(DivisionContext* ctx, GCKeyCode* keycode_map);
 
 - (void)drawInMTKView:(nonnull MTKView*)view
 {
-    handle_inputs(context, keycode_map);
+    handle_inputs(view, context, keycode_map);
     context->lifecycle.draw_callback(context);
 }
 
@@ -66,8 +71,14 @@ static inline void handle_inputs(DivisionContext* ctx, GCKeyCode* keycode_map);
     renderer->frame_buffer_height = size.height;
 }
 
-- (void)keyDown:(NSEvent *)event {
+- (void)keyDown:(NSEvent*)event
+{
     // Silent beeps
+}
+
+- (void)mouseMoved:(NSEvent*)event
+{
+    DivisionMouseInput* mouse_input = &self->context->input_context->input.mouse;
 }
 
 - (void)dealloc
@@ -76,24 +87,24 @@ static inline void handle_inputs(DivisionContext* ctx, GCKeyCode* keycode_map);
 }
 @end
 
-void handle_inputs(DivisionContext* ctx, GCKeyCode* keycode_map)
+void handle_inputs(MTKView* view, DivisionContext* ctx, GCKeyCode* keycode_map)
 {
-@autoreleasepool
+    @autoreleasepool
     {
         DivisionInputSystemContext* input_ctx = ctx->input_context;
         DivisionMouseInput* mouse = &input_ctx->input.mouse;
         DivisionKeyboardInput* keyboard = &input_ctx->input.keyboard;
         GCMouseInput* osx_mouse_input = [[GCMouse current] mouseInput];
+        NSPoint mouse_pos =
+            [[view window] convertPointFromScreen:[NSEvent mouseLocation]];
+        mouse->pos_x = mouse_pos.x;
+        mouse->pos_y = mouse_pos.y;
+
         bool left_button_pressed = [[osx_mouse_input leftButton] isPressed];
         bool right_button_pressed = [[osx_mouse_input rightButton] isPressed];
         bool middle_button_pressed = [[osx_mouse_input middleButton] isPressed];
 
-        NSPoint osx_mouse_location = [NSEvent mouseLocation];
-
         GCKeyboardInput* keyboardInput = [[GCKeyboard coalescedKeyboard] keyboardInput];
-
-        mouse->pos_x = osx_mouse_location.x;
-        mouse->pos_y = osx_mouse_location.y;
 
         bool mouse_buttons_is_pressed[] = {
             [DIVISION_INPUT_MOUSE_LEFT] = left_button_pressed,
