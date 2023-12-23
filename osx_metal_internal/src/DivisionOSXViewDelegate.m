@@ -1,5 +1,10 @@
 #include "DivisionOSXViewDelegate.h"
 
+#include <AppKit/AppKit.h>
+#include <Foundation/Foundation.h>
+#include <GameController/GameController.h>
+#include <MetalKit/MetalKit.h>
+
 #include "division_engine_core/context.h"
 #include "division_engine_core/input.h"
 #include "division_engine_core/keycode.h"
@@ -12,12 +17,6 @@
 #include "osx_texture.h"
 #include "osx_uniform_buffer.h"
 #include "osx_vertex_buffer.h"
-#include <AppKit/AppKit.h>
-#import <Carbon/Carbon.h>
-#include <Foundation/Foundation.h>
-#include <GameController/GameController.h>
-#include <MetalKit/MetalKit.h>
-#include <objc/objc.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
@@ -74,11 +73,6 @@ static inline void handle_inputs(
 - (void)keyDown:(NSEvent*)event
 {
     // Silent beeps
-}
-
-- (void)mouseMoved:(NSEvent*)event
-{
-    DivisionMouseInput* mouse_input = &self->context->input_context->input.mouse;
 }
 
 - (void)dealloc
