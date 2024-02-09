@@ -1,5 +1,9 @@
 #include "DivisionOSXAppDelegate.h"
-#include "division_engine_core/context.h"
+
+#include <division_engine_core/context.h>
+#include <division_engine_core/renderer.h>
+
+#include <CoreFoundation/CoreFoundation.h>
 #include <Foundation/Foundation.h>
 #include <objc/objc.h>
 #include <stdbool.h>
@@ -61,6 +65,10 @@ static NSMenu* createMenuBar(DivisionOSXAppDelegate* app_delegate);
     id<MTLDevice> device = MTLCreateSystemDefaultDevice();
     view = [[MTKView alloc] initWithFrame:windowFrame device:device];
     [view setColorPixelFormat:MTLPixelFormatBGRA8Unorm_sRGB];
+
+    CGSize drawableSize =  [view drawableSize];
+    context->renderer_context->frame_buffer_width = drawableSize.width;
+    context->renderer_context->frame_buffer_height = drawableSize.height;
 
     viewDelegate = [DivisionOSXViewDelegate withContext:context device:device];
     [view setDelegate:viewDelegate];
