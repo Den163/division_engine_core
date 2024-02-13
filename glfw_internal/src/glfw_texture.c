@@ -117,7 +117,7 @@ bool division_engine_internal_platform_texture_impl_init_new_element(
 }
 
 void division_engine_internal_platform_texture_set_data(
-    DivisionContext* ctx, uint32_t texture_id, void* data
+    DivisionContext* ctx, uint32_t texture_id, const void* data
 )
 {
     DivisionTextureSystemContext* tex_ctx = ctx->texture_context;
@@ -138,6 +138,7 @@ void division_engine_internal_platform_texture_set_data(
         data
     );
 }
+
 void division_engine_internal_platform_texture_free(
     DivisionContext* ctx, uint32_t texture_id
 )

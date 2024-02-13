@@ -69,7 +69,7 @@ void division_engine_vertex_buffer_system_context_free(DivisionContext* ctx)
 
 bool division_engine_vertex_buffer_alloc(
     DivisionContext* ctx,
-    const DivisionVertexBufferSettings* vertex_buffer_settings,
+    const DivisionVertexBufferConstSettings* vertex_buffer_settings,
     uint32_t* out_vertex_buffer_id
 )
 {
@@ -80,7 +80,15 @@ bool division_engine_vertex_buffer_alloc(
     DivisionVertexBuffer vertex_buffer = {
         .per_vertex_attributes = NULL,
         .per_instance_attributes = NULL,
-        .settings = *vertex_buffer_settings,
+        .settings =
+            {
+                .size = vertex_buffer_settings->size,
+                .topology = vertex_buffer_settings->topology,
+                .per_vertex_attribute_count =
+                    vertex_buffer_settings->per_vertex_attribute_count,
+                .per_instance_attribute_count =
+                    vertex_buffer_settings->per_instance_attribute_count,
+            },
     };
     vertex_buffer.settings.per_vertex_attributes = NULL;
     vertex_buffer.settings.per_instance_attributes = NULL;

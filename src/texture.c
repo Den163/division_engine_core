@@ -58,7 +58,7 @@ void division_engine_texture_free(DivisionContext* ctx, uint32_t texture_id)
 }
 
 void division_engine_texture_set_data(
-    DivisionContext* ctx, uint32_t texture_id, void* data
+    DivisionContext* ctx, uint32_t texture_id, const void* data
 )
 {
     division_engine_internal_platform_texture_set_data(ctx, texture_id, data);

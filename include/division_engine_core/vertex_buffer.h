@@ -40,6 +40,16 @@ typedef struct DivisionVertexBufferSettings
     DivisionRenderTopology topology;
 } DivisionVertexBufferSettings;
 
+typedef struct DivisionVertexBufferConstSettings 
+{
+    DivisionVertexBufferSize size;
+    const DivisionVertexAttributeSettings* per_vertex_attributes;
+    const DivisionVertexAttributeSettings* per_instance_attributes;
+    int32_t per_vertex_attribute_count;
+    int32_t per_instance_attribute_count;
+    DivisionRenderTopology topology;
+} DivisionVertexBufferConstSettings;
+
 typedef struct DivisionVertexAttribute
 {
     int32_t offset;
@@ -94,7 +104,7 @@ extern "C"
      */
     DIVISION_EXPORT bool division_engine_vertex_buffer_alloc(
         DivisionContext* ctx,
-        const DivisionVertexBufferSettings* vertex_buffer_settings,
+        const DivisionVertexBufferConstSettings* vertex_buffer_settings,
         uint32_t* out_vertex_buffer_id
     );
 

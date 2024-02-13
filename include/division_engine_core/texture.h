@@ -81,7 +81,7 @@ extern "C"
     );
 
     DIVISION_EXPORT void division_engine_texture_set_data(
-        DivisionContext* ctx, uint32_t texture_id, void* data
+        DivisionContext* ctx, uint32_t texture_id, const void* data
     );
 
 #ifdef __cplusplus

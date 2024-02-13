@@ -139,7 +139,7 @@ void division_engine_internal_platform_texture_free(
 }
 
 void division_engine_internal_platform_texture_set_data(
-    DivisionContext* ctx, uint32_t texture_id, void* data
+    DivisionContext* ctx, uint32_t texture_id, const void* data
 )
 {
     DivisionTextureSystemContext* tex_ctx = ctx->texture_context;
@@ -170,7 +170,7 @@ void division_engine_internal_platform_texture_set_data(
             region.origin.x = xOffset;
             region.origin.y = yOffset;
 
-            void* src_ptr = data + i * src_data_bytes_per_pixel;
+            const void* src_ptr = data + i * src_data_bytes_per_pixel;
             [tex_impl->mtl_texture replaceRegion:region
                                      mipmapLevel:0
                                        withBytes:src_ptr
