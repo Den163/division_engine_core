@@ -1,5 +1,6 @@
 #include "division_engine_core/data_structures/unordered_id_table.h"
-#include "division_engine_core/division_lifecycle.h"
+#include "division_engine_core/types/division_lifecycle.h"
+
 #include "division_engine_core/platform_internal/platfrom_shader.h"
 
 #include "division_engine_core/renderer.h"
@@ -164,5 +165,7 @@ void division_engine_internal_platform_shader_program_free(
     shader->fragment_function = nil;
     shader->vertex_function = nil;
 
-    division_unordered_id_table_remove_id(&ctx->shader_context->id_table, shader_program_id);
+    division_unordered_id_table_remove_id(
+        &ctx->shader_context->id_table, shader_program_id
+    );
 }

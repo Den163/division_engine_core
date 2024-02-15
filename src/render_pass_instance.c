@@ -1,7 +1,5 @@
-#include "division_engine_core/color.h"
 #include "division_engine_core/platform_internal/platform_render_pass_instance.h"
 #include <division_engine_core/render_pass_instance.h>
-#include <stdint.h>
 
 void division_engine_render_pass_instance_draw(
     DivisionContext* ctx,

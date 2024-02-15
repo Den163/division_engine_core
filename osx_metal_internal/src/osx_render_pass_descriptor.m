@@ -1,5 +1,6 @@
 #include "osx_render_pass.h"
 #include "division_engine_core/context.h"
+#include "division_engine_core/shader.h"
 #include "division_engine_core/platform_internal/platform_render_pass_descriptor.h"
 
 #include "division_engine_core/render_pass_descriptor.h"

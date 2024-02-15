@@ -1,9 +1,11 @@
 #include "division_engine_core/font.h"
 #include "division_engine_core/context.h"
 #include "division_engine_core/data_structures/unordered_id_table.h"
+
 #include "freetype/freetype.h"
 #include "freetype/ftimage.h"
 #include "freetype/fttypes.h"
+
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -111,7 +113,7 @@ bool division_engine_font_get_glyph(
     *out_glyph = (DivisionFontGlyph){
         .width = ft_bitmap.width,
         .height = ft_bitmap.rows,
-        .advance_x = ft_glyph->advance.x / 64.0f,
+        .advance_x = (uint32_t) ((float) ft_glyph->advance.x / 64.0f),
         .left = ft_face->glyph->bitmap_left,
         .top = ft_face->glyph->bitmap_top,
     };

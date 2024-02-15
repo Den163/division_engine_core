@@ -10,7 +10,7 @@
 
 #include "division_engine_core/context.h"
 
-#include "division_engine_core/division_lifecycle.h"
+#include "division_engine_core/types/division_lifecycle.h"
 #include "division_engine_core/font.h"
 #include "division_engine_core/input.h"
 #include "division_engine_core/render_pass_descriptor.h"

@@ -4,16 +4,13 @@
 #include <stdint.h>
 
 #include "context.h"
-#include "division_engine_core/data_structures/unordered_id_table.h"
-#include "division_engine_core/shader.h"
-#include "division_engine_core_export.h"
+#include "types/uniform_buffer.h"
+
+#include "data_structures/unordered_id_table.h"
+
+#include <division_engine_core_export.h>
 
 struct DivisionUniformBufferInternal_;
-
-typedef struct DivisionUniformBufferDescriptor
-{
-    size_t data_bytes;
-} DivisionUniformBufferDescriptor;
 
 typedef struct DivisionUniformBufferSystemContext
 {

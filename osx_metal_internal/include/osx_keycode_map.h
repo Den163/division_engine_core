@@ -1,7 +1,7 @@
 #pragma once
 
 #import <GameController/GameController.h>
-#include <division_engine_core/keycode.h>
+#include <division_engine_core/types/keycode.h>
 
 #include <memory.h>
 

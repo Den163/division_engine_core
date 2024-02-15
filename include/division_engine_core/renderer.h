@@ -3,9 +3,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "color.h"
 #include "context.h"
-#include "state.h"
 
 typedef struct DivisionRendererSystemContext
 {

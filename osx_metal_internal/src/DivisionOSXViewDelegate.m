@@ -6,11 +6,10 @@
 #include <MetalKit/MetalKit.h>
 
 #include "division_engine_core/context.h"
-#include "division_engine_core/input.h"
-#include "division_engine_core/keycode.h"
 #include "division_engine_core/renderer.h"
-#include "division_engine_core/texture.h"
-#include "division_engine_core/uniform_buffer.h"
+#include "division_engine_core/types/input.h"
+#include "division_engine_core/types/texture.h"
+#include "division_engine_core/types/uniform_buffer.h"
 #include "division_engine_core/utility.h"
 #include "osx_keycode_map.h"
 #include "osx_render_pass.h"
@@ -66,8 +65,8 @@ static inline void handle_inputs(
 {
     DivisionRendererSystemContext* renderer = context->renderer_context;
 
-    renderer->frame_buffer_width = size.width;
-    renderer->frame_buffer_height = size.height;
+    renderer->frame_buffer_width = (int32_t) size.width;
+    renderer->frame_buffer_height = (int32_t) size.height;
 }
 
 - (void)keyDown:(NSEvent*)event
@@ -91,8 +90,8 @@ void handle_inputs(MTKView* view, DivisionContext* ctx, GCKeyCode* keycode_map)
         GCMouseInput* osx_mouse_input = [[GCMouse current] mouseInput];
         NSPoint mouse_pos =
             [[view window] convertPointFromScreen:[NSEvent mouseLocation]];
-        mouse->pos_x = mouse_pos.x;
-        mouse->pos_y = mouse_pos.y;
+        mouse->pos_x = (int32_t) mouse_pos.x;
+        mouse->pos_y = (int32_t) mouse_pos.y;
 
         bool left_button_pressed = [[osx_mouse_input leftButton] isPressed];
         bool right_button_pressed = [[osx_mouse_input rightButton] isPressed];

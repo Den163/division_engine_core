@@ -2,15 +2,15 @@
 
 #include <stdbool.h>
 
-#include "color.h"
-#include "division_lifecycle.h"
-#include "settings.h"
-#include "state.h"
+#include "types/color.h"
+#include "types/division_lifecycle.h"
+#include "types/settings.h"
+#include "types/state.h"
 
 #include <division_engine_core_export.h>
 
 #define DIVISION_INTERNAL_ERROR (-8)
-#define DIVISION_THROW_INTERNAL_ERROR(ctx, message) \
+#define DIVISION_THROW_INTERNAL_ERROR(ctx, message)                                      \
     ctx->lifecycle.error_callback(ctx, DIVISION_INTERNAL_ERROR, message)
 
 struct DivisionRendererSystemContext;
@@ -45,8 +45,7 @@ extern "C"
 #endif
 
     DIVISION_EXPORT bool division_engine_context_initialize(
-        const DivisionSettings* settings,
-        DivisionContext* output_context
+        const DivisionSettings* settings, DivisionContext* output_context
     );
 
     DIVISION_EXPORT void division_engine_context_register_lifecycle(

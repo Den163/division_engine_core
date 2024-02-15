@@ -1,25 +1,17 @@
 #pragma once
 
 #include <ft2build.h>
-#include <stdint.h>
-#include <sys/types.h>
-#include <unicode/uchar.h>
 #include FT_FREETYPE_H
 
+#include <stdint.h>
+
+#include "context.h"
+#include "types/font.h"
+#include "types/settings.h"
+
 #include "data_structures/unordered_id_table.h"
-#include "division_engine_core/context.h"
-#include "division_engine_core/settings.h"
-#include "division_engine_core_export.h"
 
-typedef struct DivisionFontGlyph
-{
-    uint32_t width;
-    uint32_t height;
-    uint32_t advance_x;
-    uint32_t left;
-    uint32_t top;
-
-} DivisionFontGlyph;
+#include <division_engine_core_export.h>
 
 typedef struct DivisionFontSystemContext
 {
@@ -55,17 +47,14 @@ extern "C"
     );
 
     DIVISION_EXPORT bool division_engine_font_get_glyph(
-        DivisionContext* ctx, 
-        uint32_t font_id, 
-        int32_t character, 
+        DivisionContext* ctx,
+        uint32_t font_id,
+        int32_t character,
         DivisionFontGlyph* out_glyph
     );
 
     DIVISION_EXPORT bool division_engine_font_rasterize_glyph(
-        DivisionContext* ctx,
-        uint32_t font_id,
-        int32_t character,
-        uint8_t* bitmap
+        DivisionContext* ctx, uint32_t font_id, int32_t character, uint8_t* bitmap
     );
 
 #ifdef __cplusplus
