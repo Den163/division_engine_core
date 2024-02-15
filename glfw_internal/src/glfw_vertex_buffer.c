@@ -256,8 +256,8 @@ void division_engine_internal_platform_vertex_buffer_copy_data(
     glCopyNamedBufferSubData(
         src_vb_impl->gl_vbo,
         dst_vb_impl->gl_vbo,
-        src_vertices_bytes,
-        dst_vertices_bytes,
+        (long) src_vertices_bytes,
+        (long) dst_vertices_bytes,
         DIVISION_MIN(
             division_engine_vertex_buffer_instances_bytes(src_vb),
             division_engine_vertex_buffer_instances_bytes(dst_vb)
