@@ -5,7 +5,7 @@
 #include <string.h>
 
 #include "division_engine_core/input.h"
-#include "division_engine_core/keycode.h"
+#include "division_engine_core/types/keycode.h"
 
 #include <GLFW/glfw3.h>
 
@@ -15,7 +15,7 @@
 #define __DVISION_GLFW_MAP_KEYCODE_NUMPAD__(keycode)                                     \
     [DIVISION_KEYCODE_NUMPAD_##keycode] = GLFW_KEY_KP_##keycode
 
-int DIVISION_GLFW_KEYCODE_MAP[] = {
+const int DIVISION_GLFW_KEYCODE_MAP[] = {
     __DIVISION_GLFW_MAP_KEYCODE__(Q),
     __DIVISION_GLFW_MAP_KEYCODE__(W),
     __DIVISION_GLFW_MAP_KEYCODE__(E),

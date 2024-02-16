@@ -2,6 +2,7 @@
 #include "division_engine_core/platform_internal/platform_render_pass_instance.h"
 
 #include "division_engine_core/render_pass_descriptor.h"
+#include "division_engine_core/shader.h"
 #include "division_engine_core/texture.h"
 #include "division_engine_core/utility.h"
 #include "division_engine_core/vertex_buffer.h"
@@ -13,6 +14,7 @@
 #include "glfw_texture.h"
 #include "glfw_uniform_buffer.h"
 #include "glfw_vertex_buffer.h"
+#include <stdint.h>
 
 static inline void bind_uniform_buffer(
     DivisionUniformBufferSystemContext* ctx, const DivisionIdWithBinding* buffer_binding
@@ -116,11 +118,11 @@ void division_engine_internal_platform_render_pass_instance_draw(
         {
             glDrawElementsInstancedBaseVertexBaseInstance(
                 vb_internal.gl_topology,
-                pass_instance->index_count,
+                (int) pass_instance->index_count,
                 GL_UNSIGNED_INT,
                 NULL,
-                pass_instance->instance_count,
-                pass_instance->first_vertex,
+                (int) pass_instance->instance_count,
+                (int) pass_instance->first_vertex,
                 pass_instance->first_instance
             );
         }
@@ -128,10 +130,10 @@ void division_engine_internal_platform_render_pass_instance_draw(
         {
             glDrawElementsBaseVertex(
                 vb_internal.gl_topology,
-                pass_instance->index_count,
+                (int) pass_instance->index_count,
                 GL_UNSIGNED_INT,
                 NULL,
-                pass_instance->first_vertex
+                (int) pass_instance->first_vertex
             );
         }
     }

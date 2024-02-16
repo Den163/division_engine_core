@@ -1,6 +1,7 @@
 #include "division_engine_core/vertex_buffer.h"
 #include "division_engine_core/context.h"
 #include "division_engine_core/platform_internal/platform_vertex_buffer.h"
+#include "division_engine_core/types/vertex_buffer.h"
 #include "division_engine_core/utility.h"
 
 #include <memory.h>
@@ -225,7 +226,9 @@ bool division_engine_vertex_buffer_resize(
     new_settings.size = new_size;
 
     uint32_t new_buffer_id;
-    if (!division_engine_vertex_buffer_alloc(ctx, &new_settings, &new_buffer_id))
+    if (!division_engine_vertex_buffer_alloc(
+            ctx, (DivisionVertexBufferConstSettings*) &new_settings, &new_buffer_id
+        ))
     {
         DIVISION_THROW_INTERNAL_ERROR(ctx, "Failed to resize vertex buffer");
         return false;

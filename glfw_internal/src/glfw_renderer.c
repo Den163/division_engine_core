@@ -4,7 +4,7 @@
 #include "GLFW/glfw3.h"
 #include "glad/gl.h"
 
-#include "division_engine_core/keycode.h"
+#include "division_engine_core/types/keycode.h"
 #include <math.h>
 #include <stdio.h>
 
@@ -15,6 +15,8 @@
 #include "glfw_keycode_map.h"
 
 #include <stdint.h>
+
+#define DIVISION_TARGET_FPS 60.0f
 
 typedef struct DivisionWindowContextPlatformInternal_*
     DivisionWindowContextPlatformInternalPtr_;
@@ -118,7 +120,7 @@ void division_engine_internal_platform_renderer_run_loop(DivisionContext* ctx)
         current_time = glfwGetTime();
         delta_time = current_time - last_frame_time;
 
-        if (delta_time >= 1 / 60.f)
+        if (delta_time >= 1 / DIVISION_TARGET_FPS)
         {
             check_window_resizing(renderer_context, window);
 
@@ -161,10 +163,10 @@ void handle_input(GLFWwindow* window, DivisionContext* ctx)
     DivisionKeyboardInput* keyboard_input = &input->keyboard;
 
     double mouse_x, mouse_y;
-
     glfwGetCursorPos(window, &mouse_x, &mouse_y);
+
     mouse_input->pos_x = floor(mouse_x);
-    mouse_input->pos_y = ctx->renderer_context->frame_buffer_height - floor(mouse_y);
+    mouse_input->pos_y = (int) (ctx->renderer_context->frame_buffer_height - floor(mouse_y));
 
     mouse_input->mouse_button_state_mask = 0;
     DIVISION_INPUT_SET_MOUSE_KEY_STATE(
