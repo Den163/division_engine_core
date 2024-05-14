@@ -11,6 +11,27 @@
 #include <stdlib.h>
 #include <string.h>
 
+static inline char* alloc_cat_str(const char* str0, const char* str1)
+{
+    size_t len0 = strlen(str0);
+    size_t len1 = strlen(str1);
+
+    size_t new_len = len0 + len1;
+    char* new_str = malloc(new_len + 1);
+
+    memcpy(new_str, str0, len0);
+    memcpy(new_str + len0, str1, len1);
+    new_str[new_len] = '\n';
+
+    return new_str;
+}
+
+#define DIVISION_THROW_FT_ERROR(ctx, user_message, ft_error)                             \
+    const char* ft_error_str = FT_Error_String(ft_error);                                \
+    char* error_message = alloc_cat_str("FT_New_Face failed. FT error: ", ft_error_str); \
+    DIVISION_THROW_INTERNAL_ERROR(ctx, error_message);                                   \
+    free(error_message);
+
 bool division_engine_font_system_context_alloc(
     DivisionContext* ctx, const DivisionSettings* settings
 )
@@ -75,7 +96,8 @@ bool division_engine_font_alloc(
     if (ft_error)
     {
         division_unordered_id_table_remove_id(&font_context->face_id_table, font_id);
-        DIVISION_THROW_INTERNAL_ERROR(ctx, "FT_New_Face failed");
+        DIVISION_THROW_FT_ERROR(ctx, "FT_New_Face failed. FT error: ", ft_error)
+
         return false;
     }
 
@@ -83,7 +105,9 @@ bool division_engine_font_alloc(
     if (ft_error)
     {
         division_unordered_id_table_remove_id(&font_context->face_id_table, font_id);
-        DIVISION_THROW_INTERNAL_ERROR(ctx, "Failed to set character size");
+        DIVISION_THROW_FT_ERROR(
+            ctx, "Failed to set character size. FT error: ", ft_error
+        );
         return false;
     }
 
@@ -113,7 +137,7 @@ bool division_engine_font_get_glyph(
     *out_glyph = (DivisionFontGlyph){
         .width = ft_bitmap.width,
         .height = ft_bitmap.rows,
-        .advance_x = (uint32_t) ((float) ft_glyph->advance.x / 64.0f),
+        .advance_x = (uint32_t)((float)ft_glyph->advance.x / 64.0f),
         .left = ft_face->glyph->bitmap_left,
         .top = ft_face->glyph->bitmap_top,
     };
@@ -122,10 +146,7 @@ bool division_engine_font_get_glyph(
 }
 
 bool division_engine_font_rasterize_glyph(
-    DivisionContext* ctx,
-    uint32_t font_id,
-    int32_t character,
-    uint8_t* bitmap
+    DivisionContext* ctx, uint32_t font_id, int32_t character, uint8_t* bitmap
 )
 {
     FT_Face ft_face = ctx->font_context->ft_faces[font_id];

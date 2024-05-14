@@ -48,6 +48,7 @@ target_include_directories(
 )
 
 target_link_libraries(division_engine_core PUBLIC freetype)
+target_compile_definitions(freetype PRIVATE FT_CONFIG_OPTION_ERROR_STRINGS)
 
 GENERATE_EXPORT_HEADER(division_engine_core EXPORT_MACRO_NAME DIVISION_EXPORT)
 
